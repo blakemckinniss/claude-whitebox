@@ -8,6 +8,7 @@
 - The Research Protocol (real-time web search via Tavily) ✅
 - The Probe Protocol (runtime introspection for anti-hallucination) ✅
 - The X-Ray Protocol (AST-based structural code search) ✅
+- The Headless Protocol (browser automation via Playwright) ✅
 - High-Performance Batching (parallel execution library) ✅
 - The Elephant Protocol (persistent memory system) ✅
 - The Upkeep Protocol (automated maintenance and drift prevention) ✅
@@ -19,6 +20,7 @@
 - All hooks active (SessionStart, UserPromptSubmit, SessionEnd)
 - Automatic maintenance on session end
 - Code search: text (grep) + structure (xray)
+- Browser automation: Playwright SDK with zero-friction scaffolding
 
 **NEXT STEPS:**
 1. Awaiting new direction from user

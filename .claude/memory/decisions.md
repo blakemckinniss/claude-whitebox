@@ -60,3 +60,6 @@ The Upkeep Protocol: Automated Maintenance. Decision: Force continuous synchroni
 
 ### 2025-11-20 17:14
 The X-Ray Protocol: AST-Based Structural Search. Decision: Build semantic code search using Python's ast module instead of text-based grep. Reason: grep is blind to code structure - cannot distinguish definitions from usages, see inheritance, or understand decorators. Solution: xray.py parses AST and provides semantic queries (find class definitions, track imports, find decorators, see inheritance). Consequences: Only works for Python code, but provides precise structural understanding. No external dependencies. Philosophy: Whitebox semantic search - transparent stdlib-based analysis.
+
+### 2025-11-20 17:20
+The Headless Protocol: Browser Automation SDK. Decision: Wrap Playwright in clean SDK to make browser automation the path of least resistance. Reason: LLMs avoid Playwright due to boilerplate and friction, defaulting to requests+BS4 which fails on dynamic sites. Solution: browser.py provides context managers, smart_dump for LLM-readable content, auto-screenshots on error, safe helpers. Scaffolder supports --template playwright for zero-boilerplate generation. Hook blocks requests+BS4 for UI tasks. Consequences: Requires playwright installation but eliminates friction. Philosophy: Whitebox automation - transparent Python wrapping Playwright sync API.

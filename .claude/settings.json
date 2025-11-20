@@ -44,6 +44,10 @@
           {
             "type": "command",
             "command": "python3 .claude/hooks/sanity_check.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/force_playwright.py"
           }
         ]
       }

@@ -23,6 +23,13 @@ Before taking action, categorize the task:
 *   *Examples:* Querying Snowflake, fetching GitHub issues, parsing complex JSON logs.
 *   **Goal:** Transparency and Reusability. We want an artifact we can debug and version control.
 
+### 4. Is it a Browser/UI Task? (Scraping, E2E Testing, Screenshots)
+🎭 **Use Playwright (`scripts/lib/browser.py`)**
+*   *Command:* `python3 scripts/scaffold.py scratch/tmp_ui.py "Test login" --template playwright`
+*   **Rule:** Do NOT use `requests` or `BeautifulSoup` for sites with JavaScript, login forms, or dynamic content.
+*   **Why:** CSRF tokens, React/Vue hydration, cookies, and localStorage require a real browser.
+*   **Debug:** If script fails, check `scratch/error.png` for automatic screenshot.
+
 ---
 
 ## 🔮 The Oracle Protocol
@@ -316,6 +323,181 @@ No external dependencies. No AI inference. Pure structural analysis.
 ### Philosophy
 
 The X-Ray is **Whitebox semantic search**. The script's code is transparent, uses only Python stdlib (`ast`), and all analysis is deterministic. You're not text-matching—you're understanding code structure.
+
+---
+
+## 🎭 The Headless Protocol (Browser Automation)
+
+**The Core Problem:** LLMs avoid Playwright because of high friction - too much boilerplate, verbose async code, and complex setup. The lazy path is `requests.get()` + BeautifulSoup, which fails on dynamic sites.
+
+**The Solution:** Make Playwright the path of least resistance with a clean SDK wrapper and template scaffolding.
+
+### Text Scraping vs Browser Automation
+
+**Text Scraping (`requests` + `BeautifulSoup`):**
+- Works only for static HTML
+- Cannot handle JavaScript rendering
+- No access to cookies/localStorage
+- Cannot interact with forms requiring CSRF tokens
+- Fast but limited
+
+**Browser Automation (Playwright):**
+- Full JavaScript execution (React, Vue, Angular)
+- Handles dynamic content loading
+- Supports cookies, sessions, localStorage
+- Can interact with real UI elements (click, fill, wait)
+- Screenshots for debugging
+- Slower but comprehensive
+
+### When to Use Playwright
+
+Use Playwright for **dynamic sites**:
+- "Log into the admin panel" → Requires session/cookies
+- "Fill out this form" → Needs CSRF tokens
+- "Test the UI flow" → JavaScript interactions
+- "Take screenshots of pages" → Visual verification
+- "Scrape data after login" → Authenticated sessions
+- "Test React/Vue app" → JavaScript rendering
+
+Use `requests` for **static APIs**:
+- "Fetch JSON from API endpoint" → Simple GET request
+- "Download a file" → Direct HTTP download
+- "POST to webhook" → No browser needed
+
+### The Browser SDK
+
+The `scripts/lib/browser.py` module provides:
+
+**1. Context Manager for Sessions:**
+```python
+from browser import get_browser_session
+
+with get_browser_session(headless=True) as (p, browser, page):
+    page.goto("https://example.com")
+    # Your automation logic
+```
+
+**2. Smart Content Dumping:**
+```python
+from browser import smart_dump
+
+with get_browser_session() as (p, browser, page):
+    page.goto("https://example.com")
+    content = smart_dump(page)  # LLM-friendly text (no HTML)
+    print(content)
+```
+
+**3. Automatic Screenshots:**
+```python
+from browser import take_screenshot
+
+with get_browser_session() as (p, browser, page):
+    page.goto("https://example.com")
+    screenshot_path = take_screenshot(page, "homepage")
+```
+
+**4. Safe Helpers with Error Handling:**
+```python
+from browser import safe_fill, safe_click, wait_for_selector
+
+safe_fill(page, "#username", "test")  # Auto-screenshot on error
+safe_click(page, "button[type=submit]")
+```
+
+### Scaffolding Playwright Scripts
+
+**DO NOT write Playwright boilerplate manually.** Use the template:
+
+```bash
+# Scaffold a new browser automation script
+python3 scripts/scaffold.py scratch/tmp_login.py "Test login flow" --template playwright
+```
+
+This generates a script with:
+- Browser session setup (context manager)
+- Error handling with automatic screenshots
+- Smart content dumping helpers
+- Commented examples for common tasks
+
+### Example Usage
+
+```bash
+# Generate Playwright script
+python3 scripts/scaffold.py scratch/tmp_test_ui.py "Test dashboard" --template playwright
+
+# Edit the script to add your logic
+# The template includes:
+#   - page.goto(url)
+#   - page.fill(selector, value)
+#   - page.click(selector)
+#   - page.wait_for_selector(selector)
+#   - smart_dump(page)
+#   - take_screenshot(page, name)
+
+# Run the script
+python3 scratch/tmp_test_ui.py
+
+# If it fails, check the automatic screenshot
+ls scratch/error.png
+```
+
+### The Right Way vs The Wrong Way
+
+❌ **Wrong (requests):**
+```python
+User: "Log into the staging site and check the dashboard"
+Claude: *Writes requests.Session() POST to /login*
+Result: ❌ Fails - CSRF token missing, cookies not handled, JavaScript not executed
+```
+
+✅ **Right (Playwright):**
+```python
+User: "Log into the staging site and check the dashboard"
+Claude: *Scaffolds Playwright script*
+Hook: ✅ No warning - using correct tool
+
+Script:
+    with get_browser_session() as (p, browser, page):
+        page.goto("https://staging.example.com/login")
+        safe_fill(page, "#username", "test")
+        safe_fill(page, "#password", "secret")
+        safe_click(page, "button[type=submit]")
+        page.wait_for_selector(".dashboard")
+        content = smart_dump(page)
+        logger.info(f"Dashboard loaded: {content[:200]}")
+
+Result: ✅ Success - real browser handles everything
+```
+
+### Installation
+
+Playwright requires initial setup:
+
+```bash
+# Install playwright
+pip install playwright pytest-playwright
+
+# Install browser binaries
+playwright install chromium
+
+# Or with system package manager (if pip fails)
+apt-get install python3-playwright
+playwright install chromium
+```
+
+### Error Debugging
+
+When a Playwright script fails:
+1. **Check the screenshot:** `scratch/error.png` is automatically created
+2. **Read the logs:** Error messages include current URL and selector
+3. **Run headless=False:** See the browser visually for debugging
+4. **Use smart_dump:** Print page content to verify what's actually loaded
+
+### Philosophy
+
+The Headless Protocol is **Whitebox browser automation**. The library code is transparent Python wrapping Playwright's sync API. All browser interactions are explicit function calls. Screenshots and content dumps are human-readable for debugging.
+
+No blackbox "auto-scraping" services. No AI-powered element detection. Pure deterministic browser automation.
 
 ---
 

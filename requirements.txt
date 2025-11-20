@@ -9,6 +9,10 @@ python-dotenv>=1.0.0
 # For parallel execution with progress bars
 tqdm>=4.65.0
 
+# For browser automation (The Headless Protocol)
+playwright>=1.40.0
+pytest-playwright>=0.4.0
+
 # Required API Keys (add to .env file):
 # - OPENROUTER_API_KEY: For Oracle consultations (scripts/ops/consult.py)
 # - TAVILY_API_KEY: For research queries (scripts/ops/research.py)
