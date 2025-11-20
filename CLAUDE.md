@@ -111,6 +111,96 @@ The Researcher is **Whitebox real-time intelligence**. The script's code is tran
 
 ---
 
+## 🐘 The Elephant Protocol (Memory Management)
+
+**Context Window ≠ Memory.** You suffer from amnesia. To survive, externalize your memory.
+
+### The Problem
+- Context windows fill up → architectural decisions forgotten
+- Regression loops: fixing the same bug multiple times
+- Session amnesia: no memory of what was being worked on
+- Lost lessons: repeating the same mistakes
+
+### The Solution: Three Layers of Memory
+
+**1. Active Context (`.claude/memory/active_context.md`) - Short Term**
+- What are we working on *right now*?
+- Current sprint, status, next steps, blockers
+- Updated frequently during active work
+
+**2. Decisions (`.claude/memory/decisions.md`) - Medium Term**
+- Why did we choose this library/pattern/structure?
+- Architectural Decision Records (ADRs)
+- Prevents architectural drift
+
+**3. Lessons (`.claude/memory/lessons.md`) - Long Term**
+- What tried to kill us? What failed?
+- Bug patterns, wrong assumptions, gotchas
+- Prevents repeating mistakes
+
+### Usage
+
+**Read Memory:**
+```bash
+# Read all memory
+python3 scripts/ops/remember.py
+
+# Read specific category
+python3 scripts/ops/remember.py read context
+python3 scripts/ops/remember.py read decisions
+python3 scripts/ops/remember.py read lessons
+```
+
+**Add to Memory:**
+```bash
+# Record a lesson (CRITICAL - do this immediately after bugs/failures)
+python3 scripts/ops/remember.py add lessons "Tried to use X, failed because Y. Use Z instead."
+
+# Record a decision
+python3 scripts/ops/remember.py add decisions "Selected Tqdm because built-in logging was too verbose."
+
+# Update context
+python3 scripts/ops/remember.py add context "Finished setup. Next step: Implement login."
+```
+
+**Search Memory:**
+```bash
+# Search across all memory
+python3 scripts/ops/remember.py search all "pytest"
+
+# Search specific category
+python3 scripts/ops/remember.py search decisions "database"
+```
+
+### When to Use (Critical)
+
+**The "Pain Log" (Highest Priority):**
+- ⚠️ Immediately after encountering a bug → record the lesson
+- ⚠️ After a failed approach → document why it failed
+- ⚠️ After discovering a gotcha → prevent future pain
+
+**The "Decision Record":**
+- When making architectural choices (library selection, pattern adoption)
+- When establishing constraints or standards
+- When rejecting an alternative approach (document why)
+
+**The "Context Handoff":**
+- End of work session → update current status
+- Before context clear/compact → preserve state
+- When switching tasks → document transition
+
+### Philosophy
+
+Memory is stored in **plain markdown files** (not vector databases, not MCP servers). This means:
+- ✅ Human-readable and auditable
+- ✅ Version-controlled with git
+- ✅ Searchable with standard tools
+- ✅ No external dependencies
+
+The Elephant Protocol turns ephemeral token context into **persistent file storage**. Memory injected automatically at `SessionStart` ensures continuity across sessions.
+
+---
+
 ## 🔄 The Scripting Protocol
 
 ### Phase A: The Scratchpad (Exploration)

@@ -18,6 +18,10 @@
           {
             "type": "command",
             "command": "cat .claude/hooks/manifesto.txt"
+          },
+          {
+            "type": "command",
+            "command": "echo '\n🧠 LOADING PROJECT MEMORY...' && cat .claude/memory/active_context.md && echo '\n--- RECENT LESSONS ---' && tail -n 10 .claude/memory/lessons.md"
           }
         ]
       }
