@@ -9,12 +9,14 @@
 - The Probe Protocol (runtime introspection for anti-hallucination) ✅
 - High-Performance Batching (parallel execution library) ✅
 - The Elephant Protocol (persistent memory system) ✅
+- The Upkeep Protocol (automated maintenance and drift prevention) ✅
 
 **SYSTEM HEALTH:**
 - All 24 tests passing (5 suites: unit, integration, alignment, stability)
-- 5 operational tools registered in index
+- 7 operational tools registered in index
 - Memory persistence validated across session restoration
-- All hooks active and functional (including sanity_check.py)
+- All hooks active (SessionStart, UserPromptSubmit, SessionEnd)
+- Automatic maintenance on session end
 
 **NEXT STEPS:**
 1. Awaiting new direction from user

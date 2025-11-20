@@ -54,3 +54,6 @@
 
 ### 2025-11-20 17:04
 The Probe Protocol: Runtime Introspection. Decision: Force runtime API verification before coding. Reason: LLMs hallucinate library methods based on probability, not truth. Solution: Dynamic module inspection via probe.py reveals actual runtime state. Consequences: Eliminates guesswork, but requires discipline to run probe before coding. Philosophy: Completes the Knowledge Pyramid (Oracle=concept, Researcher=docs, Probe=syntax).
+
+### 2025-11-20 17:10
+The Upkeep Protocol: Automated Maintenance. Decision: Force continuous synchronization between code and documentation via automation. Reason: LLMs cannot be trusted to remember to update indexes and requirements - drift (bitrot) is inevitable without enforcement. Solution: upkeep.py scans project, pre_commit.py blocks stale commits, SessionEnd hook runs maintenance automatically. Consequences: Requires discipline but eliminates technical debt accumulation. Philosophy: Whitebox automation - all maintenance is transparent, auditable Python code.

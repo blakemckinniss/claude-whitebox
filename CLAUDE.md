@@ -276,6 +276,102 @@ The Elephant Protocol turns ephemeral token context into **persistent file stora
 
 ---
 
+## 🧹 The Upkeep Protocol (Definition of Done)
+
+**The Problem:** Documentation, indexes, and requirements drift away from actual code. This is called "bitrot" - where project artifacts become stale and unreliable.
+
+**The Solution:** Automation and gatekeeping. You cannot rely on LLMs to "remember" to update documentation. The system must enforce it.
+
+### The "Clean Exit" Rule
+
+You are **not finished** with a task until the environment is consistent. Before ending a major task or session, you **MUST** run:
+
+```bash
+python3 scripts/ops/upkeep.py
+```
+
+This script automatically:
+1. **Updates the tool registry** (runs `index.py`)
+2. **Verifies dependencies** (scans imports vs `requirements.txt`)
+3. **Checks scratch hygiene** (warns about old files >24h)
+4. **Logs maintenance** (timestamps in `.claude/memory/upkeep_log.md`)
+
+### File Synchronization Rules
+
+**When you add a dependency:**
+```bash
+# Add to requirements.txt immediately
+echo "requests>=2.31.0" >> requirements.txt
+```
+
+**When you add a script:**
+```bash
+# Run the indexer immediately
+python3 scripts/index.py
+```
+
+**When you change architecture:**
+```bash
+# Document the decision immediately
+python3 scripts/ops/remember.py add decisions "Switched from X to Y because Z"
+```
+
+### Scratchpad Hygiene
+
+The `scratch/` folder is for **temporary** work:
+- ✅ **Promote useful scripts** to `scripts/` if they prove valuable
+- ✅ **Delete garbage** when experiments fail
+- ❌ **Do not accumulate zombie files** that are never used
+
+The Upkeep Protocol warns when files exceed 24 hours old.
+
+### The Gatekeeper (Pre-Commit Check)
+
+To prevent committing code with stale indexes, run the gatekeeper before commits:
+
+```bash
+# Verify project state before committing
+python3 scripts/ops/pre_commit.py
+```
+
+This script:
+1. Runs the indexer
+2. Checks if `tool_index.md` changed
+3. **Blocks the commit** if the index was stale
+4. Tells you to stage the updated file and retry
+
+**Integration with git hooks (optional):**
+```bash
+# Add to .git/hooks/pre-commit (if you want automatic enforcement)
+#!/bin/bash
+python3 scripts/ops/pre_commit.py || exit 1
+```
+
+### Automatic Maintenance
+
+The Upkeep Protocol runs automatically at `SessionEnd` (when you type `/exit` or session times out).
+
+**What happens:**
+```
+> Session Ending...
+> [Janitor] Updating Tool Registry... ✅ Done
+> [Janitor] Checking dependencies... ✅ All documented
+> [Janitor] Checking scratch/... ⚠️  3 files older than 24h
+> [Janitor] Cleanup suggestions logged
+```
+
+### Philosophy
+
+The Upkeep Protocol enforces **continuous synchronization** between code and documentation. This prevents:
+- ❌ Stale tool indexes that mislead you
+- ❌ Undocumented dependencies that break installation
+- ❌ Forgotten scratch files that clutter the workspace
+- ❌ Lost architectural context from missing decision logs
+
+**Whitebox Principle:** All maintenance is transparent, auditable Python code. No blackbox "auto-formatters" or opaque build systems.
+
+---
+
 ## 🔄 The Scripting Protocol
 
 ### Phase A: The Scratchpad (Exploration)
