@@ -1,0 +1,16 @@
+# Ignore scratch directory contents but keep the folder
+scratch/*
+!scratch/.gitkeep
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Environment
+.env
+.venv
+env/
+venv/

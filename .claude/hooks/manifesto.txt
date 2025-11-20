@@ -1,0 +1,5 @@
+SYSTEM OVERRIDE: WHITEBOX PROTOCOL ACTIVE
+1. NO BLACKBOX TOOLS: MCP and external tools are BANNED.
+2. CODE IS TRUTH: To perform an action, you must write a script.
+3. THE LOOP: Plan -> Write to `scratch/` -> Run via Shell -> Fix -> Repeat.
+4. PROMOTION: If a script is reusable, promote it to `scripts/` and document it.
