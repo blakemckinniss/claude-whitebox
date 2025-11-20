@@ -12,7 +12,13 @@ Before taking action, categorize the task:
 *   *Examples:* Checking if a file exists, reading a config, `ls -la`, `grep "TODO"`.
 *   **Goal:** Speed and efficiency. Don't write a script just to `cat` a file.
 
-### 2. Is it a Logic or External Operation? (APIs, DBs, Data Munging)
+### 2. Is it a Structural Question? (Definitions, Inheritance, Dependencies)
+🔬 **Use The X-Ray (`scripts/ops/xray.py`)**
+*   *Examples:* "Where is class `User` defined?", "Who imports `requests`?", "Find functions with `@tool` decorator."
+*   **Why:** `grep` is blind to context. X-Ray sees the code structure via AST parsing.
+*   **Goal:** Semantic understanding beyond text matching.
+
+### 3. Is it a Logic or External Operation? (APIs, DBs, Data Munging)
 📝 **Write a Script (`scratch/` or `scripts/`)**
 *   *Examples:* Querying Snowflake, fetching GitHub issues, parsing complex JSON logs.
 *   **Goal:** Transparency and Reusability. We want an artifact we can debug and version control.
@@ -183,6 +189,133 @@ This eliminates hallucinations because the system forces you to traverse this py
 ### Philosophy
 
 The Probe is **Whitebox runtime verification**. The script's code is transparent, imports are explicit, and all introspection happens via Python's standard `inspect` module. You're not guessing—you're reading the actual runtime state.
+
+---
+
+## 🔬 The X-Ray Protocol (Structural Code Search)
+
+**The Core Problem:** `grep` finds text, not structure. When you search for "class User", grep returns every line containing that string: definitions, imports, comments, docstrings. You wanted the definition, not 50 usages.
+
+**The Solution:** AST-based semantic search that understands Python code structure.
+
+### Text Search vs Structure Search
+
+**Text Search (`grep`):**
+- Finds strings like "User" anywhere in text
+- Cannot distinguish between definition, usage, or comment
+- Returns overwhelming results (definitions mixed with usages)
+- Blind to code relationships (inheritance, decorators, call chains)
+
+**Structure Search (`xray.py`):**
+- Parses Python AST (Abstract Syntax Tree)
+- Finds definitions, not mentions
+- Understands classes, functions, imports, calls, decorators
+- Shows inheritance hierarchies and function signatures
+
+### When to Use X-Ray
+
+Use X-Ray for **structural questions**:
+- "Where is class `X` defined?" → Find class definitions
+- "What does class `Y` inherit from?" → See base classes
+- "Which functions have the `@retry` decorator?" → Find decorators
+- "Who imports `requests`?" → Track import dependencies
+- "Where is function `foo` called?" → Find call sites
+- "List all functions in module X" → Catalog API surface
+
+Use `grep` for **content questions**:
+- "Which files mention 'TODO'?" → Text search
+- "Find error messages containing 'failed'" → Text search
+- "Where is this exact code snippet?" → Text search
+
+### Example Usage
+
+```bash
+# Find class definitions
+python3 scripts/ops/xray.py scripts/ --type class --name User
+
+# Find what a class inherits from (with details)
+python3 scripts/ops/xray.py . --type class --name Model --details
+
+# Find functions with specific decorator
+python3 scripts/ops/xray.py . --type decorator --name tool
+
+# Find all imports of a module
+python3 scripts/ops/xray.py . --type import --name requests
+
+# Find where a function is called
+python3 scripts/ops/xray.py . --type call --name setup_script
+
+# Find functions matching a pattern (regex)
+python3 scripts/ops/xray.py . --type function --name "^test_"
+
+# Scan specific file
+python3 scripts/ops/xray.py scripts/lib/core.py --type function
+
+# Find all structures (functions, classes, imports)
+python3 scripts/ops/xray.py scripts/ --type all
+```
+
+### Output Format
+
+**Function Definitions:**
+```
+🔹 DEF: setup_script(description) @deprecated
+   📍 scripts/lib/core.py:21
+   📄 Creates argument parser with standard flags
+```
+
+**Class Definitions:**
+```
+📦 CLASS: CodeVisitor (inherits: ast.NodeVisitor) @dataclass
+   📍 scripts/ops/xray.py:28
+   📄 AST visitor that finds and reports code structures
+```
+
+**Imports:**
+```
+📥 IMPORT: from core import setup_script
+   📍 scripts/ops/probe.py:25
+```
+
+**Function Calls:**
+```
+📞 CALL: logger.info()
+   📍 scripts/ops/upkeep.py:318
+```
+
+### The Right Way vs The Wrong Way
+
+❌ **Wrong (grep):**
+```
+User: "Where is the Process class defined?"
+Claude: *Runs grep -r "class Process"*
+Result: 15 matches (definitions, imports, comments, docstrings)
+Claude: *Reads through all 15 to find the actual definition*
+```
+
+✅ **Right (X-Ray):**
+```
+User: "Where is the Process class defined?"
+Claude: *Runs xray.py --type class --name Process*
+Result: 📦 CLASS: Process (inherits: Base, Runnable)
+        📍 scripts/lib/process.py:42
+Claude: "It's defined at scripts/lib/process.py:42 and inherits from Base and Runnable."
+```
+
+### Technical Implementation
+
+X-Ray uses Python's built-in `ast` module to:
+1. Parse Python files into Abstract Syntax Trees
+2. Walk the AST nodes (FunctionDef, ClassDef, Import, Call, etc.)
+3. Match nodes against search criteria (type + name pattern)
+4. Extract semantic information (args, bases, decorators, docstrings)
+5. Report results grouped by file
+
+No external dependencies. No AI inference. Pure structural analysis.
+
+### Philosophy
+
+The X-Ray is **Whitebox semantic search**. The script's code is transparent, uses only Python stdlib (`ast`), and all analysis is deterministic. You're not text-matching—you're understanding code structure.
 
 ---
 

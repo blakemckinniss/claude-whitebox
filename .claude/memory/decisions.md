@@ -57,3 +57,6 @@ The Probe Protocol: Runtime Introspection. Decision: Force runtime API verificat
 
 ### 2025-11-20 17:10
 The Upkeep Protocol: Automated Maintenance. Decision: Force continuous synchronization between code and documentation via automation. Reason: LLMs cannot be trusted to remember to update indexes and requirements - drift (bitrot) is inevitable without enforcement. Solution: upkeep.py scans project, pre_commit.py blocks stale commits, SessionEnd hook runs maintenance automatically. Consequences: Requires discipline but eliminates technical debt accumulation. Philosophy: Whitebox automation - all maintenance is transparent, auditable Python code.
+
+### 2025-11-20 17:14
+The X-Ray Protocol: AST-Based Structural Search. Decision: Build semantic code search using Python's ast module instead of text-based grep. Reason: grep is blind to code structure - cannot distinguish definitions from usages, see inheritance, or understand decorators. Solution: xray.py parses AST and provides semantic queries (find class definitions, track imports, find decorators, see inheritance). Consequences: Only works for Python code, but provides precise structural understanding. No external dependencies. Philosophy: Whitebox semantic search - transparent stdlib-based analysis.

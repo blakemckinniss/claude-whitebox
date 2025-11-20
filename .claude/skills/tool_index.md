@@ -2,7 +2,7 @@
 
 Auto-generated index of available tools in the arsenal.
 
-**Total scripts:** 7
+**Total scripts:** 8
 
 | Script | Description |
 |:-------|:------------|
@@ -13,6 +13,7 @@ Auto-generated index of available tools in the arsenal.
 | `scripts/ops/remember.py` | The Elephant: Manages persistent project memory (Context, Decisions, Lessons) |
 | `scripts/ops/research.py` | The Researcher: Performs deep web search using Tavily to retrieve up-to-date documentation and context |
 | `scripts/ops/upkeep.py` | The Janitor: Scans the project, updates indexes, verifies requirements, and cleans scratch/ |
+| `scripts/ops/xray.py` | The X-Ray: Performs AST-based structural search on Python code (Classes, Functions, Imports, Decorators) |
 
 ---
 *Last updated by `scripts/index.py`*
