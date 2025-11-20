@@ -68,6 +68,37 @@ All scripts in `scripts/` must adhere to the Whitebox SDK:
 - **NO "Imaginary" APIs**: Do not guess how a library works. Write a script to inspect `dir(lib)` if unsure.
 - **NO Silent Failures**: Scripts must exit with non-zero codes on failure.
 
+## 🧪 Testing & Validation
+
+### Test Suite Location
+All tests are in `.claude/tests/` organized by category:
+- **`unit/`** - Core library function tests
+- **`integration/`** - Scaffolder, indexer workflow tests
+- **alignment/`** - Whitebox principle enforcement tests
+- **`stability/`** - Path resolution and edge case tests
+
+### Running Tests
+```bash
+# Run all tests
+python3 .claude/tests/runner.py
+
+# Run specific suite
+python3 .claude/tests/runner.py unit
+python3 .claude/tests/runner.py integration
+python3 .claude/tests/runner.py alignment
+python3 .claude/tests/runner.py stability
+```
+
+### When to Run Tests
+- **Before committing SDK changes** - Ensure stability
+- **After modifying core library** - Validate dependents still work
+- **When adding new tools** - Confirm integration
+- **Periodically** - Catch regressions early
+
+### Test Philosophy
+Tests embody the Whitebox principle: "If you can't test it transparently, don't build it."
+Every test is readable Python validating expected behavior without external dependencies.
+
 ## 📡 Response Protocol: The "Engineer's Footer"
 At the end of every significant response (especially after writing or running code), you **MUST** append this block:
 
@@ -82,6 +113,7 @@ At the end of every significant response (especially after writing or running co
 ## ⚡ Commands
 - **Scaffold Tool:** `python3 scripts/scaffold.py scripts/<cat>/<name>.py "<desc>"`
 - **Refresh Index:** `python3 scripts/index.py`
+- **Run Tests:** `python3 .claude/tests/runner.py`
 - **Run Tmp:** `python3 scratch/tmp_<name>.py`
 - **Run Tool (Dry):** `python3 scripts/<cat>/<name>.py --dry-run`
 - **Run Tool (Real):** `python3 scripts/<cat>/<name>.py`
