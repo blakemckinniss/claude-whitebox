@@ -1,18 +1,6 @@
 #!/usr/bin/env python3
 """
-Script Scaffolder - Generates new scripts with Whitebox SDK standards built-in.
-
-Usage:
-    python3 scripts/scaffold.py scripts/<category>/<name>.py "Description of task"
-    python3 scripts/scaffold.py scratch/tmp_test.py "Quick test script"
-"""
-import sys
-import os
-from pathlib import Path
-
-TEMPLATE = '''#!/usr/bin/env python3
-"""
-{description}
+Demo script that prints a greeting
 """
 import sys
 import os
@@ -34,7 +22,7 @@ from core import setup_script, finalize, logger, handle_debug, check_dry_run
 
 
 def main():
-    parser = setup_script("{description}")
+    parser = setup_script("Demo script that prints a greeting")
 
     # Add custom arguments here
     # parser.add_argument('--target', required=True, help="Target resource")
@@ -60,54 +48,15 @@ def main():
         # os.remove(file)
 
         result = "placeholder"
-        logger.info(f"Result: {{result}}")
+        logger.info(f"Result: {result}")
 
         # ============================================================
 
     except Exception as e:
-        logger.error(f"Operation failed: {{e}}")
+        logger.error(f"Operation failed: {e}")
         finalize(success=False)
 
     finalize(success=True)
-
-
-if __name__ == "__main__":
-    main()
-'''
-
-
-def main():
-    if len(sys.argv) < 3:
-        print("Usage: python3 scripts/scaffold.py <path> <description>")
-        print()
-        print("Examples:")
-        print('  python3 scripts/scaffold.py scripts/db/query.py "Query database"')
-        print('  python3 scripts/scaffold.py scratch/tmp_test.py "Test something"')
-        sys.exit(1)
-
-    path = sys.argv[1]
-    description = " ".join(sys.argv[2:])
-
-    # Ensure directory exists
-    os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
-
-    # Generate content
-    content = TEMPLATE.format(description=description)
-
-    # Write file
-    with open(path, "w") as f:
-        f.write(content)
-
-    # Make executable
-    os.chmod(path, 0o755)
-
-    print(f"✅ Scaffolded new script at: {path}")
-    print(f"📝 Description: {description}")
-    print()
-    print("Next steps:")
-    print(f"  1. Edit {path} and add your logic")
-    print(f"  2. Run: python3 {path} --dry-run")
-    print(f"  3. Run: python3 {path}")
 
 
 if __name__ == "__main__":
