@@ -6,6 +6,9 @@ requests>=2.31.0
 # For .env file loading (API keys, configuration)
 python-dotenv>=1.0.0
 
+# For parallel execution with progress bars
+tqdm>=4.65.0
+
 # Required API Keys (add to .env file):
 # - OPENROUTER_API_KEY: For Oracle consultations (scripts/ops/consult.py)
 # - TAVILY_API_KEY: For research queries (scripts/ops/research.py)

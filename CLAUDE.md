@@ -142,6 +142,10 @@ All scripts in `scripts/` must adhere to the Whitebox SDK:
 3.  **Discovery**:
     *   Run the indexer after creating a new tool.
     *   Check `.claude/skills/tool_index.md` to see what tools exist.
+4.  **Performance Standards**:
+    *   **Parallel by Default:** If a script processes more than 3 items (files, API calls, URLs), you **MUST** use `scripts.lib.parallel`.
+    *   **Visual Feedback:** Batch operations must use progress bars (via `tqdm` or fallback).
+    *   **Resilience:** Batch scripts must not crash on single failures. Log the error and continue.
 
 ## 📂 Directory Roles
 - **`scratch/`**: The Workshop. Ephemeral scripts. (Git ignored)

@@ -32,6 +32,10 @@
           {
             "type": "command",
             "command": "python3 .claude/hooks/check_knowledge.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/detect_batch.py"
           }
         ]
       }
