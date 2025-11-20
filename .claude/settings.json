@@ -28,6 +28,10 @@
           {
             "type": "command",
             "command": "python3 .claude/hooks/enforce_workflow.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/check_knowledge.py"
           }
         ]
       }

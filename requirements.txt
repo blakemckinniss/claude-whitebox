@@ -1,7 +1,11 @@
 # Whitebox SDK Dependencies
 
-# For OpenRouter API integration (The Oracle)
+# For API integrations (The Oracle, The Researcher)
 requests>=2.31.0
 
-# Optional: For .env file loading (already handled in core.py)
+# For .env file loading (API keys, configuration)
 python-dotenv>=1.0.0
+
+# Required API Keys (add to .env file):
+# - OPENROUTER_API_KEY: For Oracle consultations (scripts/ops/consult.py)
+# - TAVILY_API_KEY: For research queries (scripts/ops/research.py)

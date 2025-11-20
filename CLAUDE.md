@@ -60,6 +60,57 @@ The Oracle is a **Whitebox reasoning augmentation**, not a blackbox. The script'
 
 ---
 
+## 🌐 The Research Protocol
+
+**Your internal training data is STALE (Cutoff: January 2025).**
+
+You **MUST** run `scripts/ops/research.py` BEFORE writing code if the task involves:
+
+### When to Research
+1. **New/Updated Libraries:** Any library updated in the last 18 months (Next.js, React, LangChain, AWS SDKs, Python packages)
+2. **Error Messages:** If you encounter an error, search it verbatim before attempting fixes
+3. **API Documentation:** Never guess API methods - search for current docs
+4. **Best Practices:** When implementing patterns you're uncertain about
+5. **Version-Specific Features:** When using specific versions of tools/frameworks
+6. **Breaking Changes:** When upgrading dependencies or migrating code
+
+### The Research Loop
+1. **Identify:** Task requires current information beyond your training cutoff
+2. **Search:** `python3 scripts/ops/research.py "current python openai library usage"`
+3. **Analyze:** Read the direct answer and top sources carefully
+4. **Implement:** Write code based **only** on search results, not stale memory
+5. **Validate:** Verify implementation matches current documentation
+
+### Example Usage
+```bash
+# Search for current API usage
+python3 scripts/ops/research.py "python openai library chat completion example 2025"
+
+# Deep search for complex topics
+python3 scripts/ops/research.py "nextjs 15 app router best practices" --deep
+
+# Debug error messages
+python3 scripts/ops/research.py "TypeError: 'NoneType' object is not subscriptable python fix"
+
+# Check version-specific features
+python3 scripts/ops/research.py "react 19 new hooks useOptimistic" --max-results 10
+
+# Dry-run to preview query
+python3 scripts/ops/research.py "tailwind css 4 features" --dry-run
+```
+
+### Configuration
+- Set `TAVILY_API_KEY` in your `.env` file
+- Get API key at: https://tavily.com/
+- Default: 5 results, basic search depth
+- Use `--deep` for thorough research (slower, more comprehensive)
+- Use `--max-results N` to control result count
+
+### Philosophy
+The Researcher is **Whitebox real-time intelligence**. The script's code is transparent, API calls are visible, and all sources are printed to stdout with URLs for verification. You can audit every piece of information and trace it back to its source.
+
+---
+
 ## 🔄 The Scripting Protocol
 
 ### Phase A: The Scratchpad (Exploration)
