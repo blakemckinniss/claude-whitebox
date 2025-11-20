@@ -51,3 +51,6 @@
 
 ---
 *Architectural decisions are binding until explicitly revised with new ADR entry.*
+
+### 2025-11-20 17:04
+The Probe Protocol: Runtime Introspection. Decision: Force runtime API verification before coding. Reason: LLMs hallucinate library methods based on probability, not truth. Solution: Dynamic module inspection via probe.py reveals actual runtime state. Consequences: Eliminates guesswork, but requires discipline to run probe before coding. Philosophy: Completes the Knowledge Pyramid (Oracle=concept, Researcher=docs, Probe=syntax).

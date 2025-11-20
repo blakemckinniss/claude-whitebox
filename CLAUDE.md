@@ -111,6 +111,81 @@ The Researcher is **Whitebox real-time intelligence**. The script's code is tran
 
 ---
 
+## 🔬 The Probe Protocol (Anti-Hallucination)
+
+**The Core Problem:** LLMs work on probability, not truth. When you write `client.get_user(id)`, it's not because you *know* that function exists; it's because that sequence of tokens is statistically likely.
+
+**The Solution:** You must **interrogate the runtime environment** before claiming to know it.
+
+### The "No-Guess" Rule
+
+You are **FORBIDDEN** from assuming an API method exists, especially for:
+- Libraries you haven't used in this session
+- Objects returned by complex API calls (HTTP responses, database cursors, API clients)
+- "Standard" libraries that change often (pandas, requests, boto3, pydantic, openai, etc.)
+- Any library method where you're uncertain about the signature
+
+### The Inspection Loop
+
+Before writing implementation logic:
+
+1. **Probe:** Run `python3 scripts/ops/probe.py <library_or_object>`
+2. **Verify:** Check if the method you *thought* existed is actually in the list
+3. **Confirm Signature:** If it exists, inspect the exact signature
+4. **Code:** Only use methods that appeared in the Probe output
+
+### Example Usage
+
+```bash
+# Inspect a module
+python3 scripts/ops/probe.py json
+
+# Inspect a nested object
+python3 scripts/ops/probe.py os.path
+
+# Filter by method name
+python3 scripts/ops/probe.py pandas.DataFrame --grep to_dict
+
+# Inspect a specific method's signature
+python3 scripts/ops/probe.py json.loads
+
+# Include dunder methods
+python3 scripts/ops/probe.py requests.Response --show-dunder
+```
+
+### The Right Way vs The Wrong Way
+
+❌ **Wrong:**
+```
+"I'll use `df.to_dict(orient='records')` because I think that's right."
+*Writes code. It breaks. Asks user for help.*
+```
+
+✅ **Right:**
+```
+1. Run: `python3 scripts/ops/probe.py pandas.DataFrame --grep to_dict`
+2. Verify: "I see `to_dict` in the output."
+3. Run: `python3 scripts/ops/probe.py pandas.DataFrame.to_dict`
+4. Confirm: "The signature shows `orient` is a valid arg."
+5. NOW write the code with confidence.
+```
+
+### The Knowledge Pyramid
+
+You now have three layers solving "Unknown Unknowns":
+
+1. **"I don't know the concept"** → **The Oracle** (OpenRouter) handles architecture
+2. **"I don't know the facts"** → **The Researcher** (Tavily) fetches current docs
+3. **"I don't know the syntax"** → **The Probe** (Runtime Inspector) verifies code
+
+This eliminates hallucinations because the system forces you to traverse this pyramid before writing production code.
+
+### Philosophy
+
+The Probe is **Whitebox runtime verification**. The script's code is transparent, imports are explicit, and all introspection happens via Python's standard `inspect` module. You're not guessing—you're reading the actual runtime state.
+
+---
+
 ## 🐘 The Elephant Protocol (Memory Management)
 
 **Context Window ≠ Memory.** You suffer from amnesia. To survive, externalize your memory.

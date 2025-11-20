@@ -40,6 +40,10 @@
           {
             "type": "command",
             "command": "python3 .claude/hooks/detect_batch.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/sanity_check.py"
           }
         ]
       }
