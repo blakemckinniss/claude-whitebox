@@ -1,0 +1,7 @@
+# Whitebox SDK Dependencies
+
+# For OpenRouter API integration (The Oracle)
+requests>=2.31.0
+
+# Optional: For .env file loading (already handled in core.py)
+python-dotenv>=1.0.0

@@ -19,6 +19,47 @@ Before taking action, categorize the task:
 
 ---
 
+## 🔮 The Oracle Protocol
+
+**Before writing code for any complex task (architectural decisions, refactoring, system design):**
+
+### When to Consult The Oracle
+- Architecture decisions (database schema, API design)
+- Large refactoring efforts (restructuring multiple components)
+- Performance optimization strategies
+- Security design patterns
+- Complex algorithm selection
+- Integration patterns for external systems
+
+### The Consultation Flow
+1.  **Identify Complexity:** Task requires significant design thinking or has multiple valid approaches
+2.  **Consult:** Run `python3 scripts/ops/consult.py "Problem description and context"`
+3.  **Review:** Read the `[🧠 ORACLE REASONING]` section for edge cases and considerations
+4.  **Implement:** Use the `[💡 ORACLE ADVICE]` to guide your implementation
+5.  **Validate:** Run tests to ensure the approach works
+
+### Example Usage
+```bash
+# Consult on database design
+python3 scripts/ops/consult.py "I need to design a schema for multi-tenant SaaS application. Each tenant has users, projects, and tasks. What's the best isolation strategy?"
+
+# Consult on refactoring approach
+python3 scripts/ops/consult.py "Current authentication uses JWT tokens stored in localStorage. Need to migrate to httpOnly cookies. What's the safest migration path?"
+
+# Dry-run to preview prompt
+python3 scripts/ops/consult.py "How should I structure microservices communication?" --dry-run
+```
+
+### Configuration
+- Set `OPENROUTER_API_KEY` in your `.env` file
+- Default model: `google/gemini-2.0-flash-thinking-exp:free`
+- Override with: `--model google/deepseek-r1-distill-llama-70b:free`
+
+### Philosophy
+The Oracle is a **Whitebox reasoning augmentation**, not a blackbox. The script's code is transparent, the API call is visible, and all reasoning is printed to stdout for audit. You maintain full control and visibility.
+
+---
+
 ## 🔄 The Scripting Protocol
 
 ### Phase A: The Scratchpad (Exploration)
