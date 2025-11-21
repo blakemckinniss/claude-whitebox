@@ -1,0 +1,18 @@
+{"timestamp": "2025-11-21T02:10:10.907495Z", "session": "tmpwn7i5w84", "file": "/tmp/test_auth.py", "type": "TODO", "context": "Add proper password validation", "line_estimate": 2}
+{"timestamp": "2025-11-21T02:10:10.907495Z", "session": "tmpwn7i5w84", "file": "/tmp/test_auth.py", "type": "FIXME", "context": "This is vulnerable to timing attacks", "line_estimate": 3}
+{"timestamp": "2025-11-21T02:10:10.907495Z", "session": "tmpwn7i5w84", "file": "/tmp/test_auth.py", "type": "STUB_PASS", "context": "pass", "line_estimate": 4}
+{"timestamp": "2025-11-21T02:10:10.907495Z", "session": "tmpwn7i5w84", "file": "/tmp/test_auth.py", "type": "HACK", "context": "Temporary workaround for JWT validation", "line_estimate": 7}
+{"timestamp": "2025-11-21T02:10:10.907495Z", "session": "tmpwn7i5w84", "file": "/tmp/test_auth.py", "type": "STUB_ELLIPSIS", "context": "...", "line_estimate": 8}
+{"timestamp": "2025-11-21T02:10:10.907495Z", "session": "tmpwn7i5w84", "file": "/tmp/test_auth.py", "type": "XXX", "context": "Need to implement session cleanup", "line_estimate": 11}
+{"timestamp": "2025-11-21T02:10:10.907495Z", "session": "tmpwn7i5w84", "file": "/tmp/test_auth.py", "type": "STUB_NOT_IMPL", "context": "raise NotImplementedError(\"Session cleanup not yet implemented\")", "line_estimate": 12}
+{"timestamp": "2025-11-21T02:10:10.907495Z", "session": "tmpwn7i5w84", "file": "/tmp/test_database.py", "type": "TODO", "context": "Add connection pooling", "line_estimate": 1}
+{"timestamp": "2025-11-21T02:10:25.055385+00:00", "session": "tmpg2ibefak", "file": "/tmp/test_auth.py", "type": "TODO", "context": "Add proper password validation", "line_estimate": 2}
+{"timestamp": "2025-11-21T02:10:25.055385+00:00", "session": "tmpg2ibefak", "file": "/tmp/test_auth.py", "type": "FIXME", "context": "This is vulnerable to timing attacks", "line_estimate": 3}
+{"timestamp": "2025-11-21T02:10:25.055385+00:00", "session": "tmpg2ibefak", "file": "/tmp/test_auth.py", "type": "STUB_PASS", "context": "pass", "line_estimate": 4}
+{"timestamp": "2025-11-21T02:10:25.055385+00:00", "session": "tmpg2ibefak", "file": "/tmp/test_auth.py", "type": "HACK", "context": "Temporary workaround for JWT validation", "line_estimate": 7}
+{"timestamp": "2025-11-21T02:10:25.055385+00:00", "session": "tmpg2ibefak", "file": "/tmp/test_auth.py", "type": "STUB_ELLIPSIS", "context": "...", "line_estimate": 8}
+{"timestamp": "2025-11-21T02:10:25.055385+00:00", "session": "tmpg2ibefak", "file": "/tmp/test_auth.py", "type": "XXX", "context": "Need to implement session cleanup", "line_estimate": 11}
+{"timestamp": "2025-11-21T02:10:25.055385+00:00", "session": "tmpg2ibefak", "file": "/tmp/test_auth.py", "type": "STUB_NOT_IMPL", "context": "raise NotImplementedError(\"Session cleanup not yet implemented\")", "line_estimate": 12}
+{"timestamp": "2025-11-21T02:10:25.055385+00:00", "session": "tmpg2ibefak", "file": "/tmp/test_database.py", "type": "TODO", "context": "Add connection pooling", "line_estimate": 1}
+{"timestamp": "2025-11-21T02:32:22.659288+00:00", "session": "dfb8a49e-2b55-457e-b570-293c079d9e6e", "file": "/home/jinx/workspace/claude-whitebox/scratch/reinforcement_system.py", "type": "STUB_PASS", "context": "pass  # Silent failure", "line_estimate": 326}
+{"timestamp": "2025-11-21T02:32:22.659288+00:00", "session": "dfb8a49e-2b55-457e-b570-293c079d9e6e", "file": "/home/jinx/workspace/claude-whitebox/scratch/reinforcement_system.py", "type": "STUB_PASS", "context": "pass  # Silent failure", "line_estimate": 432}

@@ -5,6 +5,7 @@
 2.  **NO HALLUCINATIONS:** We verify reality (Probe/Reality Check) before claiming facts.
 3.  **NO LAZINESS:** We use rigorous definitions of done (Finish Line).
 4.  **NO SYCOPHANCY:** We challenge assumptions (Council/Critic).
+5.  **NO BLIND TRUST:** Start with 0% confidence. Earn the right to code through evidence.
 
 ## 🗣️ Communication Standards
 *   **No Fluff:** Do not say "Certainly!", "I hope this helps", or "I apologize."
@@ -67,6 +68,8 @@
   - *Use when:* Finished a specific DoD item
 - **`/scope status`** - Check completion percentage
   - *Use when:* "How much is left?", need progress report
+- **`/confidence status`** - Check current confidence level (Epistemological Protocol)
+  - *Use when:* Verify readiness for production code, check evidence gathered
 - **`/remember add <lessons|decisions|context> "<text>"`** - Persistent memory
   - *Use when:* Document bugs, architectural decisions, session context
 - **`/upkeep`** - Project maintenance (sync requirements, tool index, check scratch)
@@ -228,6 +231,52 @@ You: "Researcher agent, investigate FastAPI dependency injection"
 
 ## 🧠 Cognition Protocols (Thinking)
 
+### 📉 The Epistemological Protocol (Confidence Calibration)
+**You start every task at 0% Confidence.**
+To raise your confidence, you must gather **Evidence**. You cannot perform actions until you meet the threshold.
+
+**The Confidence Tiers:**
+*   **0-30% (Ignorance):** You know nothing.
+    *   *Allowed:* Questions, `/research`, `/xray`, `/probe`.
+    *   *Banned:* Writing code, proposing solutions.
+*   **31-70% (Hypothesis):** You have context and documentation.
+    *   *Allowed:* `/think`, `/skeptic`, `/scaffold` (to `scratch/` only).
+    *   *Banned:* Modifying `scripts/`, claiming "I know how".
+*   **71-100% (Certainty):** You have runtime verification.
+    *   *Allowed:* Production code, `/verify`, Committing.
+
+**Reinforcement Learning (Carrot & Stick):**
+
+*Positive Reinforcement (Carrot):*
+*   Read file: **+10%**
+*   Manual research: **+20%**
+*   **Use researcher agent: +25%** (better than manual)
+*   Probe API: **+30%**
+*   Verify state: **+40%**
+*   **Delegate to script-smith: +15%** (quality gates)
+*   **Consult council: +10%** (better decisions)
+*   Run tests: **+30%**
+*   Run audit: **+15%**
+
+*Negative Reinforcement (Stick):*
+*   Skip verification: **-20%**
+*   Guess API without probe: **-15%**
+*   Write without reading: **-30%**
+*   Claim done without tests: **-25%**
+*   **Modify unexamined code: -40%** (worst violation)
+*   Claim knowledge without evidence: **-10%**
+
+**Enforcement (Automatic):**
+*   **Detection Hook:** `detect_low_confidence.py` warns on coding requests at <71%
+*   **Penalty Hook:** `detect_confidence_penalty.py` applies losses for hallucinations/shortcuts
+*   **Reward Hook:** `detect_confidence_reward.py` applies gains for proper tool usage
+*   **Gating Hook:** `confidence_gate.py` blocks Write/Edit to production files at <71%
+*   **State Tracker:** `.claude/memory/confidence_state.json` persists confidence + reinforcement log
+*   **Helper:** `python3 scripts/ops/confidence.py list` (see all actions), `status` (check level)
+
+**The Anti-Dunning-Kruger System:** Peak ignorance is not a license to code. Earn the right through evidence.
+**The Carrot-on-a-Stick:** Agent delegation and protocol usage rewarded. Shortcuts punished. Production access = carrot.
+
 ### 🏛️ The Council Protocol (Decision Making)
 Before major decisions, assemble the experts:
 *   **The Judge:** "Is this worth doing?" (ROI/YAGNI).
@@ -324,12 +373,36 @@ For tasks > 5 minutes:
 *   **Manual:** `python3 scripts/ops/upkeep.py`.
 *   **Rule:** Requirements and Tool Index must match reality.
 
+### 📊 The Debt Tracker Protocol (Auto-Detection)
+*   **What:** Automatically detects technical debt in code modifications (TODO, FIXME, HACK, stubs).
+*   **When:** Runs at session end (Stop hook).
+*   **Output:** Appends to `.claude/memory/debt_ledger.jsonl` with file paths, types, and context.
+*   **Purpose:** Persistent tracking of incomplete work and deferred decisions.
+*   **Patterns Detected:**
+    *   Comments: `TODO`, `FIXME`, `HACK`, `XXX`
+    *   Stubs: `pass`, `...`, `NotImplementedError`
+
+### 📝 The Session Digest Protocol (Auto-Summarization)
+*   **What:** Generates structured session summaries using Oracle (OpenRouter).
+*   **When:** Runs at session end (Stop hook) for conversations >3 messages.
+*   **Output:** Saved to `.claude/memory/session_digests/<session_id>.json`
+*   **Structure:**
+    *   `summary`: 2-3 sentence overview of what was accomplished
+    *   `current_topic`: Main focus area (e.g., "Database Migration")
+    *   `user_sentiment`: Brief assessment (e.g., "Productive", "Frustrated")
+    *   `active_entities`: List of key files/technologies/concepts mentioned
+    *   `key_decisions`: Major decisions or conclusions reached
+    *   `metadata`: Session ID, timestamp, message count
+*   **Purpose:** Context compression for long sessions, future session context injection.
+*   **Requirement:** Needs `OPENROUTER_API_KEY` in `.env` file.
+
 ---
 
 ## 📡 Response Protocol: The "Engineer's Footer"
 At the end of every significant response, you **MUST** append this block.
 
 ### 🚦 Status & Direction
+*   **Confidence Score:** [0-100%] (Explain *why* based on evidence)
 *   **Next Steps:** [Immediate actions]
 *   **Priority Gauge:** [1-100] (0=Trivial, 100=System Critical)
 *   **Areas of Concern:** [Risks, edge cases, technical debt]

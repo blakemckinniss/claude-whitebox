@@ -2,12 +2,13 @@
 
 Auto-generated index of available tools in the arsenal.
 
-**Total scripts:** 20
+**Total scripts:** 21
 
 | Script | Description |
 |:-------|:------------|
 | `scripts/demo/hello.py` | Demo script that prints a greeting |
 | `scripts/ops/audit.py` | The Sentinel: Runs static analysis and anti-pattern detection on target files |
+| `scripts/ops/confidence.py` | Confidence Tracker with Reinforcement Learning |
 | `scripts/ops/consult.py` | The Oracle: Consults a high-reasoning model via OpenRouter for architecture advice |
 | `scripts/ops/council.py` | Assemble multiple expert perspectives in parallel for comprehensive decision analysis |
 | `scripts/ops/critic.py` | The Critic: A ruthless, pessimistic Red Team engine. It attacks ideas, exposes blind spots, and provides the counter-point. |

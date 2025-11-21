@@ -20,6 +20,19 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/ban_stubs.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
           }
         ]
       },
@@ -57,6 +70,14 @@
           },
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_low_confidence.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_confidence_penalty.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_gaslight.py"
           },
           {
@@ -90,12 +111,30 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_confidence_reward.py"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_remember.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/debt_tracker.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/session_digest.py"
           }
         ]
       }
