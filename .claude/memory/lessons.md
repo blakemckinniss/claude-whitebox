@@ -42,3 +42,27 @@ Document failures, bugs, and wrong assumptions to prevent repeating mistakes.
 
 ### 2025-11-20 16:57
 The Elephant Protocol provides persistent memory across sessions using markdown files
+
+### 2025-11-20 20:50
+Test lesson from auto-remember hook verification
+
+### 2025-11-20 20:53
+Auto-remember Stop hook requires Claude Code restart to activate. Settings.json changes are loaded at startup, not runtime. Hook tested manually and works—extracts Memory Triggers and executes remember.py automatically.
+
+### 2025-11-20 20:54
+Auto-remember Stop hook transcript parsing was broken - looked for message.role instead of entry.type at top level. Fixed to parse Claude Code's actual transcript format: entry.type=='assistant' then entry.message.content[].text
+
+### 2025-11-20 20:56
+Auto-remember Stop hook debugging - added comprehensive logging to diagnose why hook isn't firing. Logs input, transcript parsing, message extraction, regex matching, and execution to debug_auto_remember.log file.
+
+### 2025-11-20 20:57
+Testing auto-remember Stop hook after restart with debug logging enabled. This should automatically execute and appear in lessons.md without manual intervention.
+
+### 2025-11-20 20:58
+...
+
+### 2025-11-20 20:58
+Auto-remember Stop hook is fully functional. Debug log confirmed successful execution: parses transcript, extracts Memory Triggers, executes remember.py, saves to lessons.md. Switched back to production version without debug logging.
+
+### 2025-11-20 20:59
+Auto-remember Stop hook FINAL VERIFICATION TEST at 2025-11-20 21:00 UTC - This unique timestamped lesson confirms the hook is executing automatically without manual intervention. Test ID: UNIQUE-HOOK-TEST-001
