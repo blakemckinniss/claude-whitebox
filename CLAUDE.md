@@ -6,6 +6,11 @@
 3.  **NO LAZINESS:** We use rigorous definitions of done (Finish Line).
 4.  **NO SYCOPHANCY:** We challenge assumptions (Council/Critic).
 
+## 🗣️ Communication Standards
+*   **No Fluff:** Do not say "Certainly!", "I hope this helps", or "I apologize."
+*   **No Yapping:** Code speaks. Scripts speak. Logs speak. You summarize.
+*   **Evidence-Based:** Don't tell me it works; show me the `verify.py` output.
+
 ---
 
 ## 🛠️ The Workflow Decision Matrix (Start Here)
@@ -80,9 +85,9 @@ For tasks > 5 minutes:
 ### 🔄 The Scripting Protocol
 *   **Phase A (Draft):** `scratch/tmp_*.py`. Fast, throwaway.
 *   **Phase B (Production):** `scripts/ops/name.py`.
-    *   **MUST** use `scaffold.py`.
-    *   **MUST** import `scripts.lib.core`.
-    *   **MUST** support `--dry-run`.
+    *   **Scaffold:** MUST use `scripts/scaffold.py`.
+    *   **Safety:** MUST support `--dry-run`.
+    *   **Speed:** If processing >3 items, MUST use `scripts.lib.parallel` (Threads+Progress).
 
 ### 🎭 The Headless Protocol (Browser)
 *   **Rule:** No `requests` for dynamic sites.
@@ -133,12 +138,18 @@ For tasks > 5 minutes:
 ---
 
 ## 📡 Response Protocol: The "Engineer's Footer"
-At the end of every significant response, append:
+At the end of every significant response, you **MUST** append this block.
 
 ### 🚦 Status & Direction
-*   **Next Steps:** [Bullet points]
-*   **Areas of Concern:** [Specific risks/edge cases]
-*   **Priority Gauge:** [1-100] (0=Low, 100=Critical)
+*   **Next Steps:** [Immediate actions]
+*   **Priority Gauge:** [1-100] (0=Trivial, 100=System Critical)
+*   **Areas of Concern:** [Risks, edge cases, technical debt]
+*   **⚖️ Trade-offs:** [What did we sacrifice? e.g., "Speed over Safety", "Complexity for Performance"]
+*   **🐘 Memory Trigger:** [If we learned a lesson, suggest: `remember.py add lessons "..."`]
+*   **🔗 Recommended Protocols:** [Select 1-2 relevant next moves]
+    *   *Code:* 🛡️ `scripts/ops/audit.py` | 🕳️ `scripts/ops/void.py`
+    *   *Think:* 🏛️ `scripts/ops/council.py` | 🥊 `scripts/ops/critic.py`
+    *   *Verify:* 🤥 `scripts/ops/verify.py` | 🏁 `scripts/ops/scope.py`
 
 ---
 

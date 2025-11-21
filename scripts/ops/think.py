@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The Oracle: Consults a high-reasoning model via OpenRouter for architecture advice
+The Thinker: Decomposes complex problems into atomic steps using Chain of Thought
 """
 import sys
 import os
@@ -24,10 +24,9 @@ from core import setup_script, finalize, logger, handle_debug, check_dry_run
 
 
 def main():
-    parser = setup_script("The Oracle: Consults a high-reasoning model via OpenRouter for architecture advice")
+    parser = setup_script("The Thinker: Decomposes complex problems into atomic steps using Chain of Thought")
 
-    # Custom arguments
-    parser.add_argument('prompt', help="The question or problem to analyze")
+    parser.add_argument('problem', help="The problem to decompose into sequential steps")
     parser.add_argument('--model', default="google/gemini-3-pro-preview",
                        help="OpenRouter model ID (default: Gemini 2.0 Flash Thinking)")
 
@@ -41,15 +40,46 @@ def main():
         logger.error("Please add OPENROUTER_API_KEY to your .env file")
         finalize(success=False)
 
-    logger.info(f"Consulting The Oracle ({args.model})...")
+    logger.info(f"Consulting The Thinker ({args.model})...")
 
     if args.dry_run:
-        logger.warning("⚠️  DRY RUN: Would send the following prompt to OpenRouter:")
-        logger.info(f"Prompt: {args.prompt}")
+        logger.warning("⚠️  DRY RUN: Would send the following problem to The Thinker:")
+        logger.info(f"Problem: {args.problem}")
         logger.info(f"Model: {args.model}")
         finalize(success=True)
 
     try:
+        # Prepare system prompt for sequential decomposition
+        system_prompt = """You are a Sequential Logic Engine.
+Your role is to decompose complex problems into atomic, executable steps.
+
+Rules:
+1. Identify the ROOT CAUSE first (what is the actual problem, not the symptom?)
+2. List any UNKNOWN VARIABLES that need investigation before proceeding
+3. Create a LINEAR PLAN with numbered steps (Step 1, Step 2, Step 3...)
+4. For each step, specify WHAT to do and HOW to verify it worked
+5. Do NOT write the code - only write the plan
+6. Include a "Definition of Done" at the end
+
+Output Format:
+## 🎯 Core Objective
+[What are we actually trying to achieve?]
+
+## 🚧 Constraints
+[What are the limitations, requirements, or boundaries?]
+
+## ❓ Unknown Variables
+[What do we need to investigate/probe/research first?]
+
+## 📋 Sequential Steps
+1. [Step description] → Verify: [how to check success]
+2. [Step description] → Verify: [how to check success]
+...
+
+## ✅ Definition of Done
+[What does "success" look like?]
+"""
+
         # Prepare OpenRouter API request
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -59,8 +89,10 @@ def main():
 
         data = {
             "model": args.model,
-            "messages": [{"role": "user", "content": args.prompt}],
-            "extra_body": {"reasoning": {"enabled": True}}
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": args.problem}
+            ]
         }
 
         logger.debug(f"Request payload: {json.dumps(data, indent=2)}")
@@ -81,28 +113,17 @@ def main():
         choice = result['choices'][0]['message']
         content = choice.get('content', '')
 
-        # Try to extract reasoning (format varies by provider)
-        reasoning = choice.get('reasoning', '') or result.get('reasoning', '')
-
         # Display results
         print("\n" + "=" * 70)
-        print("🧠 ORACLE REASONING")
-        print("=" * 70)
-        if reasoning:
-            print(reasoning)
-        else:
-            print("(No explicit reasoning trace provided by this model)")
-
-        print("\n" + "=" * 70)
-        print("💡 ORACLE ADVICE")
+        print("🧠 THE THINKER: SEQUENTIAL DECOMPOSITION")
         print("=" * 70)
         print(content)
         print("\n")
 
-        logger.info("Oracle consultation complete")
+        logger.info("Sequential decomposition complete")
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"Oracle communication failed: {e}")
+        logger.error(f"API communication failed: {e}")
         if 'response' in locals():
             logger.error(f"Response text: {response.text}")
         finalize(success=False)

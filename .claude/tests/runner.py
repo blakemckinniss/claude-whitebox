@@ -21,8 +21,32 @@ TEST_SUITES = {
         "unit/test_core.py",
     ],
     "integration": [
+        # SDK Infrastructure
         "integration/test_scaffolder.py",
         "integration/test_indexer.py",
+        "integration/test_scripting.py",
+
+        # Tier 1: Data/IO Protocols
+        "integration/test_oracle.py",
+        "integration/test_research.py",
+        "integration/test_probe.py",
+        "integration/test_reality_check.py",
+        "integration/test_elephant.py",
+        "integration/test_finish_line.py",
+
+        # Tier 2: Logic/Reasoning Protocols
+        "integration/test_judge.py",
+        "integration/test_critic.py",
+        "integration/test_cartesian.py",
+        "integration/test_headless.py",
+        "integration/test_macgyver.py",
+
+        # Tier 3: Safety/Monitoring Protocols
+        "integration/test_upkeep.py",
+        "integration/test_sentinel.py",
+        "integration/test_void_hunter.py",
+        "integration/test_xray.py",
+        "integration/test_synapse.py",
     ],
     "alignment": [
         "alignment/test_whitebox_principles.py",

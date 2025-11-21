@@ -63,3 +63,9 @@ The X-Ray Protocol: AST-Based Structural Search. Decision: Build semantic code s
 
 ### 2025-11-20 17:20
 The Headless Protocol: Browser Automation SDK. Decision: Wrap Playwright in clean SDK to make browser automation the path of least resistance. Reason: LLMs avoid Playwright due to boilerplate and friction, defaulting to requests+BS4 which fails on dynamic sites. Solution: browser.py provides context managers, smart_dump for LLM-readable content, auto-screenshots on error, safe helpers. Scaffolder supports --template playwright for zero-boilerplate generation. Hook blocks requests+BS4 for UI tasks. Consequences: Requires playwright installation but eliminates friction. Philosophy: Whitebox automation - transparent Python wrapping Playwright sync API.
+
+### 2025-11-20 17:41
+Adopted The Cartesian Protocol for meta-cognition. Rationale: LLMs are people-pleasers and rush to execution. We need forced adversarial reasoning to catch XY problems, sunk cost fallacy, and premature optimization. The Thinker decomposes problems sequentially. The Skeptic performs hostile review. Both use OpenRouter for external reasoning. Hook system warns before risky operations.
+
+### 2025-11-20 17:46
+Adopted The MacGyver Protocol for improvisation and resilience. Rationale: LLMs give up when tools are missing ('please install X'). MacGyver Protocol enforces Living off the Land (LotL) - use ONLY what's available. inventory.py scans system capabilities. macgyver agent has LotL mindset baked in. Fallback chain: stdlib → binaries → raw I/O → creative workarounds. Never surrender, always find a solution.

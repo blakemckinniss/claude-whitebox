@@ -28,13 +28,13 @@ def setup_script(description):
         parser.add_argument('--target', required=True)
         args = parser.parse_args()
     """
-    # Load .env if present
+    # Load .env if present (override existing env vars to ensure .env takes precedence)
     try:
         from dotenv import load_dotenv
         env_path = Path(__file__).parent.parent.parent / '.env'
         if env_path.exists():
-            load_dotenv(env_path)
-            logger.debug(f"Loaded environment from {env_path}")
+            load_dotenv(env_path, override=True)
+            logger.debug(f"Loaded environment from {env_path} (with override)")
     except ImportError:
         logger.debug("python-dotenv not installed, skipping .env load")
 
