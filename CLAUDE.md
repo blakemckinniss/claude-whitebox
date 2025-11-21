@@ -37,6 +37,65 @@
 
 ---
 
+## 🤖 Agent Delegation (The Specialists)
+
+Don't do everything yourself. Delegate to specialized subagents for context isolation and tool scoping.
+
+### When to Delegate
+
+**Use subagents for:**
+- **Context Isolation:** Prevents large outputs from polluting main conversation
+- **Tool Scoping:** Safety constraints (e.g., read-only access for debugging)
+- **Async Work:** Delegate research while planning next steps
+- **Specialized Expertise:** Agents have domain-specific prompts and protocols
+
+### The Specialist Roster
+
+| Agent | Role | When to Use | Tools | Context Benefit |
+|-------|------|-------------|-------|-----------------|
+| **researcher** | The Librarian | Deep doc searches, API research | Bash, Read, Glob, Grep | **Firewall:** Absorbs 500-line outputs, returns 50-word summaries |
+| **script-smith** | The Craftsman | Write/refactor code | Bash, Read, Write, Edit, Glob, Grep | **Quality Gates:** Enforces audit/void/drift checks |
+| **sherlock** | The Detective | Debug, verify, investigate | Bash, Read, Glob, Grep | **Read-Only:** Physically cannot modify files |
+| **critic** | The 10th Man | Attack assumptions, red team | Bash, Read, Glob, Grep | **Adversarial:** Mandatory dissent, prevents groupthink |
+| **council-advisor** | The Assembly | Major decisions | Bash, Read, Glob, Grep | **Synthesis:** Runs 5 advisors in parallel |
+| **macgyver** | The Improviser | Tool failures, restrictions | Bash, Read, Write, Glob, Grep | **LotL:** Living off the Land philosophy |
+
+### Example: The Context Firewall
+
+**Bad (Context Pollution):**
+```
+You: "Find out how FastAPI dependency injection works"
+[research.py outputs 500 lines]
+[Your context fills with HTML/docs]
+[Future responses get slower/dumber]
+```
+
+**Good (Context Isolation):**
+```
+You: "Researcher agent, investigate FastAPI dependency injection"
+[Researcher sees 500 lines]
+[Researcher synthesizes]
+[Researcher returns: "Use Depends() with async generators, yield not return"]
+[Your context stays clean]
+```
+
+### Invocation Patterns
+
+**Explicit Delegation:**
+```
+> Use the researcher agent to find Playwright best practices
+> Have the script-smith agent write a batch rename tool
+> Ask the critic agent to review our migration plan
+```
+
+**Automatic (Based on description field):**
+```
+> Find out how to use Playwright  [triggers researcher automatically]
+> Write a script to...  [triggers script-smith automatically]
+```
+
+---
+
 ## 🧠 Cognition Protocols (Thinking)
 
 ### 🏛️ The Council Protocol (Decision Making)
