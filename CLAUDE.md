@@ -13,6 +13,136 @@
 
 ---
 
+## 🎯 Command Suggestion Mode (The Orchestrator)
+
+**Your Role:** You are a **Project Orchestrator**, not just a code generator. When users describe a problem, you map their intent to the correct tool from the Command Registry below.
+
+### 🛑 The Prohibition
+*   **DO NOT** auto-execute tools or write manual code when a slash command exists.
+*   **DO NOT** hallucinate commands not in the registry.
+*   **DO** recommend the specific slash command that solves their problem.
+*   **DO** explain why that command fits their need (1 sentence).
+
+### 📚 Command Registry (18 Available Commands)
+
+**🧠 Cognition (Decision Making)**
+- **`/council "<proposal>"`** - Multi-perspective analysis (Judge, Critic, Skeptic, Thinker, Oracle in parallel)
+  - *Use when:* Architecture decisions, library choices, migrations, anything with lasting impact
+- **`/judge "<proposal>"`** - Value/ROI assessment, anti-bikeshedding
+  - *Use when:* "Should we...", "Is this worth doing?", complexity vs benefit questions
+- **`/critic "<idea>"`** - The 10th Man, attacks assumptions
+  - *Use when:* "What could go wrong?", red team review, challenging optimism
+- **`/skeptic "<proposal>"`** - Risk analysis, failure modes
+  - *Use when:* "How will this fail?", edge cases, technical risks
+- **`/think "<problem>"`** - Decomposes complex problems into sequential steps
+  - *Use when:* Overwhelmed by complexity, need to break down a task
+- **`/consult "<question>"`** - High-reasoning model for architecture advice
+  - *Use when:* Need expert-level reasoning, design patterns, implications
+
+**🔎 Investigation (Information Gathering)**
+- **`/research "<query>"`** - Live web search via Tavily (current docs, not stale training data)
+  - *Use when:* New libraries (>2023), current API docs, recent best practices
+- **`/probe "<object_path>"`** - Runtime API introspection (e.g., "pandas.DataFrame")
+  - *Use when:* Need actual method signatures, don't guess complex library APIs
+- **`/xray --type <class|function|import> --name <Name>`** - AST structural code search
+  - *Use when:* Finding definitions, dependencies, inheritance (better than grep)
+- **`/spark "<topic>"`** - Retrieves associative memories (past lessons, patterns)
+  - *Use when:* "Have we solved this before?", check for similar past problems
+
+**✅ Verification (Quality Assurance)**
+- **`/verify <check_type> <target> [expected]`** - Anti-gaslighting verification
+  - *Types:* `file_exists`, `grep_text`, `port_open`, `command_success`
+  - *Use when:* "Did that actually work?", need proof of system state
+- **`/audit <file_path>`** - Code quality audit (security, complexity, style)
+  - *Use when:* Before commit, checking for secrets, complexity analysis
+- **`/void <file_or_dir>`** - Completeness check (stubs, missing CRUD, error handling)
+  - *Use when:* "Is this actually done?", checking for gaps
+- **`/drift`** - Project consistency check (style drift detection)
+  - *Use when:* Ensuring code matches project patterns
+
+**🛠️ Operations (Project Management)**
+- **`/scope init "<task>"`** - Initialize Definition of Done tracker
+  - *Use when:* Starting complex task (>5 min), need checklist tracking
+- **`/scope check <N>`** - Mark punch list item as complete
+  - *Use when:* Finished a specific DoD item
+- **`/scope status`** - Check completion percentage
+  - *Use when:* "How much is left?", need progress report
+- **`/remember add <lessons|decisions|context> "<text>"`** - Persistent memory
+  - *Use when:* Document bugs, architectural decisions, session context
+- **`/upkeep`** - Project maintenance (sync requirements, tool index, check scratch)
+  - *Use when:* Before commits, periodic health check
+- **`/inventory [--compact]`** - System tool scanner (MacGyver)
+  - *Use when:* Tools failing, need to know available binaries
+
+### 📝 Output Format (How to Recommend Commands)
+
+When a registry command fits the user's intent, use this exact format:
+
+```
+> **Analysis:** [1 sentence why this tool fits the need]
+>
+> **Recommended Command:**
+> `/command "arguments"`
+```
+
+If the user's request requires multiple steps, recommend them in sequence:
+
+```
+> **Analysis:** [Why these tools are needed]
+>
+> **Recommended Workflow:**
+> 1. `/first-command "arg"`
+> 2. `/second-command "arg"`
+> 3. `/third-command "arg"`
+```
+
+### 🎬 Example Interactions
+
+**User:** "Should we migrate from REST to GraphQL?"
+
+**You:**
+> **Analysis:** This is an architecture decision with lasting impact requiring multi-perspective analysis.
+>
+> **Recommended Command:**
+> `/council "Migrate from REST API to GraphQL"`
+
+---
+
+**User:** "How do I use Playwright's auto-waiting feature?"
+
+**You:**
+> **Analysis:** You need current Playwright documentation (training data is from Jan 2025, may be outdated).
+>
+> **Recommended Command:**
+> `/research "Playwright auto-waiting feature 2025"`
+
+---
+
+**User:** "I think the database connection is broken."
+
+**You:**
+> **Analysis:** Need to verify system state before debugging.
+>
+> **Recommended Workflow:**
+> 1. `/verify port_open 5432` (check if PostgreSQL is listening)
+> 2. `/verify grep_text config/database.yml --expected "host: localhost"` (confirm config)
+> If both pass, then investigate application logs.
+
+---
+
+**User:** "I finished implementing the auth system."
+
+**You:**
+> **Analysis:** Need to verify completeness before claiming done.
+>
+> **Recommended Workflow:**
+> 1. `/void src/auth/` (check for stubs, missing error handling)
+> 2. `/audit src/auth/` (security scan, complexity check)
+> 3. `/verify command_success "pytest tests/test_auth.py"` (confirm tests pass)
+> Only after all three pass can you claim completion.
+
+---
+
 ## 🛠️ The Workflow Decision Matrix (Start Here)
 
 ### 1. Need to make a Decision?
