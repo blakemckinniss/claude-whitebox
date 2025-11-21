@@ -29,9 +29,10 @@ def parse_transcript(transcript_path: str) -> list[dict]:
 
 def get_last_assistant_message(messages: list[dict]) -> str:
     """Get the last assistant message content from transcript."""
-    for message in reversed(messages):
-        if message.get("role") == "assistant":
-            # Handle both text content and tool_use content
+    for entry in reversed(messages):
+        # Transcript format: {"type": "assistant", "message": {"content": [...]}}
+        if entry.get("type") == "assistant":
+            message = entry.get("message", {})
             content = message.get("content", [])
             if isinstance(content, list):
                 for block in content:
