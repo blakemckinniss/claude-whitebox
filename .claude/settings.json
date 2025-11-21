@@ -95,7 +95,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_remember.py"
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_remember_debug.py"
           }
         ]
       }
