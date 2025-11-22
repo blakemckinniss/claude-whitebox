@@ -1,0 +1,38 @@
+{
+  "$schema": "persona-presets-schema",
+  "description": "Common persona combinations for quick access. Use with --preset flag.",
+  "presets": {
+    "comprehensive": {
+      "description": "Full 5-persona analysis (recommended default)",
+      "personas": ["judge", "critic", "skeptic", "oracle", "innovator"]
+    },
+    "quick": {
+      "description": "Fast 3-persona consultation for simple decisions",
+      "personas": ["judge", "critic", "oracle"]
+    },
+    "hostile": {
+      "description": "Red team review - attack the idea",
+      "personas": ["critic", "skeptic"]
+    },
+    "creative": {
+      "description": "Idea generation and alternatives",
+      "personas": ["innovator", "advocate", "oracle"]
+    },
+    "security-review": {
+      "description": "Security-focused analysis",
+      "personas": ["security", "legal", "critic", "skeptic"]
+    },
+    "architecture": {
+      "description": "Architectural decision-making",
+      "personas": ["judge", "skeptic", "oracle", "innovator", "performance"]
+    },
+    "product": {
+      "description": "Product decision analysis",
+      "personas": ["judge", "advocate", "ux", "data", "innovator"]
+    },
+    "technical": {
+      "description": "Technical implementation review",
+      "personas": ["skeptic", "performance", "security", "thinker"]
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "classic-experts",
+  "description": "Original multi-expert protocol - Judge/Critic/Skeptic/Thinker/Oracle for comprehensive analysis",
+  "personas": [
+    {
+      "role": "The Judge (Value)",
+      "script": "judge.py",
+      "prompt_template": "Evaluate the value and ROI of this proposal. Is it worth doing? Apply Occam's Razor and YAGNI principles:\n\n{proposal}",
+      "emoji": "⚖️"
+    },
+    {
+      "role": "The Critic (Attack)",
+      "script": "critic.py",
+      "prompt_template": "Attack the core assumptions of this proposal. What are we wrong about? What's the brutal truth?\n\n{proposal}",
+      "emoji": "🥊"
+    },
+    {
+      "role": "The Skeptic (Risk)",
+      "script": "skeptic.py",
+      "prompt_template": "Analyze the risks and failure modes. How will this fail? What are the edge cases?\n\n{proposal}",
+      "emoji": "🔥"
+    },
+    {
+      "role": "The Thinker (Decompose)",
+      "script": "think.py",
+      "prompt_template": "Break this proposal into sequential steps. What's the logical decomposition?\n\n{proposal}",
+      "emoji": "🧠"
+    },
+    {
+      "role": "The Oracle (Reasoning)",
+      "script": "consult.py",
+      "prompt_template": "Provide high-level reasoning and implications. What are the second-order effects?\n\n{proposal}",
+      "emoji": "🔮"
+    }
+  ],
+  "arbiter": {
+    "role": "The Arbiter (Synthesis)",
+    "script": "arbiter.py",
+    "emoji": "🔵",
+    "model": "google/gemini-3-pro-preview"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "six-hats",
+  "description": "Edward de Bono's Six Thinking Hats framework - comprehensive decision-making with 6 perspectives",
+  "personas": [
+    {
+      "role": "White Hat (Facts)",
+      "script": "consult.py",
+      "prompt_template": "Analyze this proposal objectively using only facts, data, and precedents. What do we KNOW? What do we NOT know? Cite evidence:\n\n{proposal}",
+      "emoji": "⚪"
+    },
+    {
+      "role": "Red Hat (Risks)",
+      "script": "skeptic.py",
+      "prompt_template": "What does your gut say about this? What feels wrong? What are the warning signs and hidden risks?\n\n{proposal}",
+      "emoji": "🔴"
+    },
+    {
+      "role": "Black Hat (Critical)",
+      "script": "critic.py",
+      "prompt_template": "Attack this proposal. What are the weaknesses? Why will this fail? Be brutally critical:\n\n{proposal}",
+      "emoji": "⚫"
+    },
+    {
+      "role": "Yellow Hat (Benefits)",
+      "script": "advocate.py",
+      "prompt_template": "What are the benefits and opportunities? What's the best-case scenario? What value does this create?\n\n{proposal}",
+      "emoji": "🟡"
+    },
+    {
+      "role": "Green Hat (Alternatives)",
+      "script": "innovator.py",
+      "prompt_template": "What else could we do instead? What are creative alternatives? What's the innovative approach?\n\n{proposal}",
+      "emoji": "🟢"
+    }
+  ],
+  "arbiter": {
+    "role": "Blue Hat (Arbiter)",
+    "script": "arbiter.py",
+    "emoji": "🔵",
+    "model": "google/gemini-3-pro-preview"
+  }
+}
