@@ -2,7 +2,7 @@
 
 Auto-generated index of available tools in the arsenal.
 
-**Total scripts:** 26
+**Total scripts:** 27
 
 | Script | Description |
 |:-------|:------------|
@@ -28,6 +28,7 @@ Auto-generated index of available tools in the arsenal.
 | `scripts/ops/skeptic.py` | The Skeptic: Analyzes a proposed plan for logical fallacies and failure modes |
 | `scripts/ops/spark.py` | The Synapse: Scans prompt for keywords and retrieves associated memories and protocols |
 | `scripts/ops/think.py` | The Thinker: Decomposes complex problems into atomic steps using Chain of Thought |
+| `scripts/ops/timekeeper.py` | The Timekeeper: Assesses proposal complexity and sets dynamic deliberation limits. |
 | `scripts/ops/upkeep.py` | The Janitor: Scans the project, updates indexes, verifies requirements, and cleans scratch/ |
 | `scripts/ops/verify.py` | The Fact-Checker: Validates system state assertions. Returns True/False. Use this BEFORE claiming something is true. |
 | `scripts/ops/void.py` | The Void Hunter: Scans code for missing functionality, stubs, and logical gaps. |

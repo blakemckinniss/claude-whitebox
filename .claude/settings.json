@@ -83,6 +83,11 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
+          },
+          {
+            "type": "prompt",
+            "prompt": "You are The Shortcut Detector. Evaluate if this Task delegation follows CLAUDE.md rules.\n\nTask Delegation: $ARGUMENTS\n\n## RULES\n\n1. **Complex Delegation**: Prompts >200 chars require /think first (last 10 turns)\n2. **Researcher Agent**: Should gather evidence BEFORE delegating research\n3. **Script-Smith Agent**: Requires /audit and /void passing (last 10 turns) for production code\n4. **Agent Overuse**: Don't delegate trivial tasks that take <30 seconds\n\n## CHECK\n\n- Is prompt >200 chars without decomposition?\n- Is this researcher delegation but Claude hasn't gathered baseline evidence?\n- Is this script-smith for production without quality gates?\n- Is Claude delegating something trivial to avoid doing work?\n\n## RESPOND\n\nVIOLATION detected:\n```json\n{\n  \"hookSpecificOutput\": {\n    \"hookEventName\": \"PreToolUse\",\n    \"permissionDecision\": \"deny\",\n    \"permissionDecisionReason\": \"\u274c DELEGATION VIOLATION\\n\\nRule: [specific rule]\\nRemedy: Run /think OR gather evidence first\\n\\nSee CLAUDE.md \u00a7 Agent Delegation\"\n  }\n}\n```\n\nNo violation:\n```json\n{\n  \"hookSpecificOutput\": {\n    \"hookEventName\": \"PreToolUse\",\n    \"permissionDecision\": \"allow\"\n  }\n}\n```",
+            "timeout": 25
           }
         ]
       },
@@ -92,6 +97,16 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/trigger_skeptic.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You are The Code Intent Validator. Check if this Write/Edit follows CLAUDE.md protocols.\n\nOperation: $ARGUMENTS\n\n## VIOLATIONS TO DETECT\n\n1. **Context Blindness**: Editing file without Reading it first\n2. **Documentation Spam**: Creating .md files \"JUST FOR HUMANS\" (CLAUDE.md forbids this)\n3. **Stub Code**: Writing pass/TODO/NotImplementedError (banned by Void Hunter Protocol)\n4. **Production Without Gates**: Writing to scripts/ or src/ without /audit + /void\n5. **Premature Abstraction**: Creating helpers/utilities for one-time operations\n\n## CONTEXT\n\nCheck the file path and content:\n- Is this a new .md file for human documentation? (VIOLATION)\n- Is content a stub (pass, TODO, ...)? (VIOLATION)\n- Is this production code (scripts/, src/) without quality gates? (WARN)\n- Is Claude abstracting a single use case? (WARN)\n\n## RESPOND\n\nCRITICAL violation (block):\n```json\n{\n  \"hookSpecificOutput\": {\n    \"hookEventName\": \"PreToolUse\",\n    \"permissionDecision\": \"deny\",\n    \"permissionDecisionReason\": \"\ud83d\udeab CODE VIOLATION\\n\\n[Specific rule violated]\\n\\nSee CLAUDE.md \u00a7 Core Philosophy\"\n  }\n}\n```\n\nWarning (allow with message):\n```json\n{\n  \"hookSpecificOutput\": {\n    \"hookEventName\": \"PreToolUse\",\n    \"permissionDecision\": \"allow\"\n  },\n  \"systemMessage\": \"\u26a0\ufe0f WARNING: [concern]\"\n}\n```\n\nNo issues:\n```json\n{\n  \"hookSpecificOutput\": {\n    \"hookEventName\": \"PreToolUse\",\n    \"permissionDecision\": \"allow\"\n  }\n}\n```",
+            "timeout": 30
           }
         ]
       }
@@ -110,7 +125,7 @@
           },
           {
             "type": "command",
-            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n🧠 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
+            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n\ud83e\udde0 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
           }
         ]
       }
@@ -144,31 +159,11 @@
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/intervention.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/anti_sycophant.py"
           },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_workflow.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/check_knowledge.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_batch.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/sanity_check.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/force_playwright.py"
           },
           {
             "type": "command",
@@ -193,6 +188,41 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_on_complete.py"
+          },
+          {
+            "type": "prompt",
+            "prompt": "You are The Protocol Enforcer. Analyze if Claude's planned response follows CLAUDE.md \u00a7 Behavioral Protocols.\n\nUser Request: $ARGUMENTS\n\n## MANDATORY PROTOCOLS\n\n### Research Protocol\n- New libraries (>2023) \u2192 MUST run /research first\n- Complex APIs (pandas, boto3, fastapi) \u2192 MUST run /probe first\n- Errors/debugging \u2192 MUST /research current solutions\n\n### Decision Protocol  \n- Architecture decisions \u2192 MUST run /council (not single advisor)\n- Library choices \u2192 MUST run /council\n- Migrations \u2192 MUST run /council\n\n### Quality Protocol\n- Production code \u2192 MUST run /audit AND /void first\n- Git commits \u2192 MUST run /upkeep first\n- Claims of 'Fixed'/'Done' \u2192 MUST run /verify first\n\n### Evidence Protocol\n- File edits \u2192 MUST Read file first (context blindness prevention)\n- Production writes \u2192 MUST have 71%+ confidence\n- Strategic advice \u2192 MUST have evidence gathered\n\n### Performance Protocol\n- Batch operations (process files, bulk actions) \u2192 MUST use scripts.lib.parallel\n\n## YOUR TASK\n\nIdentify which protocols are MANDATORY for this request. Return JSON:\n\n```json\n{\n  \"decision\": \"approve\",\n  \"systemMessage\": \"\u26a0\ufe0f PROTOCOL REQUIREMENTS:\\n- MUST run /research before coding with X\\n- MUST run /council for Y decision\\n- MUST Read Z.py before editing\\n\\nThese are NON-NEGOTIABLE per CLAUDE.md \u00a7 [Section].\"\n}\n```\n\nOnly block (\"decision\": \"block\") if user explicitly asks Claude to violate safety rules. Otherwise approve with strong systemMessage.",
+            "timeout": 30
+          },
+          {
+            "type": "prompt",
+            "prompt": "You are The Intent Router. Map user requests to CLAUDE.md \u00a7 Tool Registry.\n\nUser Request: $ARGUMENTS\n\n## TOOL CATEGORIES\n\n### Cognition (Decision Making)\n- /council \u2192 Major decisions (architecture, libraries, strategy)\n- /judge \u2192 Quick ROI check\n- /critic \u2192 Red team review\n- /think \u2192 Decompose complexity\n\n### Investigation (Information Gathering)\n- /research \u2192 Live web search (new libs, current docs)\n- /probe \u2192 Runtime API introspection\n- /xray \u2192 AST code search\n\n### Verification (Quality Assurance)\n- /verify \u2192 Objective state checks (files exist, tests pass)\n- /audit \u2192 Security scan\n- /void \u2192 Completeness check\n\n### Operations (Project Management)\n- /scope init \u2192 Start DoD tracker for complex tasks\n- /upkeep \u2192 Sync requirements, check consistency\n\n## YOUR TASK\n\nIdentify the BEST tool for this request. Return JSON:\n\n```json\n{\n  \"decision\": \"approve\",\n  \"systemMessage\": \"\ud83d\udccd RECOMMENDED: /command 'args'\\n\\nWhy: [1 sentence]\\n\\nSee CLAUDE.md \u00a7 Tool Registry\"\n}\n```\n\nIf user request maps to multiple tools, list them in order.",
+            "timeout": 20
+          },
+          {
+            "type": "prompt",
+            "prompt": "Analyze if this describes a batch operation: $ARGUMENTS\n\nCheck for:\n- Keywords: batch, bulk, mass, \"all files\", iterate, loop, scan, scrape\n- Patterns: \"process files\", \"download all\", \"convert all\", \"foreach\"\n- Plural + verbs: \"process files\", \"fetch urls\", \"parse documents\"\n\nIf batch operation detected, return:\n```json\n{\n  \"decision\": \"approve\",\n  \"systemMessage\": \"\u26a0\ufe0f BATCH OPERATION DETECTED\\n\\nPERFORMANCE PROTOCOL: Use scripts.lib.parallel for multi-threading.\\n\\nExample:\\n  from parallel import run_parallel\\n  results = run_parallel(process_func, items, max_workers=10, desc='Processing')\"\n}\n```\n\nOtherwise: {\"decision\": \"approve\"}",
+            "timeout": 15
+          },
+          {
+            "type": "prompt",
+            "prompt": "Evaluate if this requires current documentation: $ARGUMENTS\n\nCheck for:\n- Fast-moving tech: React, Next.js, Tailwind, AWS, OpenAI, LangChain, PyTorch\n- Freshness indicators: latest, current, newest, updated, how to, error, fix, debug\n- Version mentions: indicating specific releases\n\nIf research needed, return:\n```json\n{\n  \"decision\": \"approve\",\n  \"systemMessage\": \"\u26a0\ufe0f KNOWLEDGE CHECK: This may require current information.\\n\\nRECOMMENDED: /research '<query>' before coding\\n\\nReason: Training data from Jan 2025 - libraries/APIs may have changed\"\n}\n```\n\nOtherwise: {\"decision\": \"approve\"}",
+            "timeout": 15
+          },
+          {
+            "type": "prompt",
+            "prompt": "Check if user wants to write code for complex libraries: $ARGUMENTS\n\nCode intent keywords: write script, create tool, implement, build, add function\nRisky libraries: pandas, numpy, boto3, azure, openai, anthropic, fastapi, django, sqlalchemy, pytorch\n\nIf coding with complex library:\n```json\n{\n  \"decision\": \"approve\",\n  \"systemMessage\": \"\u26a0\ufe0f API GUESSING PROHIBITED\\n\\nSTOP. Do not guess method signatures.\\n\\nMANDATORY:\\n1. /research '<library> current docs'\\n2. /probe <object_path>\\n\\nThen code based on ACTUAL runtime API.\\n\\nSee CLAUDE.md \u00a7 Probe Protocol\"\n}\n```\n\nOtherwise: {\"decision\": \"approve\"}",
+            "timeout": 15
+          },
+          {
+            "type": "prompt",
+            "prompt": "Check if this requires browser automation: $ARGUMENTS\n\nUI triggers: click, login, fill form, screenshot, render, e2e, selenium, browser, javascript, dynamic content\nLazy triggers: requests, beautifulsoup, bs4, urllib, httpx\n\nIf UI task + text-based approach:\n```json\n{\n  \"decision\": \"approve\",\n  \"systemMessage\": \"\u26a0\ufe0f BROWSER AUTOMATION REQUIRED\\n\\nDo NOT use requests/BeautifulSoup for dynamic sites.\\n\\nUSE: Playwright (Whitebox Browser SDK)\\n\\nWhy:\\n- CSRF tokens need browser sessions\\n- JavaScript rendering needs real browser\\n- Login flows need cookies/localStorage\\n\\nSee CLAUDE.md \u00a7 Headless Protocol\"\n}\n```\n\nOtherwise: {\"decision\": \"approve\"}",
+            "timeout": 15
+          },
+          {
+            "type": "prompt",
+            "prompt": "Detect bikeshedding/YAGNI/NIH syndrome: $ARGUMENTS\n\nBikeshedding: prettier config, linting rules, color schemes, naming conventions, formatting\nNIH: custom framework, build our own, from scratch, roll our own\nYAGNI: might need, future proof, eventually, scalability, when we grow\n\nIf detected:\n```json\n{\n  \"decision\": \"approve\",\n  \"systemMessage\": \"\u2696\ufe0f VALUE CHECK REQUIRED\\n\\nThis looks like [bikeshedding/NIH/YAGNI].\\n\\nMANDATORY: /judge '<proposal>' before proceeding\\n\\nAsk: Does this ship to production TODAY?\\n\\nSee CLAUDE.md \u00a7 Judge Protocol\"\n}\n```\n\nOtherwise: {\"decision\": \"approve\"}",
+            "timeout": 15
           }
         ]
       }

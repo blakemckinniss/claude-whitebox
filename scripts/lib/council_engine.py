@@ -37,17 +37,18 @@ class ConvergenceDetector:
 
     def check_convergence(self, round_outputs: List[Dict]) -> Dict:
         """
-        Check if personas have converged on a decision.
+        Check if personas have converged on a decision using conviction-weighted voting.
 
         Returns:
             Dict with:
                 - converged: bool
                 - agreement_ratio: float
                 - dominant_verdict: str
+                - weighted_scores: dict (verdict -> weighted score)
                 - has_new_requests: bool
                 - has_escalations: bool
                 - has_recruitments: bool
-                - confidence_stable: bool (confidence not changing >10%)
+                - has_low_conviction_stalemate: bool
         """
         verdicts = [p["verdict"] for p in round_outputs if p["verdict"]]
 
@@ -59,10 +60,45 @@ class ConvergenceDetector:
                 "reason": "No valid verdicts"
             }
 
-        # Count verdicts
-        verdict_counts = Counter(verdicts)
-        most_common_verdict, count = verdict_counts.most_common(1)[0]
-        agreement_ratio = count / len(verdicts)
+        # Calculate conviction-weighted scores
+        weighted_scores = {}
+        total_weight = 0.0
+
+        for p in round_outputs:
+            verdict = p.get("verdict")
+            if not verdict:
+                continue
+
+            confidence = p.get("confidence", 0) / 100.0  # Normalize to 0-1
+            conviction = p.get("conviction", 50) / 100.0  # Normalize to 0-1
+
+            # Weight = confidence * conviction
+            # High confidence + high conviction = maximum influence
+            # Low conviction reduces influence even with high confidence
+            weight = confidence * conviction
+
+            if verdict not in weighted_scores:
+                weighted_scores[verdict] = 0.0
+
+            weighted_scores[verdict] += weight
+            total_weight += weight
+
+        if total_weight == 0:
+            # Fallback to simple majority if all personas have 0 weight
+            verdict_counts = Counter(verdicts)
+            most_common_verdict, count = verdict_counts.most_common(1)[0]
+            agreement_ratio = count / len(verdicts)
+        else:
+            # Find dominant verdict by weighted score
+            most_common_verdict = max(weighted_scores.keys(), key=lambda v: weighted_scores[v])
+            agreement_ratio = weighted_scores[most_common_verdict] / total_weight
+
+        # Detect low-conviction stalemate (bikeshedding)
+        avg_conviction = sum(p.get("conviction", 50) for p in round_outputs) / len(round_outputs)
+        has_low_conviction_stalemate = (
+            agreement_ratio < 0.60 and  # Low agreement
+            avg_conviction < 60  # Low average conviction
+        )
 
         # Check for new information requests
         has_new_requests = any(
@@ -80,46 +116,53 @@ class ConvergenceDetector:
         )
 
         # Convergence criteria:
-        # 1. Agreement threshold met
+        # 1. Agreement threshold met (via weighted voting)
         # 2. No new information requests
         # 3. No new escalations
         # 4. No new recruitment requests
+        # 5. NOT a low-conviction stalemate (bikeshedding)
         converged = (
             agreement_ratio >= self.threshold and
             not has_new_requests and
             not has_escalations and
-            not has_recruitments
+            not has_recruitments and
+            not has_low_conviction_stalemate
         )
 
         return {
             "converged": converged,
             "agreement_ratio": agreement_ratio,
             "dominant_verdict": most_common_verdict,
+            "weighted_scores": weighted_scores,
             "has_new_requests": has_new_requests,
             "has_escalations": has_escalations,
             "has_recruitments": has_recruitments,
+            "has_low_conviction_stalemate": has_low_conviction_stalemate,
+            "avg_conviction": avg_conviction,
             "reason": self._get_convergence_reason(
                 converged, agreement_ratio, has_new_requests,
-                has_escalations, has_recruitments
+                has_escalations, has_recruitments, has_low_conviction_stalemate
             )
         }
 
     def _get_convergence_reason(
-        self, converged, ratio, requests, escalations, recruitments
+        self, converged, ratio, requests, escalations, recruitments, low_conviction_stalemate=False
     ) -> str:
         """Get human-readable convergence status"""
         if converged:
-            return f"Converged: {ratio*100:.0f}% agreement, no pending requests"
+            return f"Converged: {ratio*100:.0f}% weighted agreement, no pending requests"
 
         reasons = []
         if ratio < self.threshold:
-            reasons.append(f"Agreement {ratio*100:.0f}% < {self.threshold*100:.0f}%")
+            reasons.append(f"Weighted agreement {ratio*100:.0f}% < {self.threshold*100:.0f}%")
         if requests:
             reasons.append("New information requests pending")
         if escalations:
             reasons.append("Escalations pending")
         if recruitments:
             reasons.append("Recruitment requests pending")
+        if low_conviction_stalemate:
+            reasons.append("Low-conviction bikeshedding detected")
 
         return "Not converged: " + ", ".join(reasons)
 

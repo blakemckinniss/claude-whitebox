@@ -21,6 +21,7 @@ Usage:
 import sys
 import os
 import json
+import re
 import random
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
@@ -125,6 +126,59 @@ def assign_models(num_personas, pool):
     shuffled = pool.copy()
     random.shuffle(shuffled)
     return shuffled[:num_personas]
+
+
+def call_timekeeper(proposal, scripts_dir):
+    """
+    Call Timekeeper to assess complexity and get dynamic limits.
+
+    Returns: Dict with complexity assessment and recommended limits
+    """
+    script_path = os.path.join(scripts_dir, "timekeeper.py")
+
+    try:
+        result = subprocess.run(
+            ["python3", script_path, proposal],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
+        if result.returncode != 0:
+            logger.error(f"Timekeeper failed: {result.stderr}")
+            return None
+
+        # Parse Timekeeper output
+        output = result.stdout
+
+        # Extract fields
+        complexity_match = re.search(r'^COMPLEXITY:\s*(\w+)', output, re.MULTILINE)
+        risk_match = re.search(r'^RISK:\s*(\w+)', output, re.MULTILINE)
+        max_rounds_match = re.search(r'max_rounds:\s*(\d+)', output)
+        threshold_match = re.search(r'convergence_threshold:\s*([\d.]+)', output)
+        bias_match = re.search(r'default_bias:\s*(\w+)', output)
+
+        if not all([complexity_match, risk_match, max_rounds_match, threshold_match, bias_match]):
+            logger.error("Could not parse Timekeeper output")
+            return None
+
+        assessment = {
+            "complexity": complexity_match.group(1),
+            "risk": risk_match.group(1),
+            "max_rounds": int(max_rounds_match.group(1)),
+            "convergence_threshold": float(threshold_match.group(1)),
+            "default_bias": bias_match.group(1)
+        }
+
+        logger.info(f"⏱️  Timekeeper Assessment:")
+        logger.info(f"   Complexity: {assessment['complexity']}, Risk: {assessment['risk']}")
+        logger.info(f"   Recommended: {assessment['max_rounds']} rounds, {assessment['convergence_threshold']*100:.0f}% threshold")
+
+        return assessment
+
+    except Exception as e:
+        logger.error(f"Timekeeper error: {e}")
+        return None
 
 
 def call_persona_with_context(persona_key, persona_def, context, model, scripts_dir):
@@ -261,6 +315,15 @@ def run_deliberation(
             print(f"\n✅ CONVERGED after {round_num} rounds")
             break
 
+        # Detect bikeshedding and force decision if detected
+        if convergence.get("has_low_conviction_stalemate"):
+            print(f"\n⚠️  BIKESHEDDING DETECTED (low conviction, low agreement)")
+            print(f"   Avg conviction: {convergence.get('avg_conviction', 0):.0f}%")
+            print(f"   Forcing convergence with current dominant verdict: {convergence['dominant_verdict']}")
+            # Force convergence by marking as converged
+            convergence["converged"] = True
+            break
+
         # Gather information requests
         print(f"\n📋 Information Gathering Phase...")
         gathered, missing = gatherer.gather_all_requests(output_list)
@@ -386,19 +449,34 @@ Synthesize the multi-round deliberation into a final verdict."""
             logger.warning("OPENROUTER_API_KEY not found, using simplified synthesis")
             raise ValueError("API key not available")
 
+        # Check if bikeshedding was detected
+        bikeshedding_note = ""
+        if deliberation_result['convergence'].get('has_low_conviction_stalemate'):
+            bikeshedding_note = """
+⚠️  BIKESHEDDING DETECTED: Low conviction + low agreement suggests personas are debating
+low-stakes details. Council was forced to converge using conviction-weighted voting.
+"""
+
         arbiter_prompt = f"""You are the Arbiter in a multi-round deliberative council.
 
 {synthesis_context}
+{bikeshedding_note}
 
 ARBITER TASK:
 1. Review all rounds of deliberation
-2. Synthesize the discussion into a final verdict
+2. Synthesize the discussion into a final verdict using CONVICTION-WEIGHTED voting
 3. Explain the reasoning that led to consensus or majority
+4. If bikeshedding was detected, note which concerns were substantive vs trivial
+
+CONVICTION-WEIGHTED VOTING:
+- High confidence + high conviction votes carry maximum weight
+- Low conviction reduces voting power even with high confidence
+- The dominant verdict is determined by weighted scores, not simple majority
 
 Return your synthesis in this format:
 VERDICT: [PROCEED | CONDITIONAL_GO | STOP | ESCALATE]
 CONFIDENCE: [0-100]
-REASONING: [Your synthesis of the multi-round deliberation]
+REASONING: [Your synthesis of the multi-round deliberation, noting conviction patterns]
 """
 
         response = requests.post(
@@ -534,21 +612,36 @@ def main():
         else:
             enriched_context = context_result["formatted"]
 
+        # Call Timekeeper for dynamic limits (unless user overrode)
+        scripts_dir = os.path.join(_project_root, "scripts", "ops")
+        timekeeper_assessment = call_timekeeper(args.proposal, scripts_dir)
+
+        # Use Timekeeper's recommendations if available, otherwise use user args or defaults
+        if timekeeper_assessment:
+            max_rounds = timekeeper_assessment["max_rounds"]
+            convergence_threshold = timekeeper_assessment["convergence_threshold"]
+        else:
+            # Fallback to user args or defaults
+            max_rounds = args.max_rounds
+            convergence_threshold = args.convergence_threshold
+
         # Run multi-round deliberation
         print("\n" + "=" * 70)
         print("🏛️  MULTI-ROUND DELIBERATIVE COUNCIL")
         print("=" * 70)
         print(f"Proposal: {args.proposal}")
-        print(f"Max Rounds: {args.max_rounds}")
-        print(f"Convergence Threshold: {args.convergence_threshold*100:.0f}%")
+        print(f"Max Rounds: {max_rounds}")
+        print(f"Convergence Threshold: {convergence_threshold*100:.0f}%")
         print(f"Initial Council: {len(personas)} personas")
+        if timekeeper_assessment:
+            print(f"Complexity: {timekeeper_assessment['complexity']} (Risk: {timekeeper_assessment['risk']})")
 
         deliberation = run_deliberation(
             args.proposal,
             personas,
             enriched_context,
-            max_rounds=args.max_rounds,
-            convergence_threshold=args.convergence_threshold
+            max_rounds=max_rounds,
+            convergence_threshold=convergence_threshold
         )
 
         # Arbiter synthesis

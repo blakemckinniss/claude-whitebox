@@ -145,6 +145,7 @@ These actions WILL FAIL if prerequisites are not met. Do not attempt them.
 - **ux** - User experience, accessibility
 - **data** - Data implications, analytics
 - **recruiter** - Dynamic assembly of optimal council
+- **timekeeper** - Complexity assessment, sets dynamic deliberation limits (non-LLM)
 
 **Usage:**
 ```bash
@@ -166,11 +167,14 @@ python3 scripts/ops/council.py --convergence-threshold 0.8 --max-rounds 7 "<prop
 
 **Key Features:**
 - **Multi-Round Deliberation**: Personas respond to each other across multiple rounds until convergence
-- **Convergence Detection**: Automatically stops when agreement threshold reached (default 70%)
+- **Conviction-Weighted Voting**: Voting weight = confidence × conviction (prevents low-stakes bikeshedding)
+- **Dynamic Complexity Assessment**: Timekeeper sets round limits based on proposal complexity (2-7 rounds)
+- **Bikeshedding Detection**: Auto-detects low-conviction stalemates and forces convergence
+- **Convergence Detection**: Automatically stops when weighted agreement threshold reached
 - **Information Gathering**: Auto-fetches from codebase/memory, can pause to ask user
 - **Dynamic Recruitment**: Personas/Arbiter can request new experts mid-deliberation via `RECRUITS` field
 - **Persona Autonomy**: Can abstain, request info, escalate, agree/disagree, change positions
-- **Structured Output**: Machine-parseable responses (VERDICT, CONFIDENCE, REASONING, etc.)
+- **Structured Output**: Machine-parseable responses (VERDICT, CONFIDENCE, CONVICTION, REASONING, etc.)
 - **Anti-Sycophancy**: Random model assignment from pool prevents single-model bias
 - **Context Enrichment**: Automatically includes project state, session evidence, relevant memories
 - **Parallel Efficiency**: All personas consulted in parallel per round
@@ -186,17 +190,20 @@ python3 scripts/ops/council.py --convergence-threshold 0.8 --max-rounds 7 "<prop
 - `creative` - 3 personas (innovator, advocate, oracle)
 
 **How Multi-Round Works:**
-1. **Round 1**: Initial consultation (all personas in parallel)
-2. **Convergence Check**: If ≥70% agree and no pending requests → Done
-3. **Information Gathering**: Auto-fetch requested info, pause for user if critical
-4. **Dynamic Recruitment**: Add requested personas to council
-5. **Round 2+**: Personas see all previous outputs, can change positions
-6. **Repeat** until converged or max rounds (default 5)
-7. **Arbiter Synthesis**: Reviews all rounds → Final verdict
+1. **Timekeeper Assessment**: Analyzes proposal complexity → sets dynamic round/threshold limits
+2. **Round 1**: Initial consultation (all personas in parallel)
+3. **Conviction-Weighted Convergence Check**: Calculate weighted agreement (confidence × conviction)
+4. **Bikeshedding Detection**: If low conviction + low agreement → force convergence
+5. **Information Gathering**: Auto-fetch requested info, pause for user if critical
+6. **Dynamic Recruitment**: Add requested personas to council
+7. **Round 2+**: Personas see all previous outputs, can change positions
+8. **Repeat** until converged or max rounds (Timekeeper-determined: 2-7)
+9. **Arbiter Synthesis**: Reviews all rounds → Final conviction-weighted verdict
 
 **Persona Autonomy** (Structured Output Fields):
 - `VERDICT`: PROCEED | CONDITIONAL_GO | STOP | ABSTAIN | ESCALATE
-- `CONFIDENCE`: 0-100%
+- `CONFIDENCE`: 0-100% - Epistemic certainty ("How sure am I this analysis is correct?")
+- `CONVICTION`: 0-100% - Emotional investment ("How much do I care about this decision?")
 - `REASONING`: Detailed analysis
 - `INFO_NEEDED`: Request specific information (auto-gathered or ask user)
 - `RECRUITS`: Request new persona (e.g., "legal - GDPR concerns detected")
@@ -205,6 +212,27 @@ python3 scripts/ops/council.py --convergence-threshold 0.8 --max-rounds 7 "<prop
 - `DISAGREES_WITH`: Counter other personas
 - `CHANGED_POSITION`: Explain position change from previous round
 - `BLOCKERS`: Critical blockers preventing verdict
+
+**Conviction-Weighted Voting:**
+```
+Vote Weight = (Confidence / 100) × (Conviction / 100)
+Dominant Verdict = max(weighted_scores)
+```
+- **High confidence + high conviction** = Maximum influence
+- **High confidence + low conviction** = "I'm certain this is low-stakes" → reduced weight
+- **Low confidence + high conviction** = "I'm uncertain but this feels critical" → moderate weight
+
+This prevents bikeshedding: low-conviction debates about trivial details (e.g., "intuitive" vs "clear" naming) don't create deadlocks.
+
+**Timekeeper Complexity Tiers:**
+- **Trivial** (delete unused code, typos): 2 rounds, 80% threshold, PROCEED bias
+- **Simple** (feature additions, refactors): 3 rounds, 75% threshold
+- **Complex** (migrations, framework changes): 5 rounds, 70% threshold
+- **Strategic** (architecture, business direction): 7 rounds, 65% threshold, STOP bias
+
+**Bikeshedding Detection:**
+Triggers when `agreement < 60%` AND `avg_conviction < 60%`
+Action: Force convergence with dominant weighted verdict (bias to action over paralysis)
 
 **Why Multi-Round Deliberation?**
 - Adaptive: Personas respond to each other's reasoning

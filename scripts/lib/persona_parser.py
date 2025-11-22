@@ -58,6 +58,7 @@ class PersonaOutputParser:
             "persona_name": persona_name,
             "verdict": None,
             "confidence": 0,
+            "conviction": 50,  # Default to neutral conviction
             "reasoning": "",
             "info_needed": [],
             "escalate_to": None,
@@ -74,6 +75,7 @@ class PersonaOutputParser:
         # Extract required fields
         result["verdict"] = self._extract_verdict(raw_output)
         result["confidence"] = self._extract_confidence(raw_output)
+        result["conviction"] = self._extract_conviction(raw_output)
         result["reasoning"] = self._extract_reasoning(raw_output)
 
         # Extract optional fields
@@ -133,6 +135,24 @@ class PersonaOutputParser:
             confidence = max(0, min(100, confidence))
 
         return confidence
+
+    def _extract_conviction(self, text: str) -> int:
+        """Extract CONVICTION field"""
+        match = re.search(r'^CONVICTION:\s*(\d+)', text, re.MULTILINE | re.IGNORECASE)
+
+        if not match:
+            self.warnings.append("Missing CONVICTION field, defaulting to 50 (neutral)")
+            return 50  # Neutral conviction
+
+        conviction = int(match.group(1))
+
+        if conviction < 0 or conviction > 100:
+            self.warnings.append(
+                f"Conviction {conviction} out of range [0-100], clamping"
+            )
+            conviction = max(0, min(100, conviction))
+
+        return conviction
 
     def _extract_reasoning(self, text: str) -> str:
         """Extract REASONING field (can be multi-line)"""
