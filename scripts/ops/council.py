@@ -69,8 +69,15 @@ def load_persona_library():
 
     logger.debug(f"Loading persona library from: {library_path}")
 
-    with open(library_path) as f:
-        return json.load(f)
+    try:
+        with open(library_path) as f:
+            return json.load(f)
+    except json.JSONDecodeError as e:
+        logger.error(f"Malformed JSON in {library_path}: {e}")
+        raise RuntimeError(f"Failed to parse persona library: {e}")
+    except FileNotFoundError:
+        logger.error(f"Persona library not found at {library_path}")
+        raise RuntimeError("Persona library not found")
 
 
 def load_presets():
@@ -80,23 +87,38 @@ def load_presets():
     if not presets_path.exists():
         return {}
 
-    with open(presets_path) as f:
-        return json.load(f).get("presets", {})
+    try:
+        with open(presets_path) as f:
+            return json.load(f).get("presets", {})
+    except json.JSONDecodeError as e:
+        logger.error(f"Malformed JSON in {presets_path}: {e}")
+        return {}
 
 
 def load_model_pool():
     """Load model pool for diversity"""
     pool_path = Path(_project_root) / ".claude" / "config" / "council_models.json"
 
-    if not pool_path.exists():
-        return ["google/gemini-3-pro-preview", "openai/gpt-4-turbo", "anthropic/claude-3-opus"]
+    default_models = ["google/gemini-3-pro-preview", "openai/gpt-4-turbo", "anthropic/claude-3-opus"]
 
-    with open(pool_path) as f:
-        return json.load(f).get("models", [])
+    if not pool_path.exists():
+        return default_models
+
+    try:
+        with open(pool_path) as f:
+            models = json.load(f).get("models", [])
+            return models if models else default_models
+    except json.JSONDecodeError as e:
+        logger.error(f"Malformed JSON in {pool_path}: {e}")
+        return default_models
 
 
 def assign_models(num_personas, pool):
     """Assign unique models to personas"""
+    if not pool:
+        logger.error("Model pool is empty, using default model")
+        return ["anthropic/claude-3-opus"] * num_personas
+
     if len(pool) < num_personas:
         return [pool[i % len(pool)] for i in range(num_personas)]
 
@@ -277,18 +299,24 @@ def run_deliberation(
         if missing:
             critical_missing = [m for m in missing if m["priority"] == "critical"]
 
-            if critical_missing:
-                user_responses = UserInteraction.ask_for_information(critical_missing)
+            if critical_missing and sys.stdout.isatty():
+                try:
+                    user_responses = UserInteraction.ask_for_information(critical_missing)
 
-                # Add user responses to gathered info
-                for req_id, response in user_responses.items():
-                    req = next((m for m in critical_missing if m["id"] == req_id), None)
-                    if req:
-                        gathered.append({
-                            "request": req,
-                            "data": response,
-                            "source": "user"
-                        })
+                    # Add user responses to gathered info
+                    for req_id, response in user_responses.items():
+                        req = next((m for m in critical_missing if m["id"] == req_id), None)
+                        if req:
+                            gathered.append({
+                                "request": req,
+                                "data": response,
+                                "source": "user"
+                            })
+                except KeyboardInterrupt:
+                    print("\n\n⚠️  User interrupted. Skipping user interaction, continuing with available info...")
+                    logger.warning("User interrupted information gathering")
+            elif critical_missing:
+                logger.warning(f"Critical information needed but running in non-interactive mode. Skipping {len(critical_missing)} requests.")
 
         round_data["info_gathered"] = gathered
 
@@ -345,19 +373,79 @@ CONVERGENCE STATUS:
 
 Synthesize the multi-round deliberation into a final verdict."""
 
-    # For now, use a simplified arbiter call
-    # (Full arbiter.py expects specific hat arguments, would need refactoring)
+    # Call arbiter via OpenRouter for actual synthesis
     print("\n" + "=" * 70)
     print("🔵 ARBITER SYNTHESIS")
     print("=" * 70)
-    print(f"\nDominant Verdict: {deliberation_result['convergence']['dominant_verdict']}")
-    print(f"Agreement Level: {deliberation_result['convergence']['agreement_ratio']*100:.0f}%")
-    print(f"Rounds: {deliberation_result['total_rounds']}")
-    print(f"Final Council Size: {len(deliberation_result['final_personas'])} personas")
 
-    # TODO: Actually call arbiter with synthesis context
-    # For now, return convergence info as verdict
-    return deliberation_result['convergence']
+    try:
+        import requests
+
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            logger.warning("OPENROUTER_API_KEY not found, using simplified synthesis")
+            raise ValueError("API key not available")
+
+        arbiter_prompt = f"""You are the Arbiter in a multi-round deliberative council.
+
+{synthesis_context}
+
+ARBITER TASK:
+1. Review all rounds of deliberation
+2. Synthesize the discussion into a final verdict
+3. Explain the reasoning that led to consensus or majority
+
+Return your synthesis in this format:
+VERDICT: [PROCEED | CONDITIONAL_GO | STOP | ESCALATE]
+CONFIDENCE: [0-100]
+REASONING: [Your synthesis of the multi-round deliberation]
+"""
+
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "HTTP-Referer": "https://github.com/anthropics/claude-code",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": model,
+                "messages": [{"role": "user", "content": arbiter_prompt}]
+            },
+            timeout=60
+        )
+
+        if response.status_code == 200:
+            arbiter_output = response.json()["choices"][0]["message"]["content"]
+            logger.info("Arbiter synthesis complete")
+
+            # Parse arbiter output
+            from persona_parser import parse_persona_output
+            arbiter_verdict = parse_persona_output(arbiter_output, "arbiter")
+
+            print(f"\nFinal Verdict: {arbiter_verdict.get('verdict', 'UNKNOWN')}")
+            print(f"Confidence: {arbiter_verdict.get('confidence', 0)}%")
+            print(f"\nReasoning:")
+            print(arbiter_verdict.get('reasoning', 'No reasoning provided'))
+
+            return {
+                **deliberation_result['convergence'],
+                "arbiter_verdict": arbiter_verdict.get('verdict'),
+                "arbiter_confidence": arbiter_verdict.get('confidence'),
+                "arbiter_reasoning": arbiter_verdict.get('reasoning')
+            }
+        else:
+            logger.error(f"Arbiter API call failed: {response.status_code}")
+            raise ValueError("API call failed")
+
+    except Exception as e:
+        logger.warning(f"Arbiter synthesis failed: {e}, using convergence stats")
+        print(f"\nDominant Verdict: {deliberation_result['convergence']['dominant_verdict']}")
+        print(f"Agreement Level: {deliberation_result['convergence']['agreement_ratio']*100:.0f}%")
+        print(f"Rounds: {deliberation_result['total_rounds']}")
+        print(f"Final Council Size: {len(deliberation_result['final_personas'])} personas")
+
+        return deliberation_result['convergence']
 
 
 def main():
@@ -467,12 +555,49 @@ def main():
         arbiter_model = library["arbiter"]["model"]
         final_verdict = call_arbiter_synthesis(args.proposal, deliberation, arbiter_model)
 
+        # Save deliberation results
+        try:
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            deliberations_dir = Path(_project_root) / ".claude" / "memory" / "deliberations"
+            deliberations_dir.mkdir(parents=True, exist_ok=True)
+
+            result_file = deliberations_dir / f"{session_id}_{timestamp}.json"
+
+            deliberation_record = {
+                "timestamp": timestamp,
+                "session_id": session_id,
+                "proposal": args.proposal,
+                "config": {
+                    "max_rounds": args.max_rounds,
+                    "convergence_threshold": args.convergence_threshold,
+                    "initial_personas": [k for k, _ in personas]
+                },
+                "rounds": deliberation["rounds"],
+                "convergence": deliberation["convergence"],
+                "final_personas": [k for k, _ in deliberation["final_personas"]],
+                "total_rounds": deliberation["total_rounds"],
+                "final_verdict": final_verdict
+            }
+
+            with open(result_file, 'w') as f:
+                json.dump(deliberation_record, f, indent=2, default=str)
+
+            logger.info(f"Deliberation saved: {result_file}")
+
+        except Exception as e:
+            logger.warning(f"Failed to save deliberation results: {e}")
+
         print("\n" + "=" * 70)
         print("💡 DELIBERATION COMPLETE")
         print("=" * 70)
 
         finalize(success=True)
 
+    except KeyboardInterrupt:
+        print("\n\n⚠️  Council deliberation interrupted by user")
+        logger.warning("User interrupted council deliberation")
+        finalize(success=False)
     except Exception as e:
         logger.error(f"Council deliberation failed: {e}")
         import traceback

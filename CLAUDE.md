@@ -380,5 +380,5 @@ At the end of every significant response, append this block:
 
 **Emergency:**
 ```bash
-python3 scripts/ops/balanced_council.py "We are stuck. Analyze situation."
+python3 scripts/ops/council.py "We are stuck. Analyze situation."
 ```

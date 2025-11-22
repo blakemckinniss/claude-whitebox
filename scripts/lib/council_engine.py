@@ -127,8 +127,9 @@ class ConvergenceDetector:
 class InformationGatherer:
     """Gathers requested information from codebase/memory/user"""
 
-    def __init__(self, project_root: Path):
+    def __init__(self, project_root: Path, file_patterns: List[str] = None):
         self.project_root = project_root
+        self.file_patterns = file_patterns or ["*.py", "*.js", "*.ts", "*.tsx", "*.go", "*.rs", "*.md"]
 
     def gather_all_requests(
         self, round_outputs: List[Dict]
@@ -226,8 +227,13 @@ class InformationGatherer:
         # Try to grep for terms
         for term in terms[:3]:  # Try first 3 terms
             try:
+                # Build include patterns
+                include_args = []
+                for pattern in self.file_patterns:
+                    include_args.extend(["--include", pattern])
+
                 result = subprocess.run(
-                    ["grep", "-r", "-i", "--include=*.py", term, str(self.project_root)],
+                    ["grep", "-r", "-i"] + include_args + [term, str(self.project_root)],
                     capture_output=True,
                     text=True,
                     timeout=5
