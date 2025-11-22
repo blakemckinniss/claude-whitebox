@@ -58,6 +58,9 @@ class ContextConfig:
     TOP_KEYWORDS = 10
     MIN_SECTION_LENGTH = 20
     MIN_KEYWORD_LENGTH = 3
+    MAX_FILE_LINES = 500  # Truncate files longer than this
+    FILE_TRUNCATE_HEAD = 250  # Show first N lines
+    FILE_TRUNCATE_TAIL = 250  # Show last N lines
 
     # Timeouts
     GIT_TIMEOUT = 5
@@ -120,6 +123,101 @@ def extract_keywords(text: str, min_length: int = None) -> List[str]:
             unique.append(k)
 
     return unique
+
+
+def extract_mentioned_files(proposal: str, project_root: Path) -> List[Tuple[str, Path, int]]:
+    """
+    Extract file paths mentioned in proposal.
+
+    Returns:
+        List of (mention, resolved_path, line_count) tuples for files that exist
+    """
+    found_files = []
+
+    # Pattern 1: Common filename patterns (CLAUDE.md, README.md, config.json, etc.)
+    filename_pattern = r'\b([A-Z_][A-Za-z0-9_\-]*\.(md|py|json|yaml|yml|txt|sh|js|ts))\b'
+    for match in re.finditer(filename_pattern, proposal):
+        filename = match.group(1)
+
+        # Try to find file in project root and common directories
+        search_paths = [
+            project_root / filename,
+            project_root / ".claude" / filename,
+            project_root / "scripts" / filename,
+            project_root / "scripts" / "ops" / filename,
+            project_root / "scripts" / "lib" / filename,
+        ]
+
+        for path in search_paths:
+            if path.exists() and path.is_file():
+                try:
+                    line_count = len(path.read_text().split('\n'))
+                    found_files.append((filename, path, line_count))
+                    break
+                except Exception as e:
+                    logger.warning(f"Could not read {path}: {e}")
+
+    # Pattern 2: Explicit file paths (scripts/ops/council.py, ./src/main.py, etc.)
+    # Match paths with directory separators
+    path_pattern = r'(?:\.{0,2}/)?(?:[a-zA-Z0-9_\-]+/)+[a-zA-Z0-9_\-]+\.[a-z]{2,4}'
+    for match in re.finditer(path_pattern, proposal):
+        path_str = match.group(0)
+        path = project_root / path_str.lstrip('./')
+
+        if path.exists() and path.is_file():
+            try:
+                line_count = len(path.read_text().split('\n'))
+                # Avoid duplicates
+                if not any(str(p[1]) == str(path) for p in found_files):
+                    found_files.append((path_str, path, line_count))
+            except Exception as e:
+                logger.warning(f"Could not read {path}: {e}")
+
+    return found_files
+
+
+def read_file_with_truncation(file_path: Path, max_lines: int = None) -> Dict:
+    """
+    Read file with intelligent truncation.
+
+    Returns:
+        Dict with 'content', 'total_lines', 'truncated' keys
+    """
+    if max_lines is None:
+        max_lines = ContextConfig.MAX_FILE_LINES
+
+    try:
+        full_content = file_path.read_text()
+        lines = full_content.split('\n')
+        total_lines = len(lines)
+
+        if total_lines <= max_lines:
+            return {
+                "content": full_content,
+                "total_lines": total_lines,
+                "truncated": False
+            }
+
+        # Truncate: show head + tail
+        head = lines[:ContextConfig.FILE_TRUNCATE_HEAD]
+        tail = lines[-ContextConfig.FILE_TRUNCATE_TAIL:]
+        truncated_content = '\n'.join(head)
+        truncated_content += f"\n\n... [{total_lines - max_lines} lines omitted] ...\n\n"
+        truncated_content += '\n'.join(tail)
+
+        return {
+            "content": truncated_content,
+            "total_lines": total_lines,
+            "truncated": True
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to read {file_path}: {e}")
+        return {
+            "content": f"ERROR: Could not read file: {e}",
+            "total_lines": 0,
+            "truncated": False
+        }
 
 
 def search_memories(keywords: List[str], project_root: Path) -> Dict[str, List[str]]:
@@ -456,7 +554,31 @@ def format_context(proposal: str, context_data: Dict, project_root: Path) -> str
             parts.append(f"    Summary: {summary}")
         parts.append("")
 
-    # Section 6: Keywords
+    # Section 6: File Artifacts (CRITICAL - provides literal context)
+    file_artifacts = context_data.get("file_artifacts", [])
+    if file_artifacts:
+        parts.append("=" * 70)
+        parts.append("FILE ARTIFACTS (Mentioned in Proposal)")
+        parts.append("=" * 70)
+        parts.append("")
+
+        for artifact in file_artifacts:
+            filename = artifact["filename"]
+            file_data = artifact["file_data"]
+            total_lines = file_data["total_lines"]
+            truncated = file_data["truncated"]
+            content = file_data["content"]
+
+            parts.append(f"### {filename} ({total_lines} lines{', TRUNCATED' if truncated else ''})")
+            parts.append("```")
+            parts.append(content)
+            parts.append("```")
+            parts.append("")
+
+        parts.append("=" * 70)
+        parts.append("")
+
+    # Section 7: Keywords
     keywords = context_data.get("keywords", [])
     if keywords:
         keywords_str = ", ".join(keywords[:ContextConfig.TOP_KEYWORDS])
@@ -527,13 +649,29 @@ def build_council_context(
         if git_status.get("error"):
             warnings.append(git_status["error"])
 
+        # Extract and load mentioned files (CRITICAL - provides literal context)
+        mentioned_files = extract_mentioned_files(proposal, project_root)
+        file_artifacts = []
+
+        if mentioned_files:
+            logger.info(f"Found {len(mentioned_files)} mentioned files in proposal")
+            for filename, file_path, line_count in mentioned_files:
+                logger.info(f"  - {filename} ({line_count} lines)")
+                file_data = read_file_with_truncation(file_path)
+                file_artifacts.append({
+                    "filename": filename,
+                    "file_path": str(file_path),
+                    "file_data": file_data
+                })
+
         # Build context data structure
         context_data = {
             "keywords": keywords,
             "session_state": session_state,
             "memories": memories,
             "related_sessions": related_sessions,
-            "git_status": git_status
+            "git_status": git_status,
+            "file_artifacts": file_artifacts  # Add file artifacts
         }
 
         # Format as string
