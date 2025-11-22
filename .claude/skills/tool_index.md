@@ -7,13 +7,13 @@ Auto-generated index of available tools in the arsenal.
 | Script | Description |
 |:-------|:------------|
 | `scripts/demo/hello.py` | Demo script that prints a greeting |
+| `scripts/ops/_deprecated_balanced_council.py` | The Council: Six Thinking Hats Decision-Making Framework |
 | `scripts/ops/advocate.py` | The Advocate (Yellow Hat): Identifies benefits, opportunities, and best-case scenarios |
 | `scripts/ops/arbiter.py` | The Arbiter (Blue Hat): Synthesizes Five Hats into a final verdict |
 | `scripts/ops/audit.py` | The Sentinel: Runs static analysis and anti-pattern detection on target files |
-| `scripts/ops/balanced_council.py` | The Council: Six Thinking Hats Decision-Making Framework |
 | `scripts/ops/confidence.py` | Confidence Tracker - Session-based Epistemological Protocol |
 | `scripts/ops/consult.py` | The Oracle: Consults a high-reasoning model via OpenRouter for architecture advice |
-| `scripts/ops/council.py` | Assemble multiple expert perspectives in parallel for comprehensive decision analysis |
+| `scripts/ops/council.py` | Deliberative Council: Multi-Round Decision Framework with Convergence |
 | `scripts/ops/critic.py` | The Critic: A ruthless, pessimistic Red Team engine. It attacks ideas, exposes blind spots, and provides the counter-point. |
 | `scripts/ops/drift_check.py` | The Court: Detects stylistic drift by comparing code against reference templates |
 | `scripts/ops/evidence.py` | Evidence Ledger Viewer - Review evidence gathered during sessions |
