@@ -1,8 +1,8 @@
 {
   "session_id": "unknown",
-  "confidence": 20,
+  "confidence": 0,
   "risk": 0,
-  "turn_count": 10,
+  "turn_count": 0,
   "tokens_estimated": 0,
   "context_window_percent": 0,
   "evidence_ledger": [],
@@ -12,15 +12,9 @@
       "turn": 0,
       "confidence": 0,
       "reason": "session_start",
-      "timestamp": "2025-11-22T02:03:15.408537"
-    },
-    {
-      "turn": 1,
-      "confidence": 20,
-      "reason": "initial_assessment",
-      "timestamp": "2025-11-22T02:03:33.668038"
+      "timestamp": "2025-11-22T15:57:33.545418"
     }
   ],
   "read_files": {},
-  "initialized_at": "2025-11-22T02:03:15.408546"
+  "initialized_at": "2025-11-22T15:57:33.545428"
 }
