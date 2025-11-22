@@ -13,24 +13,35 @@ _script_path = os.path.abspath(__file__)
 _script_dir = os.path.dirname(_script_path)
 # Find project root by looking for 'scripts' directory
 _current = _script_dir
-while _current != '/':
-    if os.path.exists(os.path.join(_current, 'scripts', 'lib', 'core.py')):
+while _current != "/":
+    if os.path.exists(os.path.join(_current, "scripts", "lib", "core.py")):
         _project_root = _current
         break
     _current = os.path.dirname(_current)
 else:
     raise RuntimeError("Could not find project root with scripts/lib/core.py")
-sys.path.insert(0, os.path.join(_project_root, 'scripts', 'lib'))
-from core import setup_script, finalize, logger, handle_debug, check_dry_run
+sys.path.insert(0, os.path.join(_project_root, "scripts", "lib"))
+from core import setup_script, finalize, logger, handle_debug
 
 
 def main():
-    parser = setup_script("The Probe: Introspects Python modules/objects to reveal the ACTUAL runtime API")
+    parser = setup_script(
+        "The Probe: Introspects Python modules/objects to reveal the ACTUAL runtime API"
+    )
 
     # Arguments
-    parser.add_argument('target', help="Module or object to inspect (e.g., 'json', 'requests.models.Response', 'os.path')")
-    parser.add_argument('--grep', help="Filter attributes by pattern (case-insensitive)")
-    parser.add_argument('--show-dunder', action='store_true', help="Include __dunder__ methods in output")
+    parser.add_argument(
+        "target",
+        help="Module or object to inspect (e.g., 'json', 'requests.models.Response', 'os.path')",
+    )
+    parser.add_argument(
+        "--grep", help="Filter attributes by pattern (case-insensitive)"
+    )
+    parser.add_argument(
+        "--show-dunder",
+        action="store_true",
+        help="Include __dunder__ methods in output",
+    )
 
     args = parser.parse_args()
     handle_debug(args)
@@ -41,7 +52,7 @@ def main():
 
     try:
         # Parse target path (e.g., "os.path" -> module "os", attribute "path")
-        parts = args.target.split('.')
+        parts = args.target.split(".")
         module_name = parts[0]
 
         logger.info(f"Importing module: {module_name}")
@@ -64,18 +75,20 @@ def main():
                 obj_path += f".{attr_name}"
             except AttributeError:
                 logger.error(f"Attribute '{attr_name}' not found in {obj_path}")
-                logger.error(f"Available attributes: {', '.join([a for a in dir(obj) if not a.startswith('_')])[:200]}")
+                logger.error(
+                    f"Available attributes: {', '.join([a for a in dir(obj) if not a.startswith('_')])[:200]}"
+                )
                 finalize(success=False)
 
         # Header
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(f"🔬 PROBE RESULTS: {args.target}")
-        print("="*70)
+        print("=" * 70)
 
         # Show version if available
-        if hasattr(obj, '__version__'):
+        if hasattr(obj, "__version__"):
             print(f"\n📦 Version: {obj.__version__}")
-        elif hasattr(module, '__version__'):
+        elif hasattr(module, "__version__"):
             print(f"\n📦 Module Version: {module.__version__}")
 
         # Show type
@@ -89,7 +102,7 @@ def main():
                 sig = inspect.signature(obj)
                 print(f"  {args.target}{sig}")
             except (ValueError, TypeError):
-                print(f"  (signature unavailable)")
+                print("  (signature unavailable)")
 
             if obj.__doc__:
                 print("\n📖 DOCSTRING:")
@@ -105,7 +118,9 @@ def main():
 
         # Filter out dunder methods unless requested
         if not args.show_dunder:
-            attrs = [a for a in all_attrs if not (a.startswith('__') and a.endswith('__'))]
+            attrs = [
+                a for a in all_attrs if not (a.startswith("__") and a.endswith("__"))
+            ]
         else:
             attrs = all_attrs
 
@@ -160,14 +175,15 @@ def main():
         if args.grep:
             print(f"   (filtered by: '{args.grep}')")
         if not args.show_dunder:
-            print(f"   (excluding __dunder__ methods - use --show-dunder to see them)")
-        print("="*70 + "\n")
+            print("   (excluding __dunder__ methods - use --show-dunder to see them)")
+        print("=" * 70 + "\n")
 
         logger.info(f"Probe complete: {args.target}")
 
     except Exception as e:
         logger.error(f"Probe failed: {e}")
         import traceback
+
         traceback.print_exc()
         finalize(success=False)
 

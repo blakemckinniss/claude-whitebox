@@ -18,7 +18,7 @@ output = {
             "You must not use black-box tools.\\n"
             "ACTION REQUIRED: Write a script in `scratch/` (e.g., `scratch/tmp_tool.py`), "
             "inspect the code, and run it via `Bash`."
-        )
+        ),
     }
 }
 print(json.dumps(output))

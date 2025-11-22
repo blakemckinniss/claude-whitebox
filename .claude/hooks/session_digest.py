@@ -23,7 +23,7 @@ def parse_transcript(transcript_path: str) -> list[dict]:
     """Parse JSONL transcript file."""
     messages = []
     try:
-        with open(transcript_path, 'r') as f:
+        with open(transcript_path, "r") as f:
             for line in f:
                 if line.strip():
                     messages.append(json.loads(line))
@@ -84,7 +84,9 @@ def load_env_file(project_dir: str):
                     os.environ[key] = value
 
 
-def generate_digest(conversation_text: str, session_id: str, project_dir: str) -> dict | None:
+def generate_digest(
+    conversation_text: str, session_id: str, project_dir: str
+) -> dict | None:
     """
     Generate structured digest using Oracle (OpenRouter).
 
@@ -123,7 +125,7 @@ Output ONLY valid JSON, no markdown.
             text=True,
             timeout=30,
             cwd=project_dir,
-            env=os.environ.copy()  # Pass environment with API key
+            env=os.environ.copy(),  # Pass environment with API key
         )
 
         if result.returncode != 0:
@@ -141,7 +143,9 @@ Output ONLY valid JSON, no markdown.
                 # Skip the separator line (===...)
                 lines = advice_section.split("\n")
                 # Find first non-separator line
-                content_lines = [l for l in lines if l.strip() and not l.strip().startswith("=")]
+                content_lines = [
+                    l for l in lines if l.strip() and not l.strip().startswith("=")
+                ]
                 response_text = "\n".join(content_lines).strip()
 
         # Try to extract JSON from response (Oracle might wrap it in markdown)
@@ -157,12 +161,18 @@ Output ONLY valid JSON, no markdown.
         digest["metadata"] = {
             "session_id": session_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "message_count": conversation_text.count("User:") + conversation_text.count("Assistant:")
+            "message_count": conversation_text.count("User:")
+            + conversation_text.count("Assistant:"),
         }
 
         return digest
 
-    except (subprocess.TimeoutExpired, json.JSONDecodeError, FileNotFoundError, Exception):
+    except (
+        subprocess.TimeoutExpired,
+        json.JSONDecodeError,
+        FileNotFoundError,
+        Exception,
+    ):
         return None
 
 
@@ -173,7 +183,7 @@ def save_digest(digest: dict, session_id: str, project_dir: str):
 
     digest_path = digest_dir / f"{session_id}.json"
 
-    with open(digest_path, 'w') as f:
+    with open(digest_path, "w") as f:
         json.dump(digest, f, indent=2)
 
 

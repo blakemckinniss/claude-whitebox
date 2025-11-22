@@ -11,6 +11,7 @@ from pathlib import Path
 MEMORY_DIR = Path(__file__).resolve().parent.parent / "memory"
 STATE_FILE = MEMORY_DIR / "confidence_state.json"
 
+
 def load_confidence():
     """Load current confidence level"""
     if not STATE_FILE.exists():
@@ -22,35 +23,55 @@ def load_confidence():
     except:
         return 0
 
+
 # Load input
 try:
     input_data = json.load(sys.stdin)
 except:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 prompt = input_data.get("prompt", "")
 if not prompt:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 prompt_lower = prompt.lower()
 
 # Detect coding/action requests
 coding_triggers = [
-    "write", "implement", "create", "build", "make",
-    "refactor", "fix", "modify", "edit", "update",
-    "add a", "add the", "generate", "scaffold"
+    "write",
+    "implement",
+    "create",
+    "build",
+    "make",
+    "refactor",
+    "fix",
+    "modify",
+    "edit",
+    "update",
+    "add a",
+    "add the",
+    "generate",
+    "scaffold",
 ]
 
 # Detect if this is a coding request
@@ -88,12 +109,16 @@ NEXT STEPS:
 
 **The Dunning-Kruger Checkpoint: Peak ignorance is not a license to code.**
 """
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "UserPromptSubmit",
-                "additionalContext": additional_context
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "UserPromptSubmit",
+                        "additionalContext": additional_context,
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
     elif confidence < 71:
@@ -126,19 +151,27 @@ NEXT STEPS:
   2. Run verification commands
   3. Reach 71%+ before modifying production code
 """
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "UserPromptSubmit",
-                "additionalContext": additional_context
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "UserPromptSubmit",
+                        "additionalContext": additional_context,
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
 # Confidence sufficient or not a coding request
-print(json.dumps({
-    "hookSpecificOutput": {
-        "hookEventName": "UserPromptSubmit",
-        "additionalContext": ""
-    }
-}))
+print(
+    json.dumps(
+        {
+            "hookSpecificOutput": {
+                "hookEventName": "UserPromptSubmit",
+                "additionalContext": "",
+            }
+        }
+    )
+)
 sys.exit(0)

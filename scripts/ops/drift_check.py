@@ -12,24 +12,32 @@ _script_path = os.path.abspath(__file__)
 _script_dir = os.path.dirname(_script_path)
 # Find project root by looking for 'scripts' directory
 _current = _script_dir
-while _current != '/':
-    if os.path.exists(os.path.join(_current, 'scripts', 'lib', 'core.py')):
+while _current != "/":
+    if os.path.exists(os.path.join(_current, "scripts", "lib", "core.py")):
         _project_root = _current
         break
     _current = os.path.dirname(_current)
 else:
     raise RuntimeError("Could not find project root with scripts/lib/core.py")
-sys.path.insert(0, os.path.join(_project_root, 'scripts', 'lib'))
-from core import setup_script, finalize, logger, handle_debug, check_dry_run
+sys.path.insert(0, os.path.join(_project_root, "scripts", "lib"))
+from core import setup_script, finalize, logger, handle_debug
 
 
 def main():
-    parser = setup_script("The Court: Detects stylistic drift by comparing code against reference templates")
+    parser = setup_script(
+        "The Court: Detects stylistic drift by comparing code against reference templates"
+    )
 
-    parser.add_argument('target', help="Python file to check for style drift")
-    parser.add_argument('--reference', help="Reference file to compare against (defaults to consult.py template)")
-    parser.add_argument('--model', default="google/gemini-3-pro-preview",
-                       help="OpenRouter model ID (default: Gemini 2.0 Flash Thinking)")
+    parser.add_argument("target", help="Python file to check for style drift")
+    parser.add_argument(
+        "--reference",
+        help="Reference file to compare against (defaults to consult.py template)",
+    )
+    parser.add_argument(
+        "--model",
+        default="google/gemini-3-pro-preview",
+        help="OpenRouter model ID (default: Gemini 2.0 Flash Thinking)",
+    )
 
     args = parser.parse_args()
     handle_debug(args)
@@ -43,7 +51,7 @@ def main():
 
     # Set default reference file
     if not args.reference:
-        args.reference = os.path.join(_project_root, 'scripts', 'ops', 'consult.py')
+        args.reference = os.path.join(_project_root, "scripts", "ops", "consult.py")
         logger.info(f"Using default reference: {args.reference}")
 
     target_path = os.path.abspath(args.target)
@@ -58,11 +66,11 @@ def main():
         logger.error(f"Reference file not found: {reference_path}")
         finalize(success=False)
 
-    if not target_path.endswith('.py'):
+    if not target_path.endswith(".py"):
         logger.error("Target must be a Python file (.py)")
         finalize(success=False)
 
-    if not reference_path.endswith('.py'):
+    if not reference_path.endswith(".py"):
         logger.error("Reference must be a Python file (.py)")
         finalize(success=False)
 
@@ -71,9 +79,9 @@ def main():
 
     if args.dry_run:
         logger.warning("⚠️  DRY RUN MODE: Would compare files but not call API")
-        with open(target_path, 'r') as f:
+        with open(target_path, "r") as f:
             target_lines = len(f.readlines())
-        with open(reference_path, 'r') as f:
+        with open(reference_path, "r") as f:
             ref_lines = len(f.readlines())
         logger.info(f"Target: {target_lines} lines")
         logger.info(f"Reference: {ref_lines} lines")
@@ -81,10 +89,10 @@ def main():
 
     try:
         # Read both files
-        with open(target_path, 'r') as f:
+        with open(target_path, "r") as f:
             target_content = f.read()
 
-        with open(reference_path, 'r') as f:
+        with open(reference_path, "r") as f:
             reference_content = f.read()
 
         # Build comparison prompt
@@ -129,7 +137,7 @@ TARGET FILE ({os.path.basename(target_path)}):
             "https://openrouter.ai/api/v1/chat/completions",
             headers=headers,
             json=data,
-            timeout=120
+            timeout=120,
         )
         response.raise_for_status()
         result = response.json()
@@ -137,8 +145,8 @@ TARGET FILE ({os.path.basename(target_path)}):
         logger.debug(f"Response: {json.dumps(result, indent=2)}")
 
         # Extract response content
-        choice = result['choices'][0]['message']
-        content = choice.get('content', '')
+        choice = result["choices"][0]["message"]
+        content = choice.get("content", "")
 
         # Display results
         print("\n" + "=" * 70)
@@ -151,26 +159,32 @@ TARGET FILE ({os.path.basename(target_path)}):
         print("\n")
 
         # Check if no drift detected
-        if "no stylistic drift" in content.lower() or "no deviations" in content.lower():
+        if (
+            "no stylistic drift" in content.lower()
+            or "no deviations" in content.lower()
+        ):
             logger.info("✅ No stylistic drift detected")
             finalize(success=True)
         else:
-            logger.warning("⚠️  Stylistic deviations found - consider aligning with reference")
+            logger.warning(
+                "⚠️  Stylistic deviations found - consider aligning with reference"
+            )
             finalize(success=True)  # Don't fail, just warn
 
     except requests.exceptions.RequestException as e:
         logger.error(f"API communication failed: {e}")
-        if 'response' in locals():
+        if "response" in locals():
             logger.error(f"Response text: {response.text}")
         finalize(success=False)
     except KeyError as e:
         logger.error(f"Unexpected response format: {e}")
-        if 'result' in locals():
+        if "result" in locals():
             logger.error(f"Response: {json.dumps(result, indent=2)}")
         finalize(success=False)
     except Exception as e:
         logger.error(f"Drift check failed: {e}")
         import traceback
+
         traceback.print_exc()
         finalize(success=False)
 

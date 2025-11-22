@@ -1,0 +1,20 @@
+{
+  "session_id": "test_token_session",
+  "confidence": 40,
+  "risk": 0,
+  "turn_count": 0,
+  "tokens_estimated": 60000,
+  "context_window_percent": 30.0,
+  "evidence_ledger": [],
+  "risk_events": [],
+  "confidence_history": [
+    {
+      "turn": 0,
+      "confidence": 0,
+      "reason": "session_start",
+      "timestamp": "2025-11-21T18:56:21.994541"
+    }
+  ],
+  "read_files": {},
+  "initialized_at": "2025-11-21T18:56:21.994544"
+}

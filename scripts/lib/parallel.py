@@ -10,9 +10,11 @@ from typing import Callable, List, Any, Tuple
 # Try to import tqdm, gracefully degrade if not available
 try:
     from tqdm import tqdm
+
     HAS_TQDM = True
 except ImportError:
     HAS_TQDM = False
+
     # Fallback: simple counter
     class tqdm:
         def __init__(self, iterable=None, total=None, desc="Processing", **kwargs):
@@ -34,6 +36,7 @@ except ImportError:
         def update(self, n=1):
             self.n += n
 
+
 logger = logging.getLogger("Whitebox.Parallel")
 
 
@@ -42,7 +45,7 @@ def run_parallel(
     items: List[Any],
     max_workers: int = 10,
     desc: str = "Processing",
-    fail_fast: bool = False
+    fail_fast: bool = False,
 ) -> List[Tuple[Any, Any, Exception]]:
     """
     Execute a function in parallel across multiple items with progress tracking.
@@ -77,7 +80,7 @@ def run_parallel(
         return []
 
     if not HAS_TQDM:
-        logger.info(f"tqdm not installed, using simple progress tracking")
+        logger.info("tqdm not installed, using simple progress tracking")
 
     results = []
 
@@ -119,10 +122,7 @@ def run_parallel(
 
 
 def batch_map(
-    func: Callable,
-    items: List[Any],
-    max_workers: int = 10,
-    desc: str = "Processing"
+    func: Callable, items: List[Any], max_workers: int = 10, desc: str = "Processing"
 ) -> List[Any]:
     """
     Simpler interface: returns only successful results, logs errors.
@@ -140,7 +140,9 @@ def batch_map(
         >>> results = batch_map(lambda x: x * 2, [1, 2, 3, 4, 5])
         >>> print(results)  # [2, 4, 6, 8, 10]
     """
-    all_results = run_parallel(func, items, max_workers=max_workers, desc=desc, fail_fast=False)
+    all_results = run_parallel(
+        func, items, max_workers=max_workers, desc=desc, fail_fast=False
+    )
 
     # Filter out errors
     successes = [(item, result) for item, result, error in all_results if error is None]
@@ -152,7 +154,7 @@ def batch_filter(
     predicate: Callable[[Any], bool],
     items: List[Any],
     max_workers: int = 10,
-    desc: str = "Filtering"
+    desc: str = "Filtering",
 ) -> List[Any]:
     """
     Filter items in parallel using a predicate function.
@@ -172,7 +174,9 @@ def batch_filter(
         ...
         >>> large_files = batch_filter(is_large_file, all_files)
     """
-    all_results = run_parallel(predicate, items, max_workers=max_workers, desc=desc, fail_fast=False)
+    all_results = run_parallel(
+        predicate, items, max_workers=max_workers, desc=desc, fail_fast=False
+    )
 
     # Return items where predicate was True
     return [item for item, result, error in all_results if error is None and result]

@@ -7,10 +7,8 @@ Usage:
     python3 scripts/scaffold.py scratch/tmp_test.py "Quick test script"
     python3 scripts/scaffold.py scratch/tmp_ui.py "Test UI" --template playwright
 """
-import sys
 import os
 import argparse
-from pathlib import Path
 
 TEMPLATE = '''#!/usr/bin/env python3
 """
@@ -168,13 +166,17 @@ Examples:
   python3 scripts/scaffold.py scripts/db/query.py "Query database"
   python3 scripts/scaffold.py scratch/tmp_test.py "Test something"
   python3 scripts/scaffold.py scratch/tmp_ui.py "Test login" --template playwright
-        """
+        """,
     )
 
-    parser.add_argument('path', help="Path to the new script file")
-    parser.add_argument('description', nargs='+', help="Description of the script")
-    parser.add_argument('--template', choices=['standard', 'playwright'], default='standard',
-                       help="Template to use (standard or playwright)")
+    parser.add_argument("path", help="Path to the new script file")
+    parser.add_argument("description", nargs="+", help="Description of the script")
+    parser.add_argument(
+        "--template",
+        choices=["standard", "playwright"],
+        default="standard",
+        help="Template to use (standard or playwright)",
+    )
 
     args = parser.parse_args()
 
@@ -183,14 +185,14 @@ Examples:
     template_type = args.template
 
     # Select template
-    if template_type == 'playwright':
+    if template_type == "playwright":
         template = PLAYWRIGHT_TEMPLATE
         print("🎭 Using Playwright template")
     else:
         template = TEMPLATE
 
     # Ensure directory exists
-    os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
 
     # Generate content
     content = template.format(description=description)

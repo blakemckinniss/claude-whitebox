@@ -1,0 +1,118 @@
+{
+  "description": "Enforcement thresholds and configuration for Epistemological Protocol hooks",
+  "version": "1.0.0",
+  "thresholds": {
+    "strategic_advice": {
+      "min_confidence": 50,
+      "description": "Minimum confidence required to give strategic advice (pre_advice.py)",
+      "tier": "HYPOTHESIS+"
+    },
+    "delegation": {
+      "min_confidence": 40,
+      "description": "Minimum confidence required to delegate to advisors (pre_delegation.py)",
+      "tier": "HYPOTHESIS",
+      "rationale": "Must understand problem before delegating (garbage in, garbage out)"
+    },
+    "production_write": {
+      "min_confidence": 71,
+      "description": "Minimum confidence required to write/edit production code",
+      "tier": "CERTAINTY"
+    },
+    "scratch_write": {
+      "min_confidence": 31,
+      "description": "Minimum confidence required to write to scratch/ (experimentation)",
+      "tier": "HYPOTHESIS"
+    },
+    "delete_operation": {
+      "min_confidence": 71,
+      "description": "Minimum confidence required to delete files (no scratch exception)",
+      "tier": "CERTAINTY",
+      "rationale": "Deletion is irreversible - always requires certainty"
+    },
+    "bash_execution": {
+      "min_confidence": 71,
+      "description": "Minimum confidence for Bash commands (read-only excluded)",
+      "tier": "CERTAINTY",
+      "read_only_min": 31,
+      "read_only_commands": ["ls", "pwd", "echo", "cat", "head", "tail", "grep"]
+    }
+  },
+  "tiers": {
+    "IGNORANCE": {
+      "range": [0, 30],
+      "description": "Read/Research/Probe only, no coding",
+      "allowed_actions": ["Read", "Grep", "Glob", "WebSearch", "research.py", "probe.py", "xray.py"]
+    },
+    "HYPOTHESIS": {
+      "range": [31, 70],
+      "description": "Can write to scratch/, no production code",
+      "allowed_actions": ["Write (scratch/)", "Bash (read-only)", "Task (delegation at 40%+)"]
+    },
+    "CERTAINTY": {
+      "range": [71, 100],
+      "description": "Full capabilities (production writes, execution, commits)",
+      "allowed_actions": ["Write", "Edit", "Delete", "Bash", "Task", "Commit"]
+    }
+  },
+  "evidence_gains": {
+    "user_question": 25,
+    "web_search": 20,
+    "use_script": 20,
+    "use_researcher_agent": 25,
+    "probe_api": 15,
+    "verify_success": 15,
+    "use_script_smith": 15,
+    "run_audit": 15,
+    "read_file_first": 10,
+    "use_council": 10,
+    "read_file_repeat": 2,
+    "grep_glob": 5,
+    "run_tests": 30
+  },
+  "confidence_penalties": {
+    "hallucination": -20,
+    "falsehood": -25,
+    "insanity": -15,
+    "loop": -15,
+    "tier_violation": -10,
+    "tool_failure": -10,
+    "user_correction": -20
+  },
+  "paths": {
+    "confidence_state": ".claude/memory/confidence_state.json",
+    "session_state_pattern": ".claude/memory/session_{id}_state.json",
+    "confidence_history": ".claude/memory/confidence_history.jsonl"
+  },
+  "strategic_patterns": [
+    "\\bis\\s+(?:this|that|it).*?\\b(?:ready|good|worth|safe|okay)",
+    "\\bshould\\s+(?:we|i)\\s+(?:use|migrate|switch|add|implement)",
+    "\\bcan\\s+(?:we|i|this).*?(?:use|be\\s+used)",
+    "\\bwhat\\s+do\\s+you\\s+think",
+    "\\bis\\s+this.*?(?:good|ready).*?(?:idea|state|approach)",
+    "\\b(?:recommend|suggest|advise)",
+    "\\bworth\\s+(?:doing|using|implementing)"
+  ],
+  "delegation_strategic_patterns": [
+    "\\b(?:should|shall)\\s+(?:we|i)\\s+(?:use|migrate|switch|add|implement|adopt)",
+    "\\bis\\s+(?:this|it).*?(?:ready|good|worth|safe)",
+    "\\b(?:migrate|migration|switch|switching|move|moving)\\s+(?:to|from)",
+    "\\b(?:architecture|design)\\s+(?:decision|choice|proposal)",
+    "\\b(?:choose|choosing|select|selecting)\\s+(?:between|library|framework|technology)"
+  ],
+  "advisors": {
+    "single_perspective": ["critic.py", "judge.py", "skeptic.py", "think.py", "consult.py"],
+    "multi_perspective": ["council.py", "balanced_council.py"],
+    "enforcement": "Strategic decisions MUST use multi-perspective (Six Thinking Hats) consultation"
+  },
+  "notes": {
+    "philosophy": "You can't fight LLM nature with prompts. Only hard blocks work. Advisory = ignored. Mandatory = enforced.",
+    "enforcement_principle": "Fail closed on security gates. Malformed input = deny, not allow.",
+    "backward_compatibility": "These values override hardcoded constants in hooks. Update hooks to read from this config.",
+    "future_work": [
+      "Add hook config loader library",
+      "Support environment variable overrides (e.g., ENFORCEMENT_STRATEGIC_ADVICE=60)",
+      "Add per-project threshold customization",
+      "Add runtime threshold adjustment based on session history"
+    ]
+  }
+}

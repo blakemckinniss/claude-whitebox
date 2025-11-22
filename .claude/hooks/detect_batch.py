@@ -17,11 +17,28 @@ prompt = data.get("prompt", "").lower()
 
 # Triggers indicating batch operations
 batch_triggers = [
-    "batch", "bulk", "mass", "all files", "all ", "every",
-    "scan", "scrape", "crawl", "iterate", "loop through",
-    "process multiple", "process all", "foreach", "for each",
-    "convert all", "download all", "upload all", "delete all",
-    "update all", "migrate all", "transform all"
+    "batch",
+    "bulk",
+    "mass",
+    "all files",
+    "all ",
+    "every",
+    "scan",
+    "scrape",
+    "crawl",
+    "iterate",
+    "loop through",
+    "process multiple",
+    "process all",
+    "foreach",
+    "for each",
+    "convert all",
+    "download all",
+    "upload all",
+    "delete all",
+    "update all",
+    "migrate all",
+    "transform all",
 ]
 
 # Check if prompt mentions batch operations
@@ -29,12 +46,28 @@ batch_detected = any(trigger in prompt for trigger in batch_triggers)
 
 # Also check for plural indicators with action verbs
 plural_indicators = [
-    "files", "urls", "apis", "requests", "records",
-    "rows", "items", "documents", "pages", "entries"
+    "files",
+    "urls",
+    "apis",
+    "requests",
+    "records",
+    "rows",
+    "items",
+    "documents",
+    "pages",
+    "entries",
 ]
 action_verbs = [
-    "process", "fetch", "get", "download", "upload",
-    "parse", "convert", "transform", "migrate", "update"
+    "process",
+    "fetch",
+    "get",
+    "download",
+    "upload",
+    "parse",
+    "convert",
+    "transform",
+    "migrate",
+    "update",
 ]
 
 # Detect pattern like "process files" or "fetch urls"
@@ -45,17 +78,21 @@ for verb in action_verbs:
             break
 
 if batch_detected:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": (
-                "⚠️ BATCH OPERATION DETECTED\n"
-                "PERFORMANCE PROTOCOL: Use `scripts.lib.parallel` to multi-thread this operation.\n"
-                "Example:\n"
-                "  from parallel import run_parallel\n"
-                "  results = run_parallel(process_func, items, max_workers=10, desc=\"Processing\")"
-            )
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": (
+                        "⚠️ BATCH OPERATION DETECTED\n"
+                        "PERFORMANCE PROTOCOL: Use `scripts.lib.parallel` to multi-thread this operation.\n"
+                        "Example:\n"
+                        "  from parallel import run_parallel\n"
+                        '  results = run_parallel(process_func, items, max_workers=10, desc="Processing")'
+                    ),
+                }
+            }
+        )
+    )
 
 sys.exit(0)

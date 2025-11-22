@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Confidence Tracker with Reinforcement Learning
-Commands: status, gain, loss, reset
+Confidence Tracker - Session-based Epistemological Protocol
+Commands: status, session <id>, list
 """
 import sys
 import json
 from datetime import datetime
 from pathlib import Path
+
 
 # Find project root
 def find_project_root():
@@ -19,262 +20,204 @@ def find_project_root():
         current = current.parent
     raise RuntimeError("Cannot find project root (scripts/lib/core.py not found)")
 
+
 PROJECT_ROOT = find_project_root()
 MEMORY_DIR = PROJECT_ROOT / ".claude" / "memory"
-STATE_FILE = MEMORY_DIR / "confidence_state.json"
+STATE_FILE = MEMORY_DIR / "confidence_state.json"  # Legacy global state
 
-# Reinforcement Schedule (Positive)
-GAINS = {
-    # Investigation
-    "read_file": {"gain": 10, "desc": "Read a file"},
-    "research_manual": {"gain": 20, "desc": "Manual research"},
-    "research_agent": {"gain": 25, "desc": "Research via agent (better context isolation)"},
-    "probe": {"gain": 30, "desc": "Runtime API inspection"},
-    "verify": {"gain": 40, "desc": "State verification"},
+# Add scripts/lib to path
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-    # Agents (Delegation bonus)
-    "use_researcher": {"gain": 25, "desc": "Delegated to researcher agent"},
-    "use_script_smith": {"gain": 15, "desc": "Delegated to script-smith agent"},
-    "use_sherlock": {"gain": 20, "desc": "Delegated to sherlock agent"},
-    "use_council": {"gain": 10, "desc": "Consulted council before decision"},
-    "use_critic": {"gain": 10, "desc": "Consulted critic for review"},
+from lib.epistemology import (
+    load_session_state,
+    get_confidence_tier,
+    get_risk_level,
+)
 
-    # Protocols
-    "run_audit": {"gain": 15, "desc": "Ran audit.py before commit"},
-    "run_void": {"gain": 15, "desc": "Ran void.py completeness check"},
-    "run_drift": {"gain": 10, "desc": "Ran drift_check.py"},
-    "run_tests": {"gain": 30, "desc": "Ran test suite"},
+def get_latest_session():
+    """Find the most recent session state file"""
+    session_files = list(MEMORY_DIR.glob("session_*_state.json"))
+    if not session_files:
+        return None
 
-    # Meta-cognition
-    "think_protocol": {"gain": 5, "desc": "Used /think to decompose problem"},
-    "skeptic_review": {"gain": 5, "desc": "Used /skeptic to check risks"},
-}
+    # Sort by modification time, most recent first
+    latest = max(session_files, key=lambda p: p.stat().st_mtime)
+    session_id = latest.stem.replace("session_", "").replace("_state", "")
+    return session_id
 
-# Reinforcement Schedule (Negative)
-LOSSES = {
-    # Shortcuts
-    "skip_verification": {"loss": 20, "desc": "Skipped verification after code change"},
-    "guess_api": {"loss": 15, "desc": "Guessed API without probing"},
-    "write_without_read": {"loss": 30, "desc": "Wrote code without reading existing code"},
-    "claim_done_no_tests": {"loss": 25, "desc": "Claimed done without running tests"},
-    "modify_unexamined": {"loss": 40, "desc": "Modified code not examined"},
 
-    # Hallucinations
-    "claim_knowledge": {"loss": 10, "desc": "Claimed knowledge without evidence"},
-    "propose_without_context": {"loss": 15, "desc": "Proposed solution without gathering context"},
+def cmd_status(session_id=None):
+    """Show current confidence level for a session"""
+    # If no session specified, use latest
+    if not session_id:
+        session_id = get_latest_session()
+        if not session_id:
+            print("❌ No active sessions found")
+            print("   Sessions are created automatically when you interact with Claude")
+            return
 
-    # Workflow violations
-    "skip_planning": {"loss": 10, "desc": "Skipped /think or /council for complex task"},
-    "no_dry_run": {"loss": 15, "desc": "Ran script without --dry-run first"},
-    "commit_no_audit": {"loss": 20, "desc": "Committed without running audit.py"},
-}
+    state = load_session_state(session_id)
+    if not state:
+        print(f"❌ Session not found: {session_id}")
+        return
 
-def load_state():
-    """Load confidence state"""
-    if not STATE_FILE.exists():
-        return {
-            "current_confidence": 0,
-            "reinforcement_log": [],
-            "last_reset": datetime.now().isoformat(),
-            "total_gains": 0,
-            "total_losses": 0
-        }
-    with open(STATE_FILE) as f:
-        data = json.load(f)
-        # Migrate old format if needed
-        if "reinforcement_log" not in data:
-            data["reinforcement_log"] = data.get("evidence_log", [])
-            data["total_gains"] = 0
-            data["total_losses"] = 0
-        return data
+    confidence = state.get("confidence", 0)
+    risk = state.get("risk", 0)
+    tokens = state.get("tokens_estimated", 0)
+    token_pct = state.get("context_window_percent", 0)
+    turn = state.get("turn_count", 0)
 
-def save_state(state):
-    """Save confidence state"""
-    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
-    with open(STATE_FILE, 'w') as f:
-        json.dump(state, f, indent=2)
+    # Get tier and risk level
+    tier_name, tier_desc = get_confidence_tier(confidence)
+    risk_level, risk_desc = get_risk_level(risk)
 
-def cmd_status():
-    """Show current confidence level"""
-    state = load_state()
-    confidence = state["current_confidence"]
-
-    # Determine tier
+    # Determine tier icon
     if confidence < 31:
-        tier = "IGNORANCE (0-30%)"
         tier_icon = "🔴"
-        tier_emoji = "🚫"
     elif confidence < 71:
-        tier = "HYPOTHESIS (31-70%)"
         tier_icon = "🟡"
-        tier_emoji = "🧪"
     else:
-        tier = "CERTAINTY (71-100%)"
         tier_icon = "🟢"
-        tier_emoji = "✅"
 
-    print(f"\n📉 EPISTEMOLOGICAL PROTOCOL STATUS\n")
-    print(f"{tier_icon} Current Confidence: {confidence}%")
-    print(f"   Tier: {tier_emoji} {tier}")
-    print(f"   Last Reset: {state['last_reset']}")
+    # Risk icon
+    if risk == 0:
+        risk_icon = "🟢"
+    elif risk < 50:
+        risk_icon = "🟡"
+    elif risk < 100:
+        risk_icon = "🟠"
+    else:
+        risk_icon = "🔴"
 
-    # Reinforcement stats
-    total_gains = state.get("total_gains", 0)
-    total_losses = state.get("total_losses", 0)
-    net = total_gains - total_losses
+    # Token icon
+    if token_pct < 30:
+        token_icon = "🟢"
+    elif token_pct < 60:
+        token_icon = "🟡"
+    else:
+        token_icon = "🔴"
 
-    print(f"\n📊 Reinforcement Stats:")
-    print(f"   Total Gains: +{total_gains}%")
-    print(f"   Total Losses: -{total_losses}%")
-    print(f"   Net Score: {'+'if net >= 0 else ''}{net}%")
+    print("\n📊 EPISTEMOLOGICAL PROTOCOL STATUS\n")
+    print(f"Session ID: {session_id[:16]}...")
+    print(f"Turn: {turn}")
+    print(f"Initialized: {state.get('initialized_at', 'Unknown')}\n")
 
-    if state['reinforcement_log']:
-        print(f"\n📚 Recent Activity (Last 5):")
-        for entry in state['reinforcement_log'][-5:]:
-            action_type = entry.get('type', 'gain')
-            value = entry.get('gain', entry.get('loss', 0))
-            icon = "📈" if action_type == "gain" else "📉"
-            sign = "+" if action_type == "gain" else "-"
-            print(f"   {icon} {entry['action']}: {sign}{value}% - {entry['description']}")
+    print(f"{tier_icon} Confidence: {confidence}%")
+    print(f"   Tier: {tier_name}")
+    print(f"   {tier_desc}\n")
 
-    print(f"\n🎯 Next Threshold:")
+    print(f"{risk_icon} Risk: {risk}%")
+    print(f"   Level: {risk_level}")
+    print(f"   {risk_desc}\n")
+
+    print(f"{token_icon} Tokens: {token_pct}% ({tokens:,} / 200,000)")
+    if token_pct >= 30 and confidence < 50:
+        print("   ⚠️  WARNING: High token usage with low confidence")
+        print("   Consider council consultation for context validation")
+
+    # Evidence stats
+    evidence_ledger = state.get("evidence_ledger", [])
+    read_files = state.get("read_files", {})
+
+    print("\n📚 Evidence Gathered:")
+    print(f"   Files Read: {len(read_files)}")
+    print(f"   Total Evidence Items: {len(evidence_ledger)}")
+
+    if evidence_ledger:
+        print("\n   Recent Evidence (Last 5):")
+        for entry in evidence_ledger[-5:]:
+            tool = entry.get("tool", "Unknown")
+            boost = entry.get("boost", 0)
+            target = entry.get("target", "")
+            icon = "📈" if boost > 0 else "📉" if boost < 0 else "📊"
+            sign = "+" if boost >= 0 else ""
+            target_str = f" → {target[:40]}" if target else ""
+            print(f"   {icon} {tool}{target_str}: {sign}{boost}%")
+
+    # Risk events
+    risk_events = state.get("risk_events", [])
+    if risk_events:
+        print("\n⚠️  Risk Events:")
+        for event in risk_events[-3:]:
+            turn_num = event.get("turn", "?")
+            amount = event.get("amount", 0)
+            reason = event.get("reason", "Unknown")
+            print(f"   Turn {turn_num}: +{amount}% - {reason[:60]}")
+
+    print("\n🎯 Next Threshold:")
     if confidence < 31:
         needed = 31 - confidence
         print(f"   Need +{needed}% to reach HYPOTHESIS tier (scratch/ allowed)")
-        print(f"   💡 Tip: Use /research (+20-25%) or /probe (+30%)")
+        print("   💡 Tip: Read files (+10%), Research (+20%), Probe (+15%)")
     elif confidence < 71:
         needed = 71 - confidence
         print(f"   Need +{needed}% to reach CERTAINTY tier (production allowed)")
-        print(f"   💡 Tip: Run /verify (+40%) to unlock production")
+        print("   💡 Tip: Run verification (+15%) to unlock production")
     else:
-        print(f"   ✅ All tiers unlocked - Production code allowed")
-        print(f"   ⚠️ Warning: Confidence can still drop from violations")
+        print("   ✅ All tiers unlocked - Production code allowed")
+        print("   ⚠️  Confidence can still drop from violations")
 
     print()
 
-def cmd_gain(action_key, custom_desc=None):
-    """Add positive reinforcement"""
-    if action_key not in GAINS:
-        print(f"❌ Unknown gain action: {action_key}")
-        print(f"Available: {', '.join(GAINS.keys())}")
+
+def cmd_list_sessions():
+    """List all available sessions"""
+    session_files = list(MEMORY_DIR.glob("session_*_state.json"))
+
+    if not session_files:
+        print("❌ No sessions found")
         return
 
-    state = load_state()
-    gain_data = GAINS[action_key]
-    gain = gain_data["gain"]
-    description = custom_desc or gain_data["desc"]
+    print(f"\n📂 Available Sessions ({len(session_files)} total):\n")
 
-    # Cap at 100%
-    new_confidence = min(100, state["current_confidence"] + gain)
+    # Sort by modification time, most recent first
+    session_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
 
-    # Log entry
-    entry = {
-        "type": "gain",
-        "action": action_key,
-        "description": description,
-        "gain": gain,
-        "timestamp": datetime.now().isoformat()
-    }
-    state["reinforcement_log"].append(entry)
-    state["current_confidence"] = new_confidence
-    state["total_gains"] = state.get("total_gains", 0) + gain
+    for i, session_file in enumerate(session_files[:10], 1):  # Show last 10
+        session_id = session_file.stem.replace("session_", "").replace("_state", "")
+        state = load_session_state(session_id)
 
-    save_state(state)
-    print(f"📈 Positive Reinforcement: {description} (+{gain}%) → Total: {new_confidence}%")
+        if state:
+            confidence = state.get("confidence", 0)
+            risk = state.get("risk", 0)
+            turn = state.get("turn_count", 0)
+            initialized = state.get("initialized_at", "Unknown")[:10]  # Just date
 
-def cmd_loss(action_key, custom_desc=None):
-    """Apply negative reinforcement"""
-    if action_key not in LOSSES:
-        print(f"❌ Unknown loss action: {action_key}")
-        print(f"Available: {', '.join(LOSSES.keys())}")
-        return
+            tier_icon = "🔴" if confidence < 31 else "🟡" if confidence < 71 else "🟢"
+            risk_icon = "🟢" if risk == 0 else "🟡" if risk < 50 else "🔴"
 
-    state = load_state()
-    loss_data = LOSSES[action_key]
-    loss = loss_data["loss"]
-    description = custom_desc or loss_data["desc"]
+            print(
+                f"{i:2d}. {session_id[:16]}... [{initialized}] T:{turn:3d} {tier_icon}{confidence:3d}% {risk_icon}R:{risk:3d}%"
+            )
 
-    # Floor at 0%
-    new_confidence = max(0, state["current_confidence"] - loss)
+    if len(session_files) > 10:
+        print(f"\n   ... and {len(session_files) - 10} more sessions")
 
-    # Log entry
-    entry = {
-        "type": "loss",
-        "action": action_key,
-        "description": description,
-        "loss": loss,
-        "timestamp": datetime.now().isoformat()
-    }
-    state["reinforcement_log"].append(entry)
-    state["current_confidence"] = new_confidence
-    state["total_losses"] = state.get("total_losses", 0) + loss
-
-    save_state(state)
-    print(f"📉 Negative Reinforcement: {description} (-{loss}%) → Total: {new_confidence}%")
-
-    # Warning if dropped below threshold
-    if new_confidence < 71:
-        print(f"⚠️ WARNING: Confidence dropped below production threshold (71%)")
-        print(f"   Production writes are now BLOCKED")
-        print(f"   Gather evidence to restore access")
-
-def cmd_reset():
-    """Reset confidence to 0% (new task)"""
-    state = {
-        "current_confidence": 0,
-        "reinforcement_log": [],
-        "last_reset": datetime.now().isoformat(),
-        "total_gains": 0,
-        "total_losses": 0
-    }
-    save_state(state)
-    print("🔄 Confidence reset to 0% (new task started)")
-
-def cmd_list_actions():
-    """List all available reinforcement actions"""
-    print("\n📈 POSITIVE REINFORCEMENT ACTIONS:\n")
-    for key, data in sorted(GAINS.items()):
-        print(f"  {key:25s} +{data['gain']:2d}%  {data['desc']}")
-
-    print("\n📉 NEGATIVE REINFORCEMENT ACTIONS:\n")
-    for key, data in sorted(LOSSES.items()):
-        print(f"  {key:25s} -{data['loss']:2d}%  {data['desc']}")
+    print("\nUse: /confidence session <id> to view specific session")
     print()
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  python3 scripts/ops/confidence.py status")
-        print("  python3 scripts/ops/confidence.py gain <action_key> [description]")
-        print("  python3 scripts/ops/confidence.py loss <action_key> [description]")
-        print("  python3 scripts/ops/confidence.py reset")
-        print("  python3 scripts/ops/confidence.py list")
+        print("  python3 scripts/ops/confidence.py status         # Show latest session")
+        print("  python3 scripts/ops/confidence.py session <id>   # Show specific session")
+        print("  python3 scripts/ops/confidence.py list           # List all sessions")
         sys.exit(1)
 
     cmd = sys.argv[1]
 
     if cmd == "status":
         cmd_status()
-    elif cmd == "gain":
+    elif cmd == "session":
         if len(sys.argv) < 3:
-            print("Usage: confidence.py gain <action_key> [description]")
-            print("Run 'confidence.py list' to see available actions")
+            print("Usage: confidence.py session <session_id>")
             sys.exit(1)
-        action_key = sys.argv[2]
-        custom_desc = " ".join(sys.argv[3:]) if len(sys.argv) > 3 else None
-        cmd_gain(action_key, custom_desc)
-    elif cmd == "loss":
-        if len(sys.argv) < 3:
-            print("Usage: confidence.py loss <action_key> [description]")
-            print("Run 'confidence.py list' to see available actions")
-            sys.exit(1)
-        action_key = sys.argv[2]
-        custom_desc = " ".join(sys.argv[3:]) if len(sys.argv) > 3 else None
-        cmd_loss(action_key, custom_desc)
-    elif cmd == "reset":
-        cmd_reset()
+        session_id = sys.argv[2]
+        cmd_status(session_id)
     elif cmd == "list":
-        cmd_list_actions()
+        cmd_list_sessions()
     else:
         print(f"Unknown command: {cmd}")
+        print("Available: status, session <id>, list")
         sys.exit(1)

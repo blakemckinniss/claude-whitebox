@@ -11,23 +11,31 @@ try:
     input_data = json.load(sys.stdin)
 except:
     # If parsing fails, exit silently
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 prompt = input_data.get("prompt", "")
 
 if not prompt:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 prompt_lower = prompt.lower()
@@ -88,19 +96,27 @@ The 10th Man Rule: If you find yourself agreeing easily, you have failed.
 Force the examination of blind spots before proceeding.
 """
 
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": additional_context
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": additional_context,
+                }
+            }
+        )
+    )
 else:
     # No intervention needed
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
 
 sys.exit(0)

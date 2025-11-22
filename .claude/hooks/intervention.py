@@ -11,23 +11,31 @@ try:
     input_data = json.load(sys.stdin)
 except:
     # If parsing fails, exit silently
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 prompt = input_data.get("prompt", "")
 
 if not prompt:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 prompt_lower = prompt.lower()
@@ -85,13 +93,19 @@ if bikeshed_detected or nih_detected or yagni_detected:
     warnings = []
 
     if bikeshed_detected:
-        warnings.append("🚲 BIKESHEDDING: This looks like trivial configuration/style work")
+        warnings.append(
+            "🚲 BIKESHEDDING: This looks like trivial configuration/style work"
+        )
 
     if nih_detected:
-        warnings.append("🔧 NOT INVENTED HERE: You might be reinventing an existing solution")
+        warnings.append(
+            "🔧 NOT INVENTED HERE: You might be reinventing an existing solution"
+        )
 
     if yagni_detected:
-        warnings.append("🔮 YAGNI: You might be building for a future that hasn't happened")
+        warnings.append(
+            "🔮 YAGNI: You might be building for a future that hasn't happened"
+        )
 
     warning_text = "\n".join(warnings)
 
@@ -111,19 +125,27 @@ RECOMMENDED: Run The Judge before proceeding:
 If The Judge says STOP, you drop the task.
 """
 
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": additional_context
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": additional_context,
+                }
+            }
+        )
+    )
 else:
     # No intervention needed
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
 
 sys.exit(0)

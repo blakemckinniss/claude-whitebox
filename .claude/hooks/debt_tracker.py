@@ -32,7 +32,7 @@ def parse_transcript(transcript_path: str) -> list[dict]:
     """Parse JSONL transcript file."""
     messages = []
     try:
-        with open(transcript_path, 'r') as f:
+        with open(transcript_path, "r") as f:
             for line in f:
                 if line.strip():
                     messages.append(json.loads(line))
@@ -68,21 +68,25 @@ def extract_tool_calls(messages: list[dict]) -> list[dict]:
             # Write tool
             if block_type == "tool_use" and block.get("name") == "Write":
                 params = block.get("input", {})
-                tool_calls.append({
-                    "type": "Write",
-                    "file_path": params.get("file_path", ""),
-                    "content": params.get("content", "")
-                })
+                tool_calls.append(
+                    {
+                        "type": "Write",
+                        "file_path": params.get("file_path", ""),
+                        "content": params.get("content", ""),
+                    }
+                )
 
             # Edit tool
             elif block_type == "tool_use" and block.get("name") == "Edit":
                 params = block.get("input", {})
                 # For Edit, we only care about the new_string content
-                tool_calls.append({
-                    "type": "Edit",
-                    "file_path": params.get("file_path", ""),
-                    "content": params.get("new_string", "")
-                })
+                tool_calls.append(
+                    {
+                        "type": "Edit",
+                        "file_path": params.get("file_path", ""),
+                        "content": params.get("new_string", ""),
+                    }
+                )
 
     return tool_calls
 
@@ -107,11 +111,13 @@ def detect_debt(content: str) -> list[dict]:
                     # For comment patterns, group(1) has the comment text
                     context = match.group(1).strip() if match.groups() else line.strip()
 
-                findings.append({
-                    "type": debt_type,
-                    "context": context[:200],  # Limit to 200 chars
-                    "line": line_num
-                })
+                findings.append(
+                    {
+                        "type": debt_type,
+                        "context": context[:200],  # Limit to 200 chars
+                        "line": line_num,
+                    }
+                )
 
     return findings
 
@@ -120,7 +126,7 @@ def append_to_ledger(ledger_path: Path, entries: list[dict]):
     """Append debt entries to the JSONL ledger."""
     ledger_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(ledger_path, 'a') as f:
+    with open(ledger_path, "a") as f:
         for entry in entries:
             f.write(json.dumps(entry) + "\n")
 
@@ -165,14 +171,16 @@ def main():
         findings = detect_debt(content)
 
         for finding in findings:
-            all_findings.append({
-                "timestamp": timestamp,
-                "session": Path(transcript_path).stem,
-                "file": file_path,
-                "type": finding["type"],
-                "context": finding["context"],
-                "line_estimate": finding["line"]
-            })
+            all_findings.append(
+                {
+                    "timestamp": timestamp,
+                    "session": Path(transcript_path).stem,
+                    "file": file_path,
+                    "type": finding["type"],
+                    "context": finding["context"],
+                    "line_estimate": finding["line"],
+                }
+            )
 
     # Write to ledger
     if all_findings:
@@ -191,7 +199,7 @@ def main():
         for debt_type, count in sorted(by_type.items()):
             print(f"  • {debt_type}: {count}")
 
-        print(f"  → Saved to .claude/memory/debt_ledger.jsonl")
+        print("  → Saved to .claude/memory/debt_ledger.jsonl")
 
     sys.exit(0)
 

@@ -1,0 +1,29 @@
+{
+  "session_id": "test123",
+  "confidence": 0,
+  "risk": 20,
+  "turn_count": 0,
+  "tokens_estimated": 0,
+  "context_window_percent": 0,
+  "evidence_ledger": [],
+  "risk_events": [
+    {
+      "turn": 0,
+      "event": "risk_increase",
+      "amount": 20,
+      "command": "rm -rf /",
+      "reason": "Dangerous command blocked: Recursive delete from root",
+      "timestamp": "2025-11-21T23:50:19.949716"
+    }
+  ],
+  "confidence_history": [
+    {
+      "turn": 0,
+      "confidence": 0,
+      "reason": "session_start",
+      "timestamp": "2025-11-21T23:49:54.663448"
+    }
+  ],
+  "read_files": {},
+  "initialized_at": "2025-11-21T23:49:54.663457"
+}

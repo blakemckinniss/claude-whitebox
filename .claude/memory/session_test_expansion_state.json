@@ -1,0 +1,169 @@
+{
+  "session_id": "test_expansion",
+  "confidence": 100,
+  "risk": 0,
+  "turn_count": 0,
+  "tokens_estimated": 0,
+  "context_window_percent": 0,
+  "evidence_ledger": [
+    {
+      "turn": 0,
+      "tool": "Bash",
+      "target": "git status",
+      "boost": 5,
+      "timestamp": "2025-11-22T01:39:11.933764"
+    },
+    {
+      "turn": 0,
+      "tool": "Bash",
+      "target": "git commit -m 'test'",
+      "boost": 10,
+      "timestamp": "2025-11-22T01:39:11.934101"
+    },
+    {
+      "turn": 0,
+      "tool": "Bash",
+      "target": "git diff HEAD",
+      "boost": 10,
+      "timestamp": "2025-11-22T01:39:11.934723"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "CLAUDE.md",
+      "boost": 20,
+      "timestamp": "2025-11-22T01:39:11.935042"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "CLAUDE.md",
+      "boost": 5,
+      "timestamp": "2025-11-22T01:39:11.935367"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "README.md",
+      "boost": 15,
+      "timestamp": "2025-11-22T01:39:11.935669"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "docs/api.md",
+      "boost": 15,
+      "timestamp": "2025-11-22T01:39:11.935951"
+    },
+    {
+      "turn": 0,
+      "tool": "Write",
+      "target": "test_new.py",
+      "boost": 15,
+      "timestamp": "2025-11-22T01:39:11.936228"
+    },
+    {
+      "turn": 0,
+      "tool": "Edit",
+      "target": "test_existing.py",
+      "boost": 20,
+      "timestamp": "2025-11-22T01:39:11.936573"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "src/main.py",
+      "boost": 10,
+      "timestamp": "2025-11-22T01:39:11.936932"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "src/main.py",
+      "boost": 2,
+      "timestamp": "2025-11-22T01:39:11.937317"
+    }
+  ],
+  "risk_events": [],
+  "confidence_history": [
+    {
+      "turn": 0,
+      "confidence": 0,
+      "reason": "session_start",
+      "timestamp": "2025-11-22T01:39:11.933473"
+    },
+    {
+      "turn": 0,
+      "confidence": 5,
+      "reason": "git status",
+      "timestamp": "2025-11-22T01:39:11.933768"
+    },
+    {
+      "turn": 0,
+      "confidence": 15,
+      "reason": "git commit",
+      "timestamp": "2025-11-22T01:39:11.934104"
+    },
+    {
+      "turn": 0,
+      "confidence": 25,
+      "reason": "git diff",
+      "timestamp": "2025-11-22T01:39:11.934727"
+    },
+    {
+      "turn": 0,
+      "confidence": 45,
+      "reason": "CLAUDE.md first read",
+      "timestamp": "2025-11-22T01:39:11.935044"
+    },
+    {
+      "turn": 0,
+      "confidence": 50,
+      "reason": "CLAUDE.md re-read",
+      "timestamp": "2025-11-22T01:39:11.935370"
+    },
+    {
+      "turn": 0,
+      "confidence": 65,
+      "reason": "README.md first read",
+      "timestamp": "2025-11-22T01:39:11.935672"
+    },
+    {
+      "turn": 0,
+      "confidence": 80,
+      "reason": "generic .md first read",
+      "timestamp": "2025-11-22T01:39:11.935954"
+    },
+    {
+      "turn": 0,
+      "confidence": 95,
+      "reason": "write test file",
+      "timestamp": "2025-11-22T01:39:11.936231"
+    },
+    {
+      "turn": 0,
+      "confidence": 100,
+      "reason": "edit test file",
+      "timestamp": "2025-11-22T01:39:11.936575"
+    },
+    {
+      "turn": 0,
+      "confidence": 100,
+      "reason": "regular file first read",
+      "timestamp": "2025-11-22T01:39:11.936935"
+    },
+    {
+      "turn": 0,
+      "confidence": 100,
+      "reason": "regular file re-read",
+      "timestamp": "2025-11-22T01:39:11.937319"
+    }
+  ],
+  "read_files": {
+    "CLAUDE.md": 2,
+    "README.md": 1,
+    "docs/api.md": 1,
+    "src/main.py": 4
+  },
+  "initialized_at": "2025-11-22T01:39:11.933482"
+}

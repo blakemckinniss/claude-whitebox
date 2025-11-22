@@ -1,0 +1,10 @@
+{
+  "description": "Model pool for council member assignments. One random model is selected per member per consultation.",
+  "models": [
+    "openai/gpt-5.1",
+    "x-ai/grok-4.1-fast",
+    "google/gemini-3-pro-preview",
+    "moonshotai/kimi-k2-thinking",
+    "anthropic/claude-opus-4.1"
+  ]
+}

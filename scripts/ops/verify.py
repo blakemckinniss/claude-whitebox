@@ -12,15 +12,15 @@ _script_path = os.path.abspath(__file__)
 _script_dir = os.path.dirname(_script_path)
 # Find project root by looking for 'scripts' directory
 _current = _script_dir
-while _current != '/':
-    if os.path.exists(os.path.join(_current, 'scripts', 'lib', 'core.py')):
+while _current != "/":
+    if os.path.exists(os.path.join(_current, "scripts", "lib", "core.py")):
         _project_root = _current
         break
     _current = os.path.dirname(_current)
 else:
     raise RuntimeError("Could not find project root with scripts/lib/core.py")
-sys.path.insert(0, os.path.join(_project_root, 'scripts', 'lib'))
-from core import setup_script, finalize, logger, handle_debug, check_dry_run
+sys.path.insert(0, os.path.join(_project_root, "scripts", "lib"))
+from core import setup_script, finalize, logger, handle_debug
 
 
 def check_file_exists(target):
@@ -31,7 +31,7 @@ def check_file_exists(target):
 def check_grep_text(target, expected):
     """Check if expected text exists in file."""
     try:
-        with open(target, 'r') as f:
+        with open(target, "r") as f:
             content = f.read()
             return expected in content
     except FileNotFoundError:
@@ -41,7 +41,7 @@ def check_grep_text(target, expected):
         return False
 
 
-def check_port_open(target, host='localhost'):
+def check_port_open(target, host="localhost"):
     """Check if a port is open on localhost."""
     try:
         port = int(target)
@@ -62,11 +62,7 @@ def check_command_success(target, timeout=10):
     """Check if a command exits with code 0."""
     try:
         result = subprocess.run(
-            target,
-            shell=True,
-            capture_output=True,
-            text=True,
-            timeout=timeout
+            target, shell=True, capture_output=True, text=True, timeout=timeout
         )
         return result.returncode == 0
     except subprocess.TimeoutExpired:
@@ -78,21 +74,35 @@ def check_command_success(target, timeout=10):
 
 
 def main():
-    parser = setup_script("The Fact-Checker: Validates system state assertions. Returns True/False. Use this BEFORE claiming something is true.")
+    parser = setup_script(
+        "The Fact-Checker: Validates system state assertions. Returns True/False. Use this BEFORE claiming something is true."
+    )
 
     # Custom arguments
-    parser.add_argument('check', choices=['file_exists', 'grep_text', 'port_open', 'command_success'],
-                       help="Type of check to perform")
-    parser.add_argument('target', help="The file, port, or command to check")
-    parser.add_argument('--expected', help="Expected text for grep_text check")
-    parser.add_argument('--host', default='localhost', help="Host for port_open check (default: localhost)")
-    parser.add_argument('--timeout', type=int, default=10, help="Timeout for command_success check (default: 10s)")
+    parser.add_argument(
+        "check",
+        choices=["file_exists", "grep_text", "port_open", "command_success"],
+        help="Type of check to perform",
+    )
+    parser.add_argument("target", help="The file, port, or command to check")
+    parser.add_argument("--expected", help="Expected text for grep_text check")
+    parser.add_argument(
+        "--host",
+        default="localhost",
+        help="Host for port_open check (default: localhost)",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=10,
+        help="Timeout for command_success check (default: 10s)",
+    )
 
     args = parser.parse_args()
     handle_debug(args)
 
     # Validation
-    if args.check == 'grep_text' and not args.expected:
+    if args.check == "grep_text" and not args.expected:
         logger.error("grep_text check requires --expected argument")
         finalize(success=False)
 
@@ -106,19 +116,19 @@ def main():
         # Perform the check
         verified = False
 
-        if args.check == 'file_exists':
+        if args.check == "file_exists":
             verified = check_file_exists(args.target)
             claim = f"File/directory exists: {args.target}"
 
-        elif args.check == 'grep_text':
+        elif args.check == "grep_text":
             verified = check_grep_text(args.target, args.expected)
             claim = f"File '{args.target}' contains '{args.expected}'"
 
-        elif args.check == 'port_open':
+        elif args.check == "port_open":
             verified = check_port_open(args.target, args.host)
             claim = f"Port {args.target} is open on {args.host}"
 
-        elif args.check == 'command_success':
+        elif args.check == "command_success":
             verified = check_command_success(args.target, args.timeout)
             claim = f"Command '{args.target}' exits with code 0"
 

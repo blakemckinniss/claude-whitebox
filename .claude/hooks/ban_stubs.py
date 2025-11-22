@@ -15,7 +15,7 @@ except:
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "action": "allow"
+            "permissionDecision": "allow"
         }
     }))
     sys.exit(0)
@@ -28,7 +28,7 @@ if tool_name != "Write":
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "action": "allow"
+            "permissionDecision": "allow"
         }
     }))
     sys.exit(0)
@@ -40,37 +40,37 @@ if not content:
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "action": "allow"
+            "permissionDecision": "allow"
         }
     }))
     sys.exit(0)
 
 # Stub patterns (same as void.py)
 STUB_PATTERNS = [
-    (r'#\s*TODO:', 'TODO comment'),
-    (r'#\s*FIXME:', 'FIXME comment'),
-    (r'def\s+\w+\([^)]*\):\s*pass\s*$', 'Function stub (pass)'),
-    (r'def\s+\w+\([^)]*\):\s*\.\.\.\s*$', 'Function stub (...)'),
-    (r'raise\s+NotImplementedError', 'NotImplementedError'),
+    (r"#\s*TODO:", "TODO comment"),
+    (r"#\s*FIXME:", "FIXME comment"),
+    (r"def\s+\w+\([^)]*\):\s*pass\s*$", "Function stub (pass)"),
+    (r"def\s+\w+\([^)]*\):\s*\.\.\.\s*$", "Function stub (...)"),
+    (r"raise\s+NotImplementedError", "NotImplementedError"),
 ]
 
 # Scan content for stubs
 stubs_found = []
-for line_num, line in enumerate(content.split('\n'), 1):
+for line_num, line in enumerate(content.split("\n"), 1):
     for pattern, description in STUB_PATTERNS:
         if re.search(pattern, line, re.IGNORECASE):
-            stubs_found.append({
-                'line': line_num,
-                'type': description,
-                'content': line.strip()
-            })
+            stubs_found.append(
+                {"line": line_num, "type": description, "content": line.strip()}
+            )
 
 # If stubs detected, block the operation
 if stubs_found:
-    stub_details = "\n".join([
-        f"    Line {s['line']}: {s['type']}\n      → {s['content']}"
-        for s in stubs_found[:5]  # Show first 5
-    ])
+    stub_details = "\n".join(
+        [
+            f"    Line {s['line']}: {s['type']}\n      → {s['content']}"
+            for s in stubs_found[:5]  # Show first 5
+        ]
+    )
 
     if len(stubs_found) > 5:
         stub_details += f"\n    ... and {len(stubs_found) - 5} more"
@@ -106,8 +106,8 @@ To override this check (NOT recommended), remove the stub patterns from your cod
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "action": "deny",
-            "denyReason": additional_context
+            "permissionDecision": "deny",
+            "permissionDecisionReason": additional_context
         }
     }))
     sys.exit(0)
@@ -116,7 +116,7 @@ To override this check (NOT recommended), remove the stub patterns from your cod
 print(json.dumps({
     "hookSpecificOutput": {
         "hookEventName": "PreToolUse",
-        "action": "allow"
+        "permissionDecision": "allow"
     }
 }))
 sys.exit(0)

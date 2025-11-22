@@ -4,13 +4,14 @@ Browser automation utilities using Playwright.
 This module provides a simplified interface for browser automation tasks,
 making Playwright the path of least resistance for UI interactions.
 """
+
 import os
-import sys
 from contextlib import contextmanager
 
 # Check if playwright is available
 try:
     from playwright.sync_api import sync_playwright
+
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
@@ -54,7 +55,7 @@ def get_browser_session(headless=True, viewport=None, user_agent=None):
     if not check_playwright():
         raise ImportError("Playwright is not installed")
 
-    viewport = viewport or {'width': 1280, 'height': 720}
+    viewport = viewport or {"width": 1280, "height": 720}
     user_agent = user_agent or "Mozilla/5.0 (Whitebox Agent)"
 
     p = sync_playwright().start()
@@ -63,10 +64,7 @@ def get_browser_session(headless=True, viewport=None, user_agent=None):
 
     try:
         browser = p.chromium.launch(headless=headless)
-        context = browser.new_context(
-            viewport=viewport,
-            user_agent=user_agent
-        )
+        context = browser.new_context(viewport=viewport, user_agent=user_agent)
         page = context.new_page()
 
         logger.info(f"🎭 Browser session started (headless={headless})")
@@ -105,7 +103,7 @@ def smart_dump(page, max_length=5000):
     """
     # Wait for network idle to ensure hydration/dynamic content
     try:
-        page.wait_for_load_state('networkidle', timeout=3000)
+        page.wait_for_load_state("networkidle", timeout=3000)
     except Exception as e:
         logger.debug(f"Network idle timeout: {e}")
         # Proceed anyway if timeout
@@ -169,6 +167,7 @@ def snapshot_on_error(func):
     If the function raises an exception, a screenshot will be saved
     to scratch/error.png before re-raising the exception.
     """
+
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -176,14 +175,16 @@ def snapshot_on_error(func):
             # Try to find page object in args
             page = None
             for arg in args:
-                if hasattr(arg, 'screenshot'):
+                if hasattr(arg, "screenshot"):
                     page = arg
                     break
 
             if page:
                 try:
                     take_screenshot(page, "error")
-                    logger.error("❌ Error occurred - screenshot saved to scratch/error.png")
+                    logger.error(
+                        "❌ Error occurred - screenshot saved to scratch/error.png"
+                    )
                 except Exception as screenshot_error:
                     logger.debug(f"Could not save error screenshot: {screenshot_error}")
 
@@ -231,7 +232,7 @@ def safe_fill(page, selector, value, timeout=5000):
         wait_for_selector(page, selector, timeout=timeout)
         page.fill(selector, value)
         logger.debug(f"Filled {selector} with value")
-    except Exception as e:
+    except Exception:
         logger.error(f"Could not fill {selector}")
         take_screenshot(page, "fill_error")
         raise
@@ -250,7 +251,7 @@ def safe_click(page, selector, timeout=5000):
         wait_for_selector(page, selector, timeout=timeout)
         page.click(selector)
         logger.debug(f"Clicked {selector}")
-    except Exception as e:
+    except Exception:
         logger.error(f"Could not click {selector}")
         take_screenshot(page, "click_error")
         raise

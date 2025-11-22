@@ -15,6 +15,14 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pre_write_audit.py"
           },
           {
@@ -32,7 +40,49 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/risk_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pre_delegation.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
           }
         ]
       },
@@ -52,6 +102,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/session_init.py"
+          },
+          {
+            "type": "command",
             "command": "cat $CLAUDE_PROJECT_DIR/.claude/hooks/manifesto.txt"
           },
           {
@@ -66,7 +120,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_init.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/synapse_fire.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pre_advice.py"
           },
           {
             "type": "command",
@@ -107,6 +169,30 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/force_playwright.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/intent_classifier.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_suggester.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/prerequisite_checker.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/best_practice_enforcer.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/ecosystem_mapper.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_on_complete.py"
           }
         ]
       }
@@ -116,7 +202,19 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_tracker.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/evidence_tracker.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_confidence_reward.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/post_tool_command_suggester.py"
           }
         ]
       }
@@ -124,6 +222,14 @@
     "Stop": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pattern_detector.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/token_tracker.py"
+          },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_remember.py"
@@ -145,6 +251,10 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/scripts/ops/upkeep.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_on_end.py"
           }
         ]
       }

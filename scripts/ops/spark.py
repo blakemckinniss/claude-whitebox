@@ -13,29 +13,29 @@ _script_path = os.path.abspath(__file__)
 _script_dir = os.path.dirname(_script_path)
 # Find project root by looking for 'scripts' directory
 _current = _script_dir
-while _current != '/':
-    if os.path.exists(os.path.join(_current, 'scripts', 'lib', 'core.py')):
+while _current != "/":
+    if os.path.exists(os.path.join(_current, "scripts", "lib", "core.py")):
         _project_root = _current
         break
     _current = os.path.dirname(_current)
 else:
     raise RuntimeError("Could not find project root with scripts/lib/core.py")
-sys.path.insert(0, os.path.join(_project_root, 'scripts', 'lib'))
-from core import setup_script, finalize, logger, handle_debug, check_dry_run
+sys.path.insert(0, os.path.join(_project_root, "scripts", "lib"))
+from core import setup_script, finalize, logger, handle_debug
 
 
 def query_lessons(keywords, max_results=3):
     """Scans the Pain Log for past trauma related to these keywords."""
     matches = []
-    lessons_path = os.path.join(_project_root, '.claude', 'memory', 'lessons.md')
+    lessons_path = os.path.join(_project_root, ".claude", "memory", "lessons.md")
 
     try:
-        with open(lessons_path, 'r') as f:
+        with open(lessons_path, "r") as f:
             lines = f.readlines()
 
         for line in lines:
             # Skip headers and empty lines
-            if line.startswith('#') or not line.strip():
+            if line.startswith("#") or not line.strip():
                 continue
 
             # Check if any keyword appears in this line
@@ -60,17 +60,31 @@ def query_lessons(keywords, max_results=3):
 def extract_keywords_from_pattern(pattern):
     """Extract simple keywords from a regex pattern for lesson searching."""
     # Remove regex special characters
-    keywords = pattern.replace('(', '').replace(')', '').replace('|', ' ').replace('\\', '').split()
+    keywords = (
+        pattern.replace("(", "")
+        .replace(")", "")
+        .replace("|", " ")
+        .replace("\\", "")
+        .split()
+    )
     # Filter out very short keywords
     return [k for k in keywords if len(k) > 3]
 
 
 def main():
-    parser = setup_script("The Synapse: Scans prompt for keywords and retrieves associated memories and protocols")
+    parser = setup_script(
+        "The Synapse: Scans prompt for keywords and retrieves associated memories and protocols"
+    )
 
-    parser.add_argument('prompt', help="The user prompt to analyze for associations")
-    parser.add_argument('--no-constraints', action='store_true', help="Disable random constraint injection")
-    parser.add_argument('--json', action='store_true', help="Output JSON only (no logging)")
+    parser.add_argument("prompt", help="The user prompt to analyze for associations")
+    parser.add_argument(
+        "--no-constraints",
+        action="store_true",
+        help="Disable random constraint injection",
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="Output JSON only (no logging)"
+    )
 
     args = parser.parse_args()
     handle_debug(args)
@@ -84,18 +98,18 @@ def main():
 
     try:
         # Load synapse map
-        synapse_path = os.path.join(_project_root, '.claude', 'memory', 'synapses.json')
+        synapse_path = os.path.join(_project_root, ".claude", "memory", "synapses.json")
 
-        with open(synapse_path, 'r') as f:
+        with open(synapse_path, "r") as f:
             synapses = json.load(f)
 
-        patterns = synapses.get('patterns', {})
-        random_constraints = synapses.get('random_constraints', [])
-        meta = synapses.get('meta', {})
+        patterns = synapses.get("patterns", {})
+        random_constraints = synapses.get("random_constraints", [])
+        meta = synapses.get("meta", {})
 
-        max_associations = meta.get('max_associations', 5)
-        max_memories = meta.get('max_memories', 3)
-        constraint_probability = meta.get('constraint_probability', 0.10)
+        max_associations = meta.get("max_associations", 5)
+        max_memories = meta.get("max_memories", 3)
+        constraint_probability = meta.get("constraint_probability", 0.10)
 
         prompt_lower = args.prompt.lower()
 
@@ -129,11 +143,13 @@ def main():
 
         # 4. Build output
         output = {
-            "has_associations": len(associations) > 0 or len(memories) > 0 or constraint is not None,
+            "has_associations": len(associations) > 0
+            or len(memories) > 0
+            or constraint is not None,
             "associations": associations,
             "memories": memories,
             "constraint": constraint,
-            "matched_patterns": matched_patterns
+            "matched_patterns": matched_patterns,
         }
 
         # Output JSON
@@ -141,27 +157,34 @@ def main():
 
         if not args.json:
             if output["has_associations"]:
-                logger.info(f"Found {len(associations)} associations, {len(memories)} memories")
+                logger.info(
+                    f"Found {len(associations)} associations, {len(memories)} memories"
+                )
                 if constraint:
-                    logger.info(f"Lateral thinking constraint injected")
+                    logger.info("Lateral thinking constraint injected")
             else:
                 logger.info("No strong associations found for this prompt")
 
     except FileNotFoundError as e:
         logger.error(f"Synapse map not found: {e}")
         # Output empty associations
-        print(json.dumps({
-            "has_associations": False,
-            "associations": [],
-            "memories": [],
-            "constraint": None,
-            "matched_patterns": []
-        }))
+        print(
+            json.dumps(
+                {
+                    "has_associations": False,
+                    "associations": [],
+                    "memories": [],
+                    "constraint": None,
+                    "matched_patterns": [],
+                }
+            )
+        )
         finalize(success=False)
 
     except Exception as e:
         logger.error(f"Synapse firing failed: {e}")
         import traceback
+
         traceback.print_exc()
         finalize(success=False)
 

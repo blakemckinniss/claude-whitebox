@@ -9,14 +9,13 @@ import sys
 import json
 import subprocess
 import re
-from pathlib import Path
 
 
 def parse_transcript(transcript_path: str) -> list[dict]:
     """Parse JSONL transcript file."""
     messages = []
     try:
-        with open(transcript_path, 'r') as f:
+        with open(transcript_path, "r") as f:
             for line in f:
                 if line.strip():
                     messages.append(json.loads(line))
@@ -71,8 +70,10 @@ def execute_remember_command(command: str, project_dir: str) -> bool:
     try:
         # Parse the command to extract arguments
         # Format: remember.py add TYPE "text"
-        parts = command.split(None, 2)  # Split into ['remember.py', 'add', 'TYPE "text"']
-        if len(parts) < 3 or parts[1] != 'add':
+        parts = command.split(
+            None, 2
+        )  # Split into ['remember.py', 'add', 'TYPE "text"']
+        if len(parts) < 3 or parts[1] != "add":
             return False
 
         # Extract type and text
@@ -86,11 +87,17 @@ def execute_remember_command(command: str, project_dir: str) -> bool:
 
         # Execute remember.py
         result = subprocess.run(
-            ["python3", f"{project_dir}/scripts/ops/remember.py", "add", memory_type, text],
+            [
+                "python3",
+                f"{project_dir}/scripts/ops/remember.py",
+                "add",
+                memory_type,
+                text,
+            ],
             capture_output=True,
             text=True,
             timeout=10,
-            cwd=project_dir
+            cwd=project_dir,
         )
 
         return result.returncode == 0

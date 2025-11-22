@@ -9,7 +9,10 @@ import subprocess
 from pathlib import Path
 
 MEMORY_DIR = Path(__file__).resolve().parent.parent / "memory"
-CONFIDENCE_CMD = Path(__file__).resolve().parent.parent.parent / "scripts" / "ops" / "confidence.py"
+CONFIDENCE_CMD = (
+    Path(__file__).resolve().parent.parent.parent / "scripts" / "ops" / "confidence.py"
+)
+
 
 def apply_penalty(action_key, reason):
     """Apply confidence penalty"""
@@ -17,31 +20,40 @@ def apply_penalty(action_key, reason):
         subprocess.run(
             ["python3", str(CONFIDENCE_CMD), "loss", action_key, reason],
             capture_output=True,
-            timeout=5
+            timeout=5,
         )
     except:
         pass  # Silent failure
+
 
 # Load input
 try:
     input_data = json.load(sys.stdin)
 except:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 prompt = input_data.get("prompt", "")
 if not prompt:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 prompt_lower = prompt.lower()
@@ -49,8 +61,16 @@ prompt_lower = prompt.lower()
 # Detect hallucination patterns
 hallucination_triggers = [
     ("i know how", "claim_knowledge", "Claimed 'I know how' without evidence"),
-    ("this should work", "claim_knowledge", "Claimed 'this should work' without verification"),
-    ("i'll just", "propose_without_context", "Proposed action without gathering context"),
+    (
+        "this should work",
+        "claim_knowledge",
+        "Claimed 'this should work' without verification",
+    ),
+    (
+        "i'll just",
+        "propose_without_context",
+        "Proposed action without gathering context",
+    ),
     ("let me write", "propose_without_context", "Proposed writing without reading"),
 ]
 
@@ -85,18 +105,26 @@ REMEDY:
 
 Check status: python3 scripts/ops/confidence.py status
 """
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": additional_context
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": additional_context,
+                }
+            }
+        )
+    )
 else:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
 
 sys.exit(0)

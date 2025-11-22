@@ -12,26 +12,35 @@ _script_path = os.path.abspath(__file__)
 _script_dir = os.path.dirname(_script_path)
 # Find project root by looking for 'scripts' directory
 _current = _script_dir
-while _current != '/':
-    if os.path.exists(os.path.join(_current, 'scripts', 'lib', 'core.py')):
+while _current != "/":
+    if os.path.exists(os.path.join(_current, "scripts", "lib", "core.py")):
         _project_root = _current
         break
     _current = os.path.dirname(_current)
 else:
     raise RuntimeError("Could not find project root with scripts/lib/core.py")
-sys.path.insert(0, os.path.join(_project_root, 'scripts', 'lib'))
-from core import setup_script, finalize, logger, handle_debug, check_dry_run
+sys.path.insert(0, os.path.join(_project_root, "scripts", "lib"))
+from core import setup_script, finalize, logger, handle_debug
 
 
 def main():
-    parser = setup_script("The Researcher: Performs deep web search using Tavily to retrieve up-to-date documentation and context")
+    parser = setup_script(
+        "The Researcher: Performs deep web search using Tavily to retrieve up-to-date documentation and context"
+    )
 
     # Custom arguments
-    parser.add_argument('query', help="The search query")
-    parser.add_argument('--deep', action='store_true',
-                       help="Use advanced search depth (more thorough, slower)")
-    parser.add_argument('--max-results', type=int, default=5,
-                       help="Maximum number of results to return (default: 5)")
+    parser.add_argument("query", help="The search query")
+    parser.add_argument(
+        "--deep",
+        action="store_true",
+        help="Use advanced search depth (more thorough, slower)",
+    )
+    parser.add_argument(
+        "--max-results",
+        type=int,
+        default=5,
+        help="Maximum number of results to return (default: 5)",
+    )
 
     args = parser.parse_args()
     handle_debug(args)
@@ -61,17 +70,19 @@ def main():
             "query": args.query,
             "search_depth": search_depth,
             "include_answer": True,
-            "max_results": args.max_results
+            "max_results": args.max_results,
         }
 
-        logger.debug(f"Request payload: {json.dumps({**payload, 'api_key': '***'}, indent=2)}")
+        logger.debug(
+            f"Request payload: {json.dumps({**payload, 'api_key': '***'}, indent=2)}"
+        )
 
         # Call Tavily API
         response = requests.post(
             "https://api.tavily.com/search",
             headers={"Content-Type": "application/json"},
             json=payload,
-            timeout=30
+            timeout=30,
         )
         response.raise_for_status()
         result = response.json()
@@ -87,29 +98,29 @@ def main():
         print("=" * 70)
 
         # Show direct answer if available
-        if result.get('answer'):
+        if result.get("answer"):
             print("\n" + "💡 DIRECT ANSWER")
             print("-" * 70)
-            print(result['answer'])
+            print(result["answer"])
             print()
 
         # Show search results
-        results = result.get('results', [])
+        results = result.get("results", [])
         if results:
             print(f"\n🔍 TOP {len(results)} SOURCES")
             print("=" * 70)
 
             for idx, item in enumerate(results, 1):
-                title = item.get('title', 'No title')
-                url = item.get('url', '')
-                content = item.get('content', 'No content available')
+                title = item.get("title", "No title")
+                url = item.get("url", "")
+                content = item.get("content", "No content available")
 
                 print(f"\n[{idx}] {title}")
                 print(f"    URL: {url}")
                 print(f"    {'-' * 66}")
 
                 # Wrap content to fit nicely
-                lines = content.split('\n')
+                lines = content.split("\n")
                 for line in lines:
                     if len(line) > 66:
                         # Simple word wrapping
@@ -120,7 +131,9 @@ def main():
                                 print(current_line)
                                 current_line = "    " + word
                             else:
-                                current_line += (" " if current_line != "    " else "") + word
+                                current_line += (
+                                    " " if current_line != "    " else ""
+                                ) + word
                         if current_line.strip():
                             print(current_line)
                     else:
@@ -134,12 +147,12 @@ def main():
 
     except requests.exceptions.RequestException as e:
         logger.error(f"Tavily API communication failed: {e}")
-        if 'response' in locals():
+        if "response" in locals():
             logger.error(f"Response text: {response.text}")
         finalize(success=False)
     except KeyError as e:
         logger.error(f"Unexpected response format: {e}")
-        if 'result' in locals():
+        if "result" in locals():
             logger.error(f"Response: {json.dumps(result, indent=2)}")
         finalize(success=False)
     except Exception as e:

@@ -6,14 +6,13 @@ Shared utilities for all scripts in the arsenal.
 import argparse
 import logging
 import sys
-import os
 from pathlib import Path
 
 # Standardized Logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s | %(levelname)s | %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger("Whitebox")
 
@@ -31,7 +30,8 @@ def setup_script(description):
     # Load .env if present (override existing env vars to ensure .env takes precedence)
     try:
         from dotenv import load_dotenv
-        env_path = Path(__file__).parent.parent.parent / '.env'
+
+        env_path = Path(__file__).parent.parent.parent / ".env"
         if env_path.exists():
             load_dotenv(env_path, override=True)
             logger.debug(f"Loaded environment from {env_path} (with override)")
@@ -40,26 +40,19 @@ def setup_script(description):
 
     # Standard Args
     parser = argparse.ArgumentParser(
-        description=description,
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        description=description, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help="Simulate actions without making changes"
+        "--dry-run", action="store_true", help="Simulate actions without making changes"
     )
-    parser.add_argument(
-        '--debug',
-        action='store_true',
-        help="Enable debug logging"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     return parser
 
 
 def handle_debug(args):
     """Enable debug logging if --debug flag is set"""
-    if hasattr(args, 'debug') and args.debug:
+    if hasattr(args, "debug") and args.debug:
         logger.setLevel(logging.DEBUG)
         logger.debug("Debug mode enabled")
 
@@ -73,7 +66,7 @@ def check_dry_run(args, action_description):
             return  # Skip actual operation
         os.remove(file)
     """
-    if hasattr(args, 'dry_run') and args.dry_run:
+    if hasattr(args, "dry_run") and args.dry_run:
         logger.warning(f"⚠️  DRY RUN: Would {action_description}")
         return True
     return False

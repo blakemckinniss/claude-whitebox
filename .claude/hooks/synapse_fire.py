@@ -5,19 +5,22 @@ Synapse Fire Hook: Injects associative memory context based on user prompt
 import sys
 import json
 import subprocess
-import os
 
 # Load input
 try:
     input_data = json.load(sys.stdin)
 except:
     # If can't parse input, pass through
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 # Get user prompt
@@ -25,12 +28,16 @@ prompt = input_data.get("prompt", "")
 
 if not prompt:
     # No prompt, nothing to analyze
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 try:
@@ -39,17 +46,21 @@ try:
         ["python3", "scripts/ops/spark.py", prompt, "--json"],
         capture_output=True,
         text=True,
-        timeout=5
+        timeout=5,
     )
 
     if result.returncode != 0:
         # Spark failed, pass through without context
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "UserPromptSubmit",
-                "additionalContext": ""
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "UserPromptSubmit",
+                        "additionalContext": "",
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
     # Parse spark output
@@ -58,12 +69,16 @@ try:
     # Check if there are any associations
     if not spark_output.get("has_associations", False):
         # No associations found, pass through
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "UserPromptSubmit",
-                "additionalContext": ""
-            }
-        }))
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "UserPromptSubmit",
+                        "additionalContext": "",
+                    }
+                }
+            )
+        )
         sys.exit(0)
 
     # Build additional context message
@@ -98,28 +113,40 @@ try:
     additional_context = "\n".join(context_lines)
 
     # Output the hook result with injected context
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": additional_context
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": additional_context,
+                }
+            }
+        )
+    )
 
 except subprocess.TimeoutExpired:
     # Spark took too long, skip context injection
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
-except Exception as e:
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
+except Exception:
     # Any error, pass through without context
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": ""
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": "",
+                }
+            }
+        )
+    )
 
 sys.exit(0)

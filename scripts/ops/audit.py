@@ -6,42 +6,39 @@ import sys
 import os
 import subprocess
 import re
-from pathlib import Path
 
 # Add scripts/lib to path
 _script_path = os.path.abspath(__file__)
 _script_dir = os.path.dirname(_script_path)
 # Find project root by looking for 'scripts' directory
 _current = _script_dir
-while _current != '/':
-    if os.path.exists(os.path.join(_current, 'scripts', 'lib', 'core.py')):
+while _current != "/":
+    if os.path.exists(os.path.join(_current, "scripts", "lib", "core.py")):
         _project_root = _current
         break
     _current = os.path.dirname(_current)
 else:
     raise RuntimeError("Could not find project root with scripts/lib/core.py")
-sys.path.insert(0, os.path.join(_project_root, 'scripts', 'lib'))
-from core import setup_script, finalize, logger, handle_debug, check_dry_run
+sys.path.insert(0, os.path.join(_project_root, "scripts", "lib"))
+from core import setup_script, finalize, logger, handle_debug
 
 
 def check_ruff(filepath):
     """Run Ruff linter on the file."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🔍 [SENTINEL] Running Ruff Linter...")
-    print("="*70)
+    print("=" * 70)
 
     try:
         result = subprocess.run(
-            ["ruff", "check", filepath],
-            capture_output=True,
-            text=True
+            ["ruff", "check", filepath], capture_output=True, text=True
         )
 
         if result.returncode == 0:
             print("  ✅ Ruff: No linting errors")
             return True
         else:
-            print(f"  ❌ Ruff found issues:")
+            print("  ❌ Ruff found issues:")
             print(result.stdout)
             return False
 
@@ -55,15 +52,13 @@ def check_ruff(filepath):
 
 def check_bandit(filepath):
     """Run Bandit security scanner on the file."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🛡️  [SENTINEL] Running Bandit Security Scanner...")
-    print("="*70)
+    print("=" * 70)
 
     try:
         result = subprocess.run(
-            ["bandit", "-r", filepath, "-f", "txt"],
-            capture_output=True,
-            text=True
+            ["bandit", "-r", filepath, "-f", "txt"], capture_output=True, text=True
         )
 
         # Bandit returns 0 if no issues, 1 if issues found
@@ -71,7 +66,7 @@ def check_bandit(filepath):
             print("  ✅ Bandit: No security issues")
             return True
         else:
-            print(f"  ❌ Bandit found security issues:")
+            print("  ❌ Bandit found security issues:")
             print(result.stdout)
             return False
 
@@ -85,15 +80,15 @@ def check_bandit(filepath):
 
 def check_complexity(filepath):
     """Check cyclomatic complexity using Radon."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("📊 [SENTINEL] Checking Cyclomatic Complexity...")
-    print("="*70)
+    print("=" * 70)
 
     try:
         # Import radon here to avoid hard dependency
         from radon.complexity import cc_visit
 
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             code = f.read()
 
         complexity_scores = cc_visit(code)
@@ -123,34 +118,48 @@ def check_complexity(filepath):
 
 def check_custom_anti_patterns(filepath, strict=False):
     """Check for custom anti-patterns defined in anti_patterns.md."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🚫 [SENTINEL] Checking Custom Anti-Patterns...")
-    print("="*70)
+    print("=" * 70)
 
     # Define anti-patterns with severity levels
     anti_patterns = [
         # Critical security issues
-        (r'sk-proj-|ghp_|AWS_SECRET|api[_-]?key\s*=\s*["\'](?!.*getenv)', "🔴 CRITICAL: Hardcoded secret detected", True),
-        (r'shell\s*=\s*True', "🔴 CRITICAL: Shell injection risk (shell=True)", True),
-        (r'cursor\.execute\([^?]*f["\']', "🔴 CRITICAL: SQL injection risk (f-string in query)", True),
-
+        (
+            r'sk-proj-|ghp_|AWS_SECRET|api[_-]?key\s*=\s*["\'](?!.*getenv)',
+            "🔴 CRITICAL: Hardcoded secret detected",
+            True,
+        ),
+        (r"shell\s*=\s*True", "🔴 CRITICAL: Shell injection risk (shell=True)", True),
+        (
+            r'cursor\.execute\([^?]*f["\']',
+            "🔴 CRITICAL: SQL injection risk (f-string in query)",
+            True,
+        ),
         # Warning-level issues
-        (r'except\s*:', "🟡 WARNING: Blind exception catching", False),
-        (r'except\s+Exception\s*:', "🟡 WARNING: Catching Exception too broad", False),
-        (r'global\s+\w+', "🟡 WARNING: Global variable mutation", False),
-        (r'print\s*\(', "🟡 WARNING: Use logger.info instead of print", False),
-        (r'pdb\.set_trace\(\)|breakpoint\(\)', "🟡 WARNING: Debug breakpoint left in code", False),
-        (r'from\s+\w+\s+import\s+\*', "🟡 WARNING: Wildcard import (from X import *)", False),
-
+        (r"except\s*:", "🟡 WARNING: Blind exception catching", False),
+        (r"except\s+Exception\s*:", "🟡 WARNING: Catching Exception too broad", False),
+        (r"global\s+\w+", "🟡 WARNING: Global variable mutation", False),
+        (r"print\s*\(", "🟡 WARNING: Use logger.info instead of print", False),
+        (
+            r"pdb\.set_trace\(\)|breakpoint\(\)",
+            "🟡 WARNING: Debug breakpoint left in code",
+            False,
+        ),
+        (
+            r"from\s+\w+\s+import\s+\*",
+            "🟡 WARNING: Wildcard import (from X import *)",
+            False,
+        ),
         # Info-level issues
-        (r'TODO:', "🔵 INFO: TODO comment found", False),
-        (r'#\s*[^#\n]{50,}\n\s*#', "🔵 INFO: Large commented-out code block", False),
+        (r"TODO:", "🔵 INFO: TODO comment found", False),
+        (r"#\s*[^#\n]{50,}\n\s*#", "🔵 INFO: Large commented-out code block", False),
     ]
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             content = f.read()
-            lines = content.split('\n')
+            lines = content.split("\n")
 
         violations = []
         critical_found = False
@@ -160,7 +169,7 @@ def check_custom_anti_patterns(filepath, strict=False):
             if matches:
                 for match in matches:
                     # Find line number
-                    lineno = content[:match.start()].count('\n') + 1
+                    lineno = content[: match.start()].count("\n") + 1
                     violations.append((lineno, message, is_critical))
                     if is_critical:
                         critical_found = True
@@ -190,27 +199,27 @@ def check_custom_anti_patterns(filepath, strict=False):
 
 def check_sdk_compliance(filepath):
     """Check if the script follows Whitebox SDK standards."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("📋 [SENTINEL] Checking SDK Compliance...")
-    print("="*70)
+    print("=" * 70)
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             content = f.read()
 
         violations = []
 
         # Check for required imports
-        if 'from core import' not in content:
+        if "from core import" not in content:
             violations.append("Missing SDK imports (from core import ...)")
 
-        if 'setup_script' not in content:
+        if "setup_script" not in content:
             violations.append("Missing setup_script() call")
 
-        if 'finalize' not in content:
+        if "finalize" not in content:
             violations.append("Missing finalize() call")
 
-        if '--dry-run' not in content and 'dry_run' not in content:
+        if "--dry-run" not in content and "dry_run" not in content:
             violations.append("Missing dry-run support")
 
         # Check for docstring
@@ -232,10 +241,16 @@ def check_sdk_compliance(filepath):
 
 
 def main():
-    parser = setup_script("The Sentinel: Runs static analysis and anti-pattern detection on target files")
+    parser = setup_script(
+        "The Sentinel: Runs static analysis and anti-pattern detection on target files"
+    )
 
-    parser.add_argument('target', help="Python file to audit")
-    parser.add_argument('--strict', action='store_true', help="Fail on warnings (not just critical issues)")
+    parser.add_argument("target", help="Python file to audit")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail on warnings (not just critical issues)",
+    )
 
     args = parser.parse_args()
     handle_debug(args)
@@ -246,16 +261,16 @@ def main():
         logger.error(f"File not found: {target_path}")
         finalize(success=False)
 
-    if not target_path.endswith('.py'):
+    if not target_path.endswith(".py"):
         logger.error("Target must be a Python file (.py)")
         finalize(success=False)
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🛡️  THE SENTINEL: Code Quality Gate")
-    print("="*70)
+    print("=" * 70)
     print(f"  Target: {target_path}")
     print(f"  Strict Mode: {args.strict}")
-    print("="*70)
+    print("=" * 70)
 
     if args.dry_run:
         logger.info("Dry-run mode: Would run audits but not fail")
@@ -263,17 +278,19 @@ def main():
 
     try:
         results = {
-            'ruff': check_ruff(target_path),
-            'bandit': check_bandit(target_path),
-            'complexity': check_complexity(target_path),
-            'anti_patterns': check_custom_anti_patterns(target_path, strict=args.strict),
-            'sdk_compliance': check_sdk_compliance(target_path)
+            "ruff": check_ruff(target_path),
+            "bandit": check_bandit(target_path),
+            "complexity": check_complexity(target_path),
+            "anti_patterns": check_custom_anti_patterns(
+                target_path, strict=args.strict
+            ),
+            "sdk_compliance": check_sdk_compliance(target_path),
         }
 
         # Summary
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("📊 AUDIT SUMMARY")
-        print("="*70)
+        print("=" * 70)
 
         passed = sum(1 for v in results.values() if v)
         failed = len(results) - passed
@@ -282,12 +299,12 @@ def main():
             status = "✅ PASS" if result else "❌ FAIL"
             print(f"  {status}: {check}")
 
-        print("="*70)
+        print("=" * 70)
 
         # Determine overall result
         # Critical failure = bandit failed (always critical)
         # Anti-patterns can fail due to critical issues OR strict mode warnings
-        critical_failed = not results['bandit']
+        critical_failed = not results["bandit"]
 
         if critical_failed:
             print("🔴 CRITICAL FAILURE: Security issues detected")
@@ -301,7 +318,7 @@ def main():
         elif failed > 0:
             # Check if anti_patterns failed due to critical patterns (not strict mode)
             # If anti_patterns failed in non-strict mode, it must be critical patterns
-            if not results['anti_patterns'] and not args.strict:
+            if not results["anti_patterns"] and not args.strict:
                 print("🔴 CRITICAL FAILURE: Critical anti-patterns detected")
                 print("   Fix these issues immediately before committing!")
                 logger.error("Audit failed with critical anti-patterns")
@@ -318,6 +335,7 @@ def main():
     except Exception as e:
         logger.error(f"Audit failed: {e}")
         import traceback
+
         traceback.print_exc()
         finalize(success=False)
 

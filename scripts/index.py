@@ -21,7 +21,7 @@ def get_docstring(filepath):
         docstring = ast.get_docstring(tree)
         if docstring:
             # Return first line only
-            return docstring.split('\n')[0].strip()
+            return docstring.split("\n")[0].strip()
         return "No description provided"
     except Exception as e:
         return f"Error parsing: {e}"
@@ -35,8 +35,8 @@ def get_bash_description(filepath):
             # Look for first comment after shebang
             for line in lines[1:6]:  # Check first 5 lines
                 line = line.strip()
-                if line.startswith('#') and not line.startswith('#!'):
-                    return line.lstrip('#').strip()
+                if line.startswith("#") and not line.startswith("#!"):
+                    return line.lstrip("#").strip()
         return "No description provided"
     except:
         return "Error reading file"
@@ -50,7 +50,7 @@ def main():
     # Walk through scripts directory
     for root, dirs, files in os.walk(SCRIPT_DIR):
         # Skip lib directory
-        if 'lib' in root:
+        if "lib" in root:
             continue
 
         for file in files:

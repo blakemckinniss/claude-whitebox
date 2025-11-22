@@ -8,39 +8,38 @@ import subprocess
 import re
 import ast
 from datetime import datetime, timedelta
-from pathlib import Path
 
 # Add scripts/lib to path
 _script_path = os.path.abspath(__file__)
 _script_dir = os.path.dirname(_script_path)
 # Find project root by looking for 'scripts' directory
 _current = _script_dir
-while _current != '/':
-    if os.path.exists(os.path.join(_current, 'scripts', 'lib', 'core.py')):
+while _current != "/":
+    if os.path.exists(os.path.join(_current, "scripts", "lib", "core.py")):
         _project_root = _current
         break
     _current = os.path.dirname(_current)
 else:
     raise RuntimeError("Could not find project root with scripts/lib/core.py")
-sys.path.insert(0, os.path.join(_project_root, 'scripts', 'lib'))
-from core import setup_script, finalize, logger, handle_debug, check_dry_run
+sys.path.insert(0, os.path.join(_project_root, "scripts", "lib"))
+from core import setup_script, finalize, logger, handle_debug
 
 
 def extract_imports_from_file(filepath):
     """Extract all imported module names from a Python file."""
     imports = set()
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             tree = ast.parse(f.read(), filename=filepath)
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     # Get top-level module (e.g., 'os' from 'os.path')
-                    imports.add(alias.name.split('.')[0])
+                    imports.add(alias.name.split(".")[0])
             elif isinstance(node, ast.ImportFrom):
                 if node.module:
-                    imports.add(node.module.split('.')[0])
+                    imports.add(node.module.split(".")[0])
     except Exception as e:
         logger.debug(f"Could not parse {filepath}: {e}")
 
@@ -49,9 +48,9 @@ def extract_imports_from_file(filepath):
 
 def update_registry(dry_run):
     """Run the indexer to update tool registry."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🔧 [JANITOR] Updating Tool Registry...")
-    print("="*70)
+    print("=" * 70)
 
     if dry_run:
         print("  [DRY RUN] Would run: python3 scripts/index.py")
@@ -59,14 +58,14 @@ def update_registry(dry_run):
 
     try:
         result = subprocess.run(
-            [sys.executable, os.path.join(_project_root, 'scripts', 'index.py')],
+            [sys.executable, os.path.join(_project_root, "scripts", "index.py")],
             capture_output=True,
             text=True,
-            cwd=_project_root
+            cwd=_project_root,
         )
 
         if result.returncode == 0:
-            print(f"  ✅ Registry updated successfully")
+            print("  ✅ Registry updated successfully")
             return True
         else:
             print(f"  ❌ Registry update failed: {result.stderr}")
@@ -78,61 +77,110 @@ def update_registry(dry_run):
 
 def check_dependencies(dry_run):
     """Scan scripts for imports and verify against requirements.txt."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("📦 [JANITOR] Checking Dependencies...")
-    print("="*70)
+    print("=" * 70)
 
     # Standard library modules (incomplete list, but covers common ones)
     stdlib_modules = {
-        'abc', 'argparse', 'ast', 'asyncio', 'base64', 'collections', 'concurrent', 'copy',
-        'csv', 'datetime', 'decimal', 'email', 'enum', 'functools', 'glob',
-        'hashlib', 'hmac', 'html', 'http', 'importlib', 'inspect', 'io', 'itertools',
-        'json', 'logging', 'math', 'multiprocessing', 'operator', 'os', 'pathlib',
-        'pickle', 'platform', 'pprint', 're', 'secrets', 'shutil', 'socket', 'sqlite3',
-        'statistics', 'string', 'subprocess', 'sys', 'tempfile', 'textwrap', 'threading',
-        'time', 'traceback', 'typing', 'unittest', 'urllib', 'uuid', 'warnings', 'xml'
+        "abc",
+        "argparse",
+        "ast",
+        "asyncio",
+        "base64",
+        "collections",
+        "concurrent",
+        "copy",
+        "csv",
+        "datetime",
+        "decimal",
+        "email",
+        "enum",
+        "functools",
+        "glob",
+        "hashlib",
+        "hmac",
+        "html",
+        "http",
+        "importlib",
+        "inspect",
+        "io",
+        "itertools",
+        "json",
+        "logging",
+        "math",
+        "multiprocessing",
+        "operator",
+        "os",
+        "pathlib",
+        "pickle",
+        "platform",
+        "pprint",
+        "re",
+        "secrets",
+        "shutil",
+        "socket",
+        "sqlite3",
+        "statistics",
+        "string",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "textwrap",
+        "threading",
+        "time",
+        "traceback",
+        "typing",
+        "unittest",
+        "urllib",
+        "uuid",
+        "warnings",
+        "xml",
     }
 
     # Local project modules (our own code)
-    local_modules = {'core', 'parallel'}  # scripts/lib/* modules
+    local_modules = {"core", "parallel"}  # scripts/lib/* modules
 
     # Scan all Python files in scripts/
-    scripts_dir = os.path.join(_project_root, 'scripts')
+    scripts_dir = os.path.join(_project_root, "scripts")
     all_imports = set()
 
     for root, dirs, files in os.walk(scripts_dir):
         for file in files:
-            if file.endswith('.py'):
+            if file.endswith(".py"):
                 filepath = os.path.join(root, file)
                 imports = extract_imports_from_file(filepath)
                 all_imports.update(imports)
 
     # Filter out stdlib and local modules
-    external_imports = {imp for imp in all_imports
-                       if imp not in stdlib_modules
-                       and imp not in local_modules
-                       and not imp.startswith('_')}
+    external_imports = {
+        imp
+        for imp in all_imports
+        if imp not in stdlib_modules
+        and imp not in local_modules
+        and not imp.startswith("_")
+    }
 
     # Read requirements.txt
-    requirements_file = os.path.join(_project_root, 'requirements.txt')
+    requirements_file = os.path.join(_project_root, "requirements.txt")
     required_packages = set()
 
     if os.path.exists(requirements_file):
-        with open(requirements_file, 'r') as f:
+        with open(requirements_file, "r") as f:
             for line in f:
                 line = line.strip()
-                if line and not line.startswith('#'):
+                if line and not line.startswith("#"):
                     # Extract package name (before ==, >=, etc.)
-                    pkg_name = re.split(r'[=<>!]', line)[0].strip()
+                    pkg_name = re.split(r"[=<>!]", line)[0].strip()
                     required_packages.add(pkg_name.lower())
 
     # Import name -> Package name mapping for packages with different names
     import_to_package = {
-        'dotenv': 'python-dotenv',
-        'cv2': 'opencv-python',
-        'PIL': 'pillow',
-        'yaml': 'pyyaml',
-        'bs4': 'beautifulsoup4'
+        "dotenv": "python-dotenv",
+        "cv2": "opencv-python",
+        "PIL": "pillow",
+        "yaml": "pyyaml",
+        "bs4": "beautifulsoup4",
     }
 
     # Check for missing dependencies
@@ -148,11 +196,13 @@ def check_dependencies(dry_run):
         print(f"  ⚠️  Found {len(missing)} potentially missing dependencies:")
         for pkg in sorted(missing):
             print(f"     - {pkg}")
-        print(f"\n  💡 If these are needed, add them to requirements.txt:")
+        print("\n  💡 If these are needed, add them to requirements.txt:")
         print(f"     echo '{' '.join(sorted(missing))}' >> requirements.txt")
         return False
     else:
-        print(f"  ✅ All {len(external_imports)} external dependencies appear to be documented")
+        print(
+            f"  ✅ All {len(external_imports)} external dependencies appear to be documented"
+        )
         if external_imports:
             print(f"     Verified: {', '.join(sorted(external_imports))}")
         return True
@@ -160,11 +210,11 @@ def check_dependencies(dry_run):
 
 def check_scratch(dry_run):
     """Check scratch/ for old files and warn about cleanup."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🧹 [JANITOR] Checking Scratch Directory...")
-    print("="*70)
+    print("=" * 70)
 
-    scratch_dir = os.path.join(_project_root, 'scratch')
+    scratch_dir = os.path.join(_project_root, "scratch")
 
     if not os.path.exists(scratch_dir):
         print("  ℹ️  scratch/ directory does not exist")
@@ -197,22 +247,22 @@ def check_scratch(dry_run):
         for filepath, mtime in old_files:
             age_hours = (datetime.now() - mtime).total_seconds() / 3600
             print(f"     - {os.path.basename(filepath)} ({age_hours:.1f}h old)")
-        print(f"\n  💡 Consider:")
-        print(f"     - Promote useful scripts to scripts/")
-        print(f"     - Delete obsolete files")
+        print("\n  💡 Consider:")
+        print("     - Promote useful scripts to scripts/")
+        print("     - Delete obsolete files")
         return False
     else:
-        print(f"  ✅ All files are recent (<24h old)")
+        print("  ✅ All files are recent (<24h old)")
         return True
 
 
 def log_maintenance(dry_run):
     """Log that maintenance was performed."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("📝 [JANITOR] Logging Maintenance...")
-    print("="*70)
+    print("=" * 70)
 
-    log_file = os.path.join(_project_root, '.claude', 'memory', 'upkeep_log.md')
+    log_file = os.path.join(_project_root, ".claude", "memory", "upkeep_log.md")
 
     if dry_run:
         print(f"  [DRY RUN] Would append timestamp to {log_file}")
@@ -221,13 +271,13 @@ def log_maintenance(dry_run):
     try:
         # Create log file if it doesn't exist
         if not os.path.exists(log_file):
-            with open(log_file, 'w') as f:
+            with open(log_file, "w") as f:
                 f.write("# Upkeep Log\n\n")
                 f.write("Records of automated maintenance runs.\n\n")
 
         # Append timestamp
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(log_file, 'a') as f:
+        with open(log_file, "a") as f:
             f.write(f"- {timestamp}: Upkeep completed\n")
 
         print(f"  ✅ Logged to {os.path.basename(log_file)}")
@@ -238,14 +288,16 @@ def log_maintenance(dry_run):
 
 
 def main():
-    parser = setup_script("The Janitor: Scans the project, updates indexes, verifies requirements, and cleans scratch/")
+    parser = setup_script(
+        "The Janitor: Scans the project, updates indexes, verifies requirements, and cleans scratch/"
+    )
 
     args = parser.parse_args()
     handle_debug(args)
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🧹 THE JANITOR: Project Upkeep")
-    print("="*70)
+    print("=" * 70)
 
     if args.dry_run:
         logger.warning("⚠️  DRY RUN MODE: No changes will be made")
@@ -270,9 +322,9 @@ def main():
             issues_found.append("Maintenance logging failed")
 
         # Summary
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("📊 UPKEEP SUMMARY")
-        print("="*70)
+        print("=" * 70)
 
         if issues_found:
             print(f"  ⚠️  {len(issues_found)} issue(s) require attention:")
@@ -284,11 +336,12 @@ def main():
             print("  ✅ All checks passed! Project is clean.")
             logger.info("Upkeep completed successfully - no issues found")
 
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
     except Exception as e:
         logger.error(f"Upkeep failed: {e}")
         import traceback
+
         traceback.print_exc()
         finalize(success=False)
 

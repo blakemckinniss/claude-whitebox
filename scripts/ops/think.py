@@ -12,23 +12,30 @@ _script_path = os.path.abspath(__file__)
 _script_dir = os.path.dirname(_script_path)
 # Find project root by looking for 'scripts' directory
 _current = _script_dir
-while _current != '/':
-    if os.path.exists(os.path.join(_current, 'scripts', 'lib', 'core.py')):
+while _current != "/":
+    if os.path.exists(os.path.join(_current, "scripts", "lib", "core.py")):
         _project_root = _current
         break
     _current = os.path.dirname(_current)
 else:
     raise RuntimeError("Could not find project root with scripts/lib/core.py")
-sys.path.insert(0, os.path.join(_project_root, 'scripts', 'lib'))
-from core import setup_script, finalize, logger, handle_debug, check_dry_run
+sys.path.insert(0, os.path.join(_project_root, "scripts", "lib"))
+from core import setup_script, finalize, logger, handle_debug
 
 
 def main():
-    parser = setup_script("The Thinker: Decomposes complex problems into atomic steps using Chain of Thought")
+    parser = setup_script(
+        "The Thinker: Decomposes complex problems into atomic steps using Chain of Thought"
+    )
 
-    parser.add_argument('problem', help="The problem to decompose into sequential steps")
-    parser.add_argument('--model', default="google/gemini-3-pro-preview",
-                       help="OpenRouter model ID (default: Gemini 2.0 Flash Thinking)")
+    parser.add_argument(
+        "problem", help="The problem to decompose into sequential steps"
+    )
+    parser.add_argument(
+        "--model",
+        default="google/gemini-3-pro-preview",
+        help="OpenRouter model ID (default: Gemini 2.0 Flash Thinking)",
+    )
 
     args = parser.parse_args()
     handle_debug(args)
@@ -91,8 +98,8 @@ Output Format:
             "model": args.model,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": args.problem}
-            ]
+                {"role": "user", "content": args.problem},
+            ],
         }
 
         logger.debug(f"Request payload: {json.dumps(data, indent=2)}")
@@ -102,7 +109,7 @@ Output Format:
             "https://openrouter.ai/api/v1/chat/completions",
             headers=headers,
             json=data,
-            timeout=120
+            timeout=120,
         )
         response.raise_for_status()
         result = response.json()
@@ -110,8 +117,8 @@ Output Format:
         logger.debug(f"Response: {json.dumps(result, indent=2)}")
 
         # Extract response content
-        choice = result['choices'][0]['message']
-        content = choice.get('content', '')
+        choice = result["choices"][0]["message"]
+        content = choice.get("content", "")
 
         # Display results
         print("\n" + "=" * 70)
@@ -124,12 +131,12 @@ Output Format:
 
     except requests.exceptions.RequestException as e:
         logger.error(f"API communication failed: {e}")
-        if 'response' in locals():
+        if "response" in locals():
             logger.error(f"Response text: {response.text}")
         finalize(success=False)
     except KeyError as e:
         logger.error(f"Unexpected response format: {e}")
-        if 'result' in locals():
+        if "result" in locals():
             logger.error(f"Response: {json.dumps(result, indent=2)}")
         finalize(success=False)
     except Exception as e:

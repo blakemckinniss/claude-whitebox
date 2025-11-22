@@ -11,12 +11,16 @@ try:
     input_data = json.load(sys.stdin)
 except:
     # If can't parse input, allow the operation
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "allow"
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 tool_name = input_data.get("tool_name", "")
@@ -24,12 +28,16 @@ tool_params = input_data.get("tool_params", {})
 
 # Only check Write tool
 if tool_name != "Write":
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "allow"
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 # Extract content being written
@@ -38,15 +46,30 @@ file_path = tool_params.get("file_path", "unknown")
 
 # Define deadly sins (critical anti-patterns that must be blocked)
 deadly_sins = [
-    (r'sk-proj-[a-zA-Z0-9_-]+', "🔴 DEADLY SIN: Hardcoded OpenAI API key (sk-proj-)"),
-    (r'ghp_[a-zA-Z0-9_-]+', "🔴 DEADLY SIN: Hardcoded GitHub token (ghp_)"),
-    (r'AWS_SECRET|AKIA[0-9A-Z]{16}', "🔴 DEADLY SIN: Hardcoded AWS credentials"),
-    (r'api[_-]?key\s*=\s*["\'][^"\']{10,}["\'](?!\s*#.*getenv)', "🔴 DEADLY SIN: Hardcoded API key"),
-    (r'shell\s*=\s*True', "🔴 DEADLY SIN: Shell injection risk (shell=True in subprocess)"),
-    (r'pdb\.set_trace\(\)', "🔴 DEADLY SIN: Debug breakpoint left in code (pdb.set_trace())"),
-    (r'breakpoint\(\)', "🔴 DEADLY SIN: Debug breakpoint left in code (breakpoint())"),
-    (r'TODO:\s*Implement\s+this', "🔴 DEADLY SIN: Unfinished code (TODO: Implement this)"),
-    (r'cursor\.execute\([^)]*f["\']', "🔴 DEADLY SIN: SQL injection risk (f-string in cursor.execute)"),
+    (r"sk-proj-[a-zA-Z0-9_-]+", "🔴 DEADLY SIN: Hardcoded OpenAI API key (sk-proj-)"),
+    (r"ghp_[a-zA-Z0-9_-]+", "🔴 DEADLY SIN: Hardcoded GitHub token (ghp_)"),
+    (r"AWS_SECRET|AKIA[0-9A-Z]{16}", "🔴 DEADLY SIN: Hardcoded AWS credentials"),
+    (
+        r'api[_-]?key\s*=\s*["\'][^"\']{10,}["\'](?!\s*#.*getenv)',
+        "🔴 DEADLY SIN: Hardcoded API key",
+    ),
+    (
+        r"shell\s*=\s*True",
+        "🔴 DEADLY SIN: Shell injection risk (shell=True in subprocess)",
+    ),
+    (
+        r"pdb\.set_trace\(\)",
+        "🔴 DEADLY SIN: Debug breakpoint left in code (pdb.set_trace())",
+    ),
+    (r"breakpoint\(\)", "🔴 DEADLY SIN: Debug breakpoint left in code (breakpoint())"),
+    (
+        r"TODO:\s*Implement\s+this",
+        "🔴 DEADLY SIN: Unfinished code (TODO: Implement this)",
+    ),
+    (
+        r'cursor\.execute\([^)]*f["\']',
+        "🔴 DEADLY SIN: SQL injection risk (f-string in cursor.execute)",
+    ),
 ]
 
 # Check for deadly sins
@@ -56,7 +79,7 @@ for pattern, message in deadly_sins:
     if matches:
         for match in matches:
             # Find line number
-            lineno = content[:match.start()].count('\n') + 1
+            lineno = content[: match.start()].count("\n") + 1
             violations.append((lineno, message, match.group(0)))
 
 if violations:
@@ -71,20 +94,28 @@ if violations:
     reason += "See .claude/memory/anti_patterns.md for details."
 
     # Deny the write
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": reason
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": reason,
+                }
+            }
+        )
+    )
     sys.exit(0)
 
 # No deadly sins found, allow the write
-print(json.dumps({
-    "hookSpecificOutput": {
-        "hookEventName": "PreToolUse",
-        "permissionDecision": "allow"
-    }
-}))
+print(
+    json.dumps(
+        {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+            }
+        }
+    )
+)
 sys.exit(0)
