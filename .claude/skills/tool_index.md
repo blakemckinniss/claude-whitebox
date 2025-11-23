@@ -2,7 +2,7 @@
 
 Auto-generated index of available tools in the arsenal.
 
-**Total scripts:** 27
+**Total scripts:** 28
 
 | Script | Description |
 |:-------|:------------|
@@ -27,6 +27,7 @@ Auto-generated index of available tools in the arsenal.
 | `scripts/ops/research.py` | The Researcher: Performs deep web search using Tavily to retrieve up-to-date documentation and context |
 | `scripts/ops/scope.py` | The Project Manager: Manages the Definition of Done (DoD) for the current task. |
 | `scripts/ops/spark.py` | The Synapse: Scans prompt for keywords and retrieves associated memories and protocols |
+| `scripts/ops/swarm.py` | Oracle Swarm: Massive Parallel External Reasoning |
 | `scripts/ops/think.py` | The Thinker: Decomposes complex problems into atomic steps using Chain of Thought |
 | `scripts/ops/timekeeper.py` | The Timekeeper: Assesses proposal complexity and sets dynamic deliberation limits. |
 | `scripts/ops/upkeep.py` | The Janitor: Scans the project, updates indexes, verifies requirements, and cleans scratch/ |

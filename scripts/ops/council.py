@@ -42,6 +42,7 @@ else:
 sys.path.insert(0, os.path.join(_project_root, "scripts", "lib"))
 from core import setup_script, finalize, logger, handle_debug
 from context_builder import build_council_context
+from oracle import call_arbiter, OracleAPIError
 
 # Import council components from lib
 from persona_parser import parse_persona_output
@@ -398,12 +399,9 @@ def run_deliberation(
 
 def call_arbiter_synthesis(proposal, deliberation_result, model):
     """Call arbiter with full deliberation history"""
-    scripts_dir = os.path.join(_project_root, "scripts", "ops")
-    arbiter_script = os.path.join(scripts_dir, "arbiter.py")
-
     logger.info(f"\n🔵 Arbiter synthesizing {deliberation_result['total_rounds']} rounds...")
 
-    # Build synthesis prompt
+    # Build synthesis context
     rounds_summary = []
     for round_data in deliberation_result["rounds"]:
         r_num = round_data["round"]
@@ -422,7 +420,15 @@ def call_arbiter_synthesis(proposal, deliberation_result, model):
 
         rounds_summary.append("")
 
-    synthesis_context = f"""ORIGINAL PROPOSAL:
+    # Check if bikeshedding was detected
+    bikeshedding_note = ""
+    if deliberation_result['convergence'].get('has_low_conviction_stalemate'):
+        bikeshedding_note = """
+⚠️  BIKESHEDDING DETECTED: Low conviction + low agreement suggests personas are debating
+low-stakes details. Council was forced to converge using conviction-weighted voting.
+"""
+
+    deliberation_context = f"""ORIGINAL PROPOSAL:
 {proposal}
 
 DELIBERATION HISTORY ({deliberation_result['total_rounds']} rounds):
@@ -433,91 +439,39 @@ CONVERGENCE STATUS:
 - Agreement: {deliberation_result['convergence']['agreement_ratio']*100:.0f}%
 - Dominant Verdict: {deliberation_result['convergence']['dominant_verdict']}
 - Final Council Size: {len(deliberation_result['final_personas'])} personas
+{bikeshedding_note}
 
 Synthesize the multi-round deliberation into a final verdict."""
 
-    # Call arbiter via OpenRouter for actual synthesis
+    # Call arbiter via shared library
     print("\n" + "=" * 70)
     print("🔵 ARBITER SYNTHESIS")
     print("=" * 70)
 
     try:
-        import requests
-
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
-            logger.warning("OPENROUTER_API_KEY not found, using simplified synthesis")
-            raise ValueError("API key not available")
-
-        # Check if bikeshedding was detected
-        bikeshedding_note = ""
-        if deliberation_result['convergence'].get('has_low_conviction_stalemate'):
-            bikeshedding_note = """
-⚠️  BIKESHEDDING DETECTED: Low conviction + low agreement suggests personas are debating
-low-stakes details. Council was forced to converge using conviction-weighted voting.
-"""
-
-        arbiter_prompt = f"""You are the Arbiter in a multi-round deliberative council.
-
-{synthesis_context}
-{bikeshedding_note}
-
-ARBITER TASK:
-1. Review all rounds of deliberation
-2. Synthesize the discussion into a final verdict using CONVICTION-WEIGHTED voting
-3. Explain the reasoning that led to consensus or majority
-4. If bikeshedding was detected, note which concerns were substantive vs trivial
-
-CONVICTION-WEIGHTED VOTING:
-- High confidence + high conviction votes carry maximum weight
-- Low conviction reduces voting power even with high confidence
-- The dominant verdict is determined by weighted scores, not simple majority
-
-Return your synthesis in this format:
-VERDICT: [PROCEED | CONDITIONAL_GO | STOP | ESCALATE]
-CONFIDENCE: [0-100]
-REASONING: [Your synthesis of the multi-round deliberation, noting conviction patterns]
-"""
-
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "HTTP-Referer": "https://github.com/anthropics/claude-code",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": model,
-                "messages": [{"role": "user", "content": arbiter_prompt}]
-            },
+        result = call_arbiter(
+            proposal=proposal,
+            deliberation_context=deliberation_context,
+            model=model,
             timeout=60
         )
 
-        if response.status_code == 200:
-            arbiter_output = response.json()["choices"][0]["message"]["content"]
-            logger.info("Arbiter synthesis complete")
+        arbiter_verdict = result["parsed_verdict"]
 
-            # Parse arbiter output
-            from persona_parser import parse_persona_output
-            arbiter_verdict = parse_persona_output(arbiter_output, "arbiter")
+        print(f"\nFinal Verdict: {arbiter_verdict.get('verdict', 'UNKNOWN')}")
+        print(f"Confidence: {arbiter_verdict.get('confidence', 0)}%")
+        print(f"\nReasoning:")
+        print(arbiter_verdict.get('reasoning', 'No reasoning provided'))
 
-            print(f"\nFinal Verdict: {arbiter_verdict.get('verdict', 'UNKNOWN')}")
-            print(f"Confidence: {arbiter_verdict.get('confidence', 0)}%")
-            print(f"\nReasoning:")
-            print(arbiter_verdict.get('reasoning', 'No reasoning provided'))
+        return {
+            **deliberation_result['convergence'],
+            "arbiter_verdict": arbiter_verdict.get('verdict'),
+            "arbiter_confidence": arbiter_verdict.get('confidence'),
+            "arbiter_reasoning": arbiter_verdict.get('reasoning')
+        }
 
-            return {
-                **deliberation_result['convergence'],
-                "arbiter_verdict": arbiter_verdict.get('verdict'),
-                "arbiter_confidence": arbiter_verdict.get('confidence'),
-                "arbiter_reasoning": arbiter_verdict.get('reasoning')
-            }
-        else:
-            logger.error(f"Arbiter API call failed: {response.status_code}")
-            raise ValueError("API call failed")
-
-    except Exception as e:
-        logger.warning(f"Arbiter synthesis failed: {e}, using convergence stats")
+    except OracleAPIError as e:
+        logger.warning(f"Arbiter API call failed: {e}, using convergence stats")
         print(f"\nDominant Verdict: {deliberation_result['convergence']['dominant_verdict']}")
         print(f"Agreement Level: {deliberation_result['convergence']['agreement_ratio']*100:.0f}%")
         print(f"Rounds: {deliberation_result['total_rounds']}")

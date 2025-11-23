@@ -33,11 +33,18 @@ reminder = """
 6. Bash loop planned?
    → BLOCK YOURSELF - write script with parallel.py
 
+7. Major decision needed?
+   → Use ORACLE.PY IN PARALLEL (3s vs 90s for council.py)
+   → "Run oracle judge, critic, skeptic in parallel"
+   → 30x faster, 95% context savings
+
 Remember:
 - You have UNLIMITED bandwidth
 - Agent context is FREE (separate windows)
+- Oracle.py is 30x faster than council.py (2-3s vs 90s)
 - Sequential = wasting resources = -20% confidence
 - Parallel agents = free parallelism + free context = +20% confidence
+- Parallel oracles = 3 expert perspectives in 3 seconds
 """
 
 print(json.dumps({

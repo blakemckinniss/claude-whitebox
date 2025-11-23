@@ -26,7 +26,6 @@ Personas:
 import sys
 import os
 import json
-import requests
 
 # Add scripts/lib to path
 _script_path = os.path.abspath(__file__)
@@ -41,6 +40,7 @@ else:
     raise RuntimeError("Could not find project root with scripts/lib/core.py")
 sys.path.insert(0, os.path.join(_project_root, 'scripts', 'lib'))
 from core import setup_script, finalize, logger, handle_debug
+from oracle import call_oracle_single, OracleAPIError
 
 # ============================================================
 # PERSONA SYSTEM PROMPTS
@@ -192,62 +192,28 @@ def call_oracle(query, persona=None, custom_prompt=None, model="google/gemini-2.
     Returns:
         tuple: (content, reasoning, title)
     """
-    # Get API key
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        raise ValueError("Missing OPENROUTER_API_KEY environment variable")
-
-    # Prepare messages
-    messages = []
-
+    # Determine system prompt and title
     if custom_prompt:
-        # Custom system prompt
-        messages.append({"role": "system", "content": custom_prompt})
+        system_prompt = custom_prompt
         title = "🔮 ORACLE RESPONSE"
     elif persona:
-        # Predefined persona
+        # Map persona to system prompt
         if persona not in PERSONAS:
             raise ValueError(f"Unknown persona: {persona}. Choose from: {', '.join(PERSONAS.keys())}")
-        messages.append({"role": "system", "content": PERSONAS[persona]["prompt"]})
+        system_prompt = PERSONAS[persona]["prompt"]
         title = PERSONAS[persona]["title"]
     else:
         # No system prompt (consult mode)
+        system_prompt = None
         title = "🧠 ORACLE CONSULTATION"
 
-    messages.append({"role": "user", "content": query})
-
-    # Prepare API request
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com/claude-code/whitebox",
-    }
-
-    data = {
-        "model": model,
-        "messages": messages,
-        "extra_body": {"reasoning": {"enabled": True}},
-    }
-
-    # Call OpenRouter
+    # Call shared library function
     logger.debug(f"Calling OpenRouter with model: {model}")
-    logger.debug(f"Request payload: {json.dumps(data, indent=2)}")
-
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers=headers,
-        json=data,
-        timeout=120,
+    content, reasoning, _ = call_oracle_single(
+        query=query,
+        custom_prompt=system_prompt,
+        model=model
     )
-    response.raise_for_status()
-    result = response.json()
-
-    logger.debug(f"Response: {json.dumps(result, indent=2)}")
-
-    # Extract response
-    choice = result["choices"][0]["message"]
-    content = choice.get("content", "")
-    reasoning = choice.get("reasoning", "") or result.get("reasoning", "")
 
     return content, reasoning, title
 
@@ -344,7 +310,7 @@ def main():
     except ValueError as e:
         logger.error(f"Configuration error: {e}")
         finalize(success=False)
-    except requests.exceptions.RequestException as e:
+    except OracleAPIError as e:
         logger.error(f"API call failed: {e}")
         finalize(success=False)
     except Exception as e:
