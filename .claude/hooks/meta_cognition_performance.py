@@ -24,11 +24,20 @@ reminder = """
 
 4. Multiple agents needed?
    → Can I delegate in PARALLEL? (single message, multiple Task calls)
+   → 🚀 AGENT CONTEXT IS FREE - each agent = separate context window!
 
-5. Bash loop planned?
+5. Large research/analysis across modules?
+   → Use PARALLEL AGENTS as free workers (no token cost to main thread)
+   → Example: "Analyze auth, API, database modules" → 3 agents in ONE message
+
+6. Bash loop planned?
    → BLOCK YOURSELF - write script with parallel.py
 
-Remember: You have UNLIMITED bandwidth. Sequential = wasting resources = -20% confidence.
+Remember:
+- You have UNLIMITED bandwidth
+- Agent context is FREE (separate windows)
+- Sequential = wasting resources = -20% confidence
+- Parallel agents = free parallelism + free context = +20% confidence
 """
 
 print(json.dumps({

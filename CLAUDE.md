@@ -376,10 +376,17 @@ For tasks >5 minutes, you MUST:
 4. **Multiple agents needed?**
    - Delegate in PARALLEL → Single message with multiple Task calls
    - Example: Research FastAPI + Pydantic → 2 Task calls in ONE message
+   - **Agent context is FREE** - each agent has its own context window
+   - Use agents for parallel research/analysis without polluting main context
 
 5. **Bash loop planned?**
    - BLOCK yourself - write script using `parallel.py`
    - Sequential loops waste unlimited bandwidth
+
+6. **Large research/analysis tasks?**
+   - Use agents as PARALLEL WORKERS with FREE CONTEXT
+   - Each agent = separate context window (no token cost to main thread)
+   - Example: Analyze 5 modules → 5 agents in ONE message, all parallel
 
 **Hard Blocks (Enforced):**
 
@@ -391,7 +398,8 @@ For tasks >5 minutes, you MUST:
 - Parallel tool calls in single message: +15% confidence
 - Writing script instead of manual: +20%
 - Using `parallel.py` correctly: +25%
-- Parallel agent delegation: +15%
+- Parallel agent delegation (2+ agents in one message): +15%
+- Using agents for free context parallelism: +20%
 
 **Penalties:**
 

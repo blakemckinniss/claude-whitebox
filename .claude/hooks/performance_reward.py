@@ -56,7 +56,13 @@ if tool_name == "Task":
             task_count = sum(1 for use in last_msg.get("tool_uses", []) if use.get("toolName") == "Task")
             if task_count >= 2:
                 reward_type = "parallel_agent_delegation"
-                reward_message = f"🚀 PARALLEL AGENTS: {task_count} agents delegated in parallel (+15%)"
+                reward_message = f"🚀 PARALLEL AGENTS: {task_count} agents delegated in parallel (+15%)\n💡 Agent context is FREE - each runs in separate context window!"
+            elif task_count == 1:
+                # Even single agent delegation for large research is good (free context)
+                tool_params_check = tool_params.get("description", "")
+                if any(keyword in tool_params_check.lower() for keyword in ["analyze", "research", "investigate", "review"]):
+                    reward_type = "parallel_agent_delegation"
+                    reward_message = f"🚀 AGENT CONTEXT USAGE: Offloaded work to agent (free context isolation) (+10%)"
 
 # Apply reward if detected
 if reward_type:

@@ -121,6 +121,7 @@ CONFIDENCE_GAINS = {
     "write_batch_script": 20,
     "use_parallel_py": 25,
     "parallel_agent_delegation": 15,
+    "agent_free_context": 20,  # Using agents for free context parallelism
 }
 
 CONFIDENCE_PENALTIES = {

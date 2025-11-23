@@ -1,22 +1,22 @@
 {
-  "summary": "Refactored the .claude/agents directory to transform it from an unused vestige into an active workflow component by implementing auto-invocation hooks. Redundant agents were purged while core agents were strengthened and new ones added to handle specific tasks like architecture and security automatically.",
-  "current_topic": "Refactoring .claude/agents for automated usage",
-  "user_sentiment": "Productive and collaborative",
+  "summary": "Refactored the `.claude/agents` directory to transition agents from unused vestiges to active workflow tools by implementing auto-invocation hooks. Redundant agents were deleted, while high-value agents like `researcher` and `sherlock` were strengthened to automatically trigger based on specific conditions or context limits.",
+  "current_topic": "Refactoring Claude Agents and Auto-Invocation Strategy",
+  "user_sentiment": "Productive and decisive",
   "active_entities": [
     ".claude/agents",
-    "scripts/ops",
-    "Auto-Invocation Hooks",
-    "CLAUDE.md",
-    "researcher agent"
+    "scripts/ops/",
+    "researcher agent",
+    "sherlock agent",
+    "auto-invocation hooks"
   ],
   "key_decisions": [
-    "Implemented auto-invocation hooks to trigger agents automatically based on events rather than manual user calls.",
-    "Deleted redundant agents (council-advisor, critic, runner) that simply wrapped existing scripts.",
-    "Expanded agent capabilities by adding new specific agents like 'architect' and 'security'."
+    "Delete redundant agents (council-advisor, critic, runner) that simply wrapped existing scripts.",
+    "Implement auto-invocation hooks to automatically spawn agents based on triggers (e.g., use 'researcher' for outputs >1000 chars).",
+    "Strengthen and expand the responsibilities of remaining agents (sherlock, script-smith, macgyver) to ensure unique value over standard scripts."
   ],
   "metadata": {
     "session_id": "1c1dc425-7c38-4f0e-b223-4c777e2b099c",
-    "timestamp": "2025-11-23T00:35:27.558748+00:00",
-    "message_count": 24
+    "timestamp": "2025-11-23T00:41:01.715321+00:00",
+    "message_count": 27
   }
 }
