@@ -63,7 +63,8 @@ def main():
 
         # Run indexer
         result = subprocess.run(
-            [sys.executable, os.path.join(_project_root, "scripts", "index.py")],
+            [sys.executable, os.path.join(_project_root, "scripts", "index.py",
+            timeout=10)],
             capture_output=True,
             text=True,
             cwd=_project_root,

@@ -58,7 +58,8 @@ def update_registry(dry_run):
 
     try:
         result = subprocess.run(
-            [sys.executable, os.path.join(_project_root, "scripts", "index.py")],
+            [sys.executable, os.path.join(_project_root, "scripts", "index.py",
+            timeout=10)],
             capture_output=True,
             text=True,
             cwd=_project_root,
@@ -268,7 +269,8 @@ def consolidate_lessons(dry_run):
 
     try:
         result = subprocess.run(
-            [sys.executable, os.path.join(_project_root, "scripts", "ops", "consolidate_lessons.py")],
+            [sys.executable, os.path.join(_project_root, "scripts", "ops", "consolidate_lessons.py",
+            timeout=10)],
             capture_output=True,
             text=True,
             cwd=_project_root,
@@ -298,7 +300,8 @@ def rebuild_scratch_index(dry_run):
     try:
         # Run indexer
         result = subprocess.run(
-            [sys.executable, os.path.join(_project_root, "scratch", "prototype_scratch_indexer.py")],
+            [sys.executable, os.path.join(_project_root, "scratch", "prototype_scratch_indexer.py",
+            timeout=10)],
             capture_output=True,
             text=True,
             cwd=_project_root,

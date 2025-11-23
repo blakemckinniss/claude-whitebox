@@ -32,7 +32,8 @@ def check_ruff(filepath):
     try:
         result = subprocess.run(
             ["ruff", "check", filepath], capture_output=True, text=True
-        )
+        ,
+        timeout=10)
 
         if result.returncode == 0:
             print("  ✅ Ruff: No linting errors")
@@ -59,7 +60,8 @@ def check_bandit(filepath):
     try:
         result = subprocess.run(
             ["bandit", "-r", filepath, "-f", "txt"], capture_output=True, text=True
-        )
+        ,
+        timeout=10)
 
         # Bandit returns 0 if no issues, 1 if issues found
         if result.returncode == 0:
