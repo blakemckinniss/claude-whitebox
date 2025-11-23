@@ -244,28 +244,43 @@ Action: Force convergence with dominant weighted verdict (bias to action over pa
 
 ### 🤖 Agent Delegation (The Specialists)
 
-Don't do everything yourself. Delegate to specialized subagents for context isolation and tool scoping.
+Agents are automatically invoked via hooks OR manually delegated for specialized tasks.
 
-**Available Agents:**
-- **researcher** - Deep doc searches (Context firewall: 500→50 lines)
-- **script-smith** - Write/refactor code (Quality gates: audit/void enforced)
-- **sherlock** - Debug, investigate (Read-only: physically cannot modify)
-- **critic** - Attack assumptions, red team (Adversarial: mandatory dissent)
-- **council-advisor** - Major decisions (Runs 5 advisors in parallel)
-- **macgyver** - Tool failures, restrictions (Living off the Land philosophy)
+**AUTO-INVOKED Agents (Triggered by Hooks):**
+
+| Agent | Auto-Trigger | Unique Capability | Hook |
+|-------|--------------|-------------------|------|
+| **researcher** | Bash output >1000 chars from research/probe/xray | Context firewall (500→50 lines) | `auto_researcher.py` |
+| **script-smith** | Write to scripts/* | ONLY agent with production write permission | `block_main_write.py` |
+| **macgyver** | pip/npm install attempts | Forces improvisation (no install allowed) | `detect_install.py` |
+| **sherlock** | User says "still broken" after "fixed" | Read-only debugging (cannot modify) | `detect_gaslight.py` |
+
+**MANUAL-INVOKE Agents (Explicit Delegation):**
+
+| Agent | Use For | Tools | Value |
+|-------|---------|-------|-------|
+| **tester** | Writing test suites | Full access | TDD enforcement, edge case coverage |
+| **optimizer** | Performance tuning | Full access | Profiling → optimization → verification |
 
 **When to Delegate:**
-- Context Isolation: Prevents large outputs from polluting main conversation
-- Tool Scoping: Safety constraints (read-only for debugging)
-- Async Work: Delegate research while planning next steps
-- Specialized Expertise: Agents have domain-specific prompts
+1. **Automatic:** Hooks detect patterns → spawn agent automatically
+2. **Manual:** Complex task needs specialized expertise → explicit invocation
 
-**Invocation:**
+**Invocation Patterns:**
+```bash
+# Automatic (hook-triggered)
+python3 scripts/ops/research.py "FastAPI"  # Large output → researcher auto-spawns
+
+# Manual (explicit)
+"Use tester agent to write comprehensive tests for scripts/ops/new_feature.py"
+"Use optimizer agent to profile and speed up slow_script.py"
 ```
-> "Researcher agent, investigate FastAPI dependency injection"
-> "Script-smith agent, write a batch rename tool"
-> "Critic agent, review our migration plan"
-```
+
+**Key Principles:**
+- **Context Firewall:** Large outputs routed to researcher (prevents pollution)
+- **Tool Scoping:** Production writes forced through script-smith (quality gates)
+- **Constraint Enforcement:** Installs blocked → macgyver forces improvisation
+- **Anti-Gaslighting:** Modification loops broken by sherlock (read-only)
 
 ### 🏁 The Finish Line Protocol (Definition of Done)
 
@@ -339,6 +354,52 @@ For tasks >5 minutes, you MUST:
 - Requirements.txt matches dependencies
 - Tool index reflects reality
 - Scratch directory cleaned
+
+### ⚡ The Performance Protocol (Meta-Cognition Gate)
+
+**Philosophy:** LLMs default to sequential thinking. With unlimited bandwidth, sequential = wasteful.
+
+**Pre-Action Checklist (BEFORE every response):**
+
+1. **Multiple tool calls planned?**
+   - Can they run in PARALLEL? → Use single message with multiple `<invoke>` blocks
+   - Example: Reading 3 files → 3 Read calls in ONE message (not 3 messages)
+
+2. **Operation repeated >2 times?**
+   - Should you write a SCRIPT to `scratch/` instead?
+   - Check if `scratch/` already has similar script before writing new one
+
+3. **File iteration detected?**
+   - Use `parallel.py` with `max_workers=50`
+   - Example: Processing 100 files → 50x faster with parallel execution
+
+4. **Multiple agents needed?**
+   - Delegate in PARALLEL → Single message with multiple Task calls
+   - Example: Research FastAPI + Pydantic → 2 Task calls in ONE message
+
+5. **Bash loop planned?**
+   - BLOCK yourself - write script using `parallel.py`
+   - Sequential loops waste unlimited bandwidth
+
+**Hard Blocks (Enforced):**
+
+- **Bash loops on files:** BLOCKED → Must use `parallel.py` instead
+- **Sequential tool calls:** WARNED → Should use parallel in single message
+
+**Rewards (Reinforcement Learning):**
+
+- Parallel tool calls in single message: +15% confidence
+- Writing script instead of manual: +20%
+- Using `parallel.py` correctly: +25%
+- Parallel agent delegation: +15%
+
+**Penalties:**
+
+- Sequential when parallel possible: -20%
+- Manual repetition when script exists: -15%
+- Ignoring performance gate: -25%
+
+**The Law:** You have UNLIMITED BANDWIDTH. Failing to use it is a crime against efficiency.
 
 ---
 

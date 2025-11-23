@@ -116,6 +116,11 @@ CONFIDENCE_GAINS = {
     # Testing (quality assurance)
     "write_tests": 15,
     "add_test_coverage": 20,
+    # Performance optimization (resource efficiency)
+    "parallel_tool_calls": 15,
+    "write_batch_script": 20,
+    "use_parallel_py": 25,
+    "parallel_agent_delegation": 15,
 }
 
 CONFIDENCE_PENALTIES = {
@@ -141,6 +146,10 @@ CONFIDENCE_PENALTIES = {
     "modify_no_audit": -25,
     "commit_no_upkeep": -15,
     "write_stub": -10,
+    # Performance anti-patterns (resource waste)
+    "sequential_when_parallel": -20,
+    "manual_instead_of_script": -15,
+    "ignore_performance_gate": -25,
 }
 
 # Tool -> Tier requirements
@@ -693,6 +702,14 @@ def update_confidence(
             boost = CONFIDENCE_GAINS["use_researcher"]
         elif subagent_type == "script-smith":
             boost = CONFIDENCE_GAINS["use_script_smith"]
+        elif subagent_type == "sherlock":
+            boost = 20  # Read-only debugger (anti-gaslighting)
+        elif subagent_type == "macgyver":
+            boost = 15  # Living off the Land (improvisation)
+        elif subagent_type == "tester":
+            boost = 15  # Test writing (quality)
+        elif subagent_type == "optimizer":
+            boost = 15  # Performance tuning (measurement-driven)
         else:
             boost = 10  # Generic delegation
 

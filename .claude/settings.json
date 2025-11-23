@@ -15,6 +15,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/block_main_write.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
           },
           {
@@ -55,6 +59,14 @@
       {
         "matcher": "Bash",
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_install.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_gate.py"
+          },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
@@ -110,7 +122,7 @@
           },
           {
             "type": "command",
-            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n🧠 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
+            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n\ud83e\udde0 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
           }
         ]
       }
@@ -195,11 +207,19 @@
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_on_complete.py"
           }
         ]
+      },
+      {
+        "type": "command",
+        "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/meta_cognition_performance.py"
       }
     ],
     "PostToolUse": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_researcher.py"
+          },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_tracker.py"
@@ -217,6 +237,10 @@
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/post_tool_command_suggester.py"
           }
         ]
+      },
+      {
+        "type": "command",
+        "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_reward.py"
       }
     ],
     "Stop": [

@@ -1,0 +1,22 @@
+{
+  "summary": "Refactored the .claude/agents directory to transform it from an unused vestige into an active workflow component by implementing auto-invocation hooks. Redundant agents were purged while core agents were strengthened and new ones added to handle specific tasks like architecture and security automatically.",
+  "current_topic": "Refactoring .claude/agents for automated usage",
+  "user_sentiment": "Productive and collaborative",
+  "active_entities": [
+    ".claude/agents",
+    "scripts/ops",
+    "Auto-Invocation Hooks",
+    "CLAUDE.md",
+    "researcher agent"
+  ],
+  "key_decisions": [
+    "Implemented auto-invocation hooks to trigger agents automatically based on events rather than manual user calls.",
+    "Deleted redundant agents (council-advisor, critic, runner) that simply wrapped existing scripts.",
+    "Expanded agent capabilities by adding new specific agents like 'architect' and 'security'."
+  ],
+  "metadata": {
+    "session_id": "1c1dc425-7c38-4f0e-b223-4c777e2b099c",
+    "timestamp": "2025-11-23T00:35:27.558748+00:00",
+    "message_count": 24
+  }
+}
