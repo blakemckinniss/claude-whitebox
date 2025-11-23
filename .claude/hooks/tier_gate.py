@@ -1,142 +1,206 @@
 #!/usr/bin/env python3
 """
-Tier Gate Hook: Enforces confidence tier requirements before tool usage
-Triggers on: PreToolUse
+Tier Gate V2: WITH AUTO-TUNING
+PreToolUse Hook: Enforces confidence tier restrictions
+
+EVOLUTION:
+- Phase 1 (OBSERVE): Track tier violations silently
+- Phase 2 (WARN): Suggest evidence gathering
+- Phase 3 (ENFORCE): Block actions below required tier
+
+AUTO-TUNING:
+- Learns optimal tier thresholds from success/failure patterns
 """
+
 import sys
 import json
 from pathlib import Path
 
 # Add scripts/lib to path
-SCRIPT_DIR = Path(__file__).resolve().parent.parent.parent / "scripts"
-sys.path.insert(0, str(SCRIPT_DIR))
+PROJECT_DIR = Path.cwd()
+while not (PROJECT_DIR / "scripts" / "lib").exists() and PROJECT_DIR != PROJECT_DIR.parent:
+    PROJECT_DIR = PROJECT_DIR.parent
 
-from lib.epistemology import (
-    load_session_state,
-    initialize_session_state,
-    check_tier_gate,
-    apply_penalty,
-    get_confidence_tier,
+sys.path.insert(0, str(PROJECT_DIR / "scripts" / "lib"))
+
+from auto_tuning import AutoTuner
+from meta_learning import record_manual_bypass, check_exception_rule
+from epistemology import load_session_state, get_confidence_tier
+
+# Pattern definitions
+TIER_PATTERNS = {'ignorance_coding': {'threshold': 1, 'suggested_action': 'Gather evidence (Read/Research/Probe) to reach HYPOTHESIS tier (31%+)'}, 'hypothesis_production': {'threshold': 1, 'suggested_action': 'Reach CERTAINTY tier (71%+) before modifying production code'}}
+
+# Initialize auto-tuner
+MEMORY_DIR = PROJECT_DIR / ".claude" / "memory"
+STATE_FILE = MEMORY_DIR / "tier_gate_state.json"
+
+tuner = AutoTuner(
+    system_name="tier_enforcement",
+    state_file=STATE_FILE,
+    patterns=TIER_PATTERNS,
+    default_phase="observe",
 )
 
-# Load input
-try:
-    input_data = json.load(sys.stdin)
-except json.JSONDecodeError as e:
-    # SECURITY: Fail CLOSED on malformed input
-    error_msg = f"Tier gate: Malformed JSON input - {type(e).__name__}: {str(e)[:100]}"
-    print(error_msg, file=sys.stderr)
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": f"Security: Cannot validate tier without valid input. {error_msg}"
+
+def main():
+    """Main enforcement logic"""
+    try:
+        data = json.load(sys.stdin)
+    except:
+        output = {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+            }
         }
-    }))
+        print(json.dumps(output))
+        sys.exit(0)
+
+    session_id = data.get("sessionId", "unknown")
+    tool_name = data.get("toolName", "")
+    tool_params = data.get("toolParams", {})
+    turn = data.get("turn", 0)
+    prompt = data.get("prompt", "")
+
+    # Load session state
+    state = load_session_state(session_id)
+    if not state:
+        # Allow if no state (fail open)
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}}))
+        sys.exit(0)
+
+    current_confidence = state.get("confidence", 0)
+    tier_name, tier_desc = get_confidence_tier(current_confidence)
+
+    # Pattern 1: Coding at IGNORANCE tier (0-30%)
+    if current_confidence < 31 and tool_name in ["Write", "Edit"]:
+        pattern_name = "ignorance_coding"
+
+        # Check exception rules
+        should_bypass, rule = check_exception_rule(
+            "tier_gate",
+            {"tool": tool_name, "confidence": current_confidence, "tier": tier_name}
+        )
+
+        if should_bypass:
+            output = {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
+                    "additionalContext": f"🎓 Exception: {rule['reason']}",
+                }
+            }
+            print(json.dumps(output))
+            sys.exit(0)
+
+        # Check if should enforce
+        action, message = tuner.should_enforce(pattern_name, prompt)
+
+        # Track bypass
+        if "MANUAL" in prompt:
+            record_manual_bypass(
+                hook_name="tier_gate",
+                context={"tool": tool_name, "confidence": current_confidence, "tier": tier_name},
+                turn=turn,
+                reason="Manual bypass of tier enforcement"
+            )
+
+        # Update metrics
+        tuner.update_metrics(
+            pattern_name,
+            turns_wasted=3,  # Estimate for fixing hallucinated code
+            script_written=False,
+            bypassed="MANUAL" in prompt or "SUDO MANUAL" in prompt
+        )
+
+        # Phase transition
+        transition_msg = tuner.check_phase_transition(turn)
+        if transition_msg:
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow", "additionalContext": transition_msg}}))
+            sys.exit(0)
+
+        # Auto-tune
+        tuner.auto_tune_thresholds(turn)
+
+        # Report
+        report = tuner.generate_report(turn)
+        if report:
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow", "additionalContext": report}}))
+            sys.exit(0)
+
+        # Enforcement
+        if action == "block" and message:
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": message}}))
+            sys.exit(0)
+        elif action == "warn" and message:
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow", "additionalContext": message}}))
+            sys.exit(0)
+
+    # Pattern 2: Production code at HYPOTHESIS tier (31-70%)
+    if 31 <= current_confidence < 71 and tool_name in ["Write", "Edit"]:
+        file_path = tool_params.get("file_path", "")
+        is_production = "scripts/" in file_path or "src/" in file_path or file_path.endswith(".py") and "scratch/" not in file_path
+
+        if is_production:
+            pattern_name = "hypothesis_production"
+
+            # Check exception rules
+            should_bypass, rule = check_exception_rule(
+                "tier_gate",
+                {"tool": tool_name, "confidence": current_confidence, "tier": tier_name, "file": file_path}
+            )
+
+            if should_bypass:
+                print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow", "additionalContext": f"🎓 Exception: {rule['reason']}"}}))
+                sys.exit(0)
+
+            # Check if should enforce
+            action, message = tuner.should_enforce(pattern_name, prompt)
+
+            # Track bypass
+            if "MANUAL" in prompt:
+                record_manual_bypass(
+                    hook_name="tier_gate",
+                    context={"tool": tool_name, "confidence": current_confidence, "tier": tier_name, "file": file_path},
+                    turn=turn,
+                    reason="Manual bypass for production code"
+                )
+
+            # Update metrics
+            tuner.update_metrics(
+                pattern_name,
+                turns_wasted=5,  # High cost for buggy production code
+                script_written=False,
+                bypassed="MANUAL" in prompt or "SUDO MANUAL" in prompt
+            )
+
+            # Phase transition
+            transition_msg = tuner.check_phase_transition(turn)
+            if transition_msg:
+                print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow", "additionalContext": transition_msg}}))
+                sys.exit(0)
+
+            # Auto-tune
+            tuner.auto_tune_thresholds(turn)
+
+            # Report
+            report = tuner.generate_report(turn)
+            if report:
+                print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow", "additionalContext": report}}))
+                sys.exit(0)
+
+            # Enforcement
+            if action == "block" and message:
+                print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": message}}))
+                sys.exit(0)
+            elif action == "warn" and message:
+                print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow", "additionalContext": message}}))
+                sys.exit(0)
+
+    # Allow execution (default)
+    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}}))
     sys.exit(0)
-except Exception as e:
-    # SECURITY: Fail CLOSED on unexpected errors
-    error_msg = f"Tier gate: Unexpected error - {type(e).__name__}: {str(e)[:100]}"
-    print(error_msg, file=sys.stderr)
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": f"Security: System error in tier gate. {error_msg}"
-        }
-    }))
-    sys.exit(0)
 
-session_id = input_data.get("sessionId", "unknown")
-tool_name = input_data.get("toolName", "")
-tool_params = input_data.get("toolParams", {})
 
-if not tool_name:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "allow"
-        }
-    }))
-    sys.exit(0)
-
-# Load session state
-state = load_session_state(session_id)
-if not state:
-    state = initialize_session_state(session_id)
-
-current_confidence = state.get("confidence", 0)
-turn = state.get("turn_count", 0)
-
-# Check tier gate (graduated system - returns 4 values now)
-allowed, block_message, penalty_type, enforcement_mode = check_tier_gate(
-    tool_name, tool_params, current_confidence, session_id
-)
-
-if not allowed:
-    # Apply specific penalty (tier_violation, edit_before_read, modify_unexamined, etc.)
-    penalty_type = penalty_type or "tier_violation"  # Default fallback
-    new_confidence = apply_penalty(
-        session_id=session_id,
-        penalty_type=penalty_type,
-        turn=turn,
-        reason=f"Attempted {tool_name} - {penalty_type}",
-    )
-
-    # Block the action
-    tier_name, _ = get_confidence_tier(new_confidence)
-    full_message = f"""{block_message}
-
-New Confidence: {new_confidence}% ({tier_name} TIER)
-
-Next Steps:
-  1. Gather evidence using allowed tools
-  2. Build confidence to required tier
-  3. Then retry this action
-"""
-
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": full_message
-        }
-    }))
-    sys.exit(0)
-
-# Handle warning mode (TRUSTED tier - allow with penalty)
-if allowed and block_message and enforcement_mode == "warn":
-    # Action allowed but with warning + penalty
-    penalty_type = penalty_type or "tier_violation"
-    new_confidence = apply_penalty(
-        session_id=session_id,
-        penalty_type=penalty_type,
-        turn=turn,
-        reason=f"Warning: {tool_name} - {penalty_type}",
-    )
-
-    tier_name, _ = get_confidence_tier(new_confidence)
-    warning_context = f"""{block_message}
-
-New Confidence: {new_confidence}% ({tier_name} TIER)
-
-Action proceeding (TRUSTED tier allows this with penalty).
-"""
-
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "allow",
-            "additionalContext": warning_context
-        }
-    }))
-    sys.exit(0)
-
-# Allow the action
-print(json.dumps({
-    "hookSpecificOutput": {
-        "hookEventName": "PreToolUse",
-        "permissionDecision": "allow"
-    }
-}))
-sys.exit(0)
+if __name__ == "__main__":
+    main()

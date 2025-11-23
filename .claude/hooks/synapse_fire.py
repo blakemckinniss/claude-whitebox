@@ -1,47 +1,88 @@
 #!/usr/bin/env python3
 """
 Synapse Fire Hook: Injects associative memory context based on user prompt
+OPTIMIZED: Session-level caching for spark.py results
 """
 import sys
 import json
 import subprocess
+import hashlib
+import time
+from pathlib import Path
+
+# SESSION-LEVEL CACHE
+CACHE_DIR = Path("/tmp/claude_synapse_cache")
+CACHE_DIR.mkdir(exist_ok=True)
+CACHE_TTL = 300  # 5 minutes
+
+def get_cache_key(session_id: str, prompt: str) -> str:
+    """Generate cache key from session + prompt prefix"""
+    # Use first 100 chars of prompt to group similar queries
+    prompt_prefix = prompt[:100].lower().strip()
+    return hashlib.md5(f"{session_id}:{prompt_prefix}".encode()).hexdigest()
+
+def get_cached_result(cache_key: str):
+    """Get cached spark result"""
+    cache_file = CACHE_DIR / f"{cache_key}.json"
+
+    if cache_file.exists():
+        # Check if cache is fresh
+        if time.time() - cache_file.stat().st_mtime < CACHE_TTL:
+            try:
+                with open(cache_file) as f:
+                    return json.load(f)
+            except:
+                pass
+    return None
+
+def set_cached_result(cache_key: str, result):
+    """Cache spark result"""
+    cache_file = CACHE_DIR / f"{cache_key}.json"
+    try:
+        with open(cache_file, 'w') as f:
+            json.dump(result, f)
+    except:
+        pass
+
+def output_empty_context():
+    """Output empty context (no associations)"""
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "UserPromptSubmit",
+            "additionalContext": "",
+        }
+    }))
+    sys.exit(0)
 
 # Load input
 try:
     input_data = json.load(sys.stdin)
 except:
-    # If can't parse input, pass through
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": "UserPromptSubmit",
-                    "additionalContext": "",
-                }
-            }
-        )
-    )
-    sys.exit(0)
+    output_empty_context()
 
-# Get user prompt
+# Get user prompt and session
 prompt = input_data.get("prompt", "")
+session_id = input_data.get("session_id", "")
 
-if not prompt:
-    # No prompt, nothing to analyze
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": "UserPromptSubmit",
-                    "additionalContext": "",
-                }
-            }
-        )
-    )
+if not prompt or not session_id:
+    output_empty_context()
+
+# Check cache first
+cache_key = get_cache_key(session_id, prompt)
+cached = get_cached_result(cache_key)
+
+if cached:
+    # Cache hit - return immediately
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "UserPromptSubmit",
+            "additionalContext": cached.get("context", ""),
+        }
+    }))
     sys.exit(0)
 
+# Cache miss - run spark.py
 try:
-    # Run spark.py to get associations
     result = subprocess.run(
         ["python3", "scripts/ops/spark.py", prompt, "--json"],
         capture_output=True,
@@ -50,36 +91,16 @@ try:
     )
 
     if result.returncode != 0:
-        # Spark failed, pass through without context
-        print(
-            json.dumps(
-                {
-                    "hookSpecificOutput": {
-                        "hookEventName": "UserPromptSubmit",
-                        "additionalContext": "",
-                    }
-                }
-            )
-        )
-        sys.exit(0)
+        output_empty_context()
 
     # Parse spark output
     spark_output = json.loads(result.stdout)
 
     # Check if there are any associations
     if not spark_output.get("has_associations", False):
-        # No associations found, pass through
-        print(
-            json.dumps(
-                {
-                    "hookSpecificOutput": {
-                        "hookEventName": "UserPromptSubmit",
-                        "additionalContext": "",
-                    }
-                }
-            )
-        )
-        sys.exit(0)
+        # Cache negative result (no associations)
+        set_cached_result(cache_key, {"context": ""})
+        output_empty_context()
 
     # Build additional context message
     context_lines = ["\n🧠 SUBCONSCIOUS RECALL (Associative Memory):"]
@@ -112,41 +133,22 @@ try:
     # Join all context lines
     additional_context = "\n".join(context_lines)
 
+    # Cache the result
+    set_cached_result(cache_key, {"context": additional_context})
+
     # Output the hook result with injected context
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": "UserPromptSubmit",
-                    "additionalContext": additional_context,
-                }
-            }
-        )
-    )
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "UserPromptSubmit",
+            "additionalContext": additional_context,
+        }
+    }))
 
 except subprocess.TimeoutExpired:
     # Spark took too long, skip context injection
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": "UserPromptSubmit",
-                    "additionalContext": "",
-                }
-            }
-        )
-    )
+    output_empty_context()
 except Exception:
     # Any error, pass through without context
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": "UserPromptSubmit",
-                    "additionalContext": "",
-                }
-            }
-        )
-    )
+    output_empty_context()
 
 sys.exit(0)

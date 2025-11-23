@@ -261,7 +261,7 @@ if completion_detected and has_changes:
 # No auto-commit needed
 print(json.dumps({
     "hookSpecificOutput": {
-        "hookEventName": "UserPromptSubmit",
+        "hookEventName": "PostToolUse",
         "additionalContext": ""
     }
 }))

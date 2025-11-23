@@ -15,6 +15,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/constitutional_guard.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/root_pollution_gate.py"
           },
           {
@@ -39,6 +43,10 @@
           },
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_reasoning_rigor.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
           }
         ]
@@ -48,11 +56,19 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/constitutional_guard.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
           },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_reasoning_rigor.py"
           },
           {
             "type": "command",
@@ -94,6 +110,14 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/force_playwright.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_background_opportunity.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_parallel_bash.py"
           }
         ]
       },
@@ -122,6 +146,24 @@
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/trigger_skeptic.py"
           }
         ]
+      },
+      {
+        "matcher": "(Read|Grep|Glob|WebFetch|WebSearch)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/native_batching_enforcer.py"
+          }
+        ]
+      },
+      {
+        "matcher": "(Read|Grep|Glob|Edit)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_enforcer_gate.py"
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -139,6 +181,10 @@
           {
             "type": "command",
             "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n\ud83e\udde0 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_analyzer.py"
           }
         ]
       }
@@ -153,6 +199,10 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/synapse_fire.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/absurdity_detector.py"
           },
           {
             "type": "command",
@@ -213,6 +263,14 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/meta_cognition_performance.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/batching_analyzer.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_prompt_analyzer.py"
           }
         ]
       }
@@ -220,6 +278,18 @@
     "PostToolUse": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_logical_fallacy.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_tool_failure.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_test_failure.py"
+          },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_researcher.py"
@@ -267,6 +337,30 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_on_complete.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_telemetry_collector.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/batching_telemetry.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/background_telemetry.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_enforcer.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_guardian.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_documentarian.py"
           }
         ]
       }
@@ -307,6 +401,10 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_on_end.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_janitor.py"
           }
         ]
       }

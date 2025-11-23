@@ -85,10 +85,28 @@ Focus on:
 # PERSONA SYSTEM PROMPTS
 # ============================================================
 
+# Persona file loading
+def load_persona_file(filename):
+    """Load persona prompt from file"""
+    from pathlib import Path
+    persona_dir = Path(__file__).parent.parent.parent / ".claude" / "personas"
+    filepath = persona_dir / filename
+    if filepath.exists():
+        with open(filepath, 'r') as f:
+            return f.read()
+    return None
+
+
 PERSONAS = {
     "judge": {
         "name": "The Judge",
         "title": "⚖️ THE JUDGE'S RULING",
+        "tiers": {
+            "exploration": "judge_exploration.txt",
+            "production": "judge_production.txt",
+            "critical": "judge_critical.txt",
+        },
+        "default_tier": "production",
         "prompt": """You are The Judge. You are a ruthless Minimalist Architect and grumpy Senior Staff Engineer.
 Your goal is to STOP work. You hate code. You love existing solutions.
 You have seen every framework fail, every "improvement" create technical debt, and every "refactor" introduce bugs.
@@ -123,7 +141,12 @@ If the verdict is PROCEED, still suggest what to cut to make it leaner."""
 
     "critic": {
         "name": "The Critic",
-        "title": "🥊 THE CRITIC'S ASSAULT",
+        "title": "🥊 THE CRITIC'S REVIEW",
+        "modes": {
+            "editor": "critic_editor.txt",
+            "legacy": None,  # Use old prompt
+        },
+        "default_mode": "editor",
         "prompt": """You are The Critic. You are not helpful. You are not nice. You are the Eternal Pessimist.
 Your job is to find the fatal flaw in the user's thinking. You are the 10th Man.
 
@@ -156,7 +179,12 @@ Be direct. Be harsh. Be honest. This is your ONLY job."""
 
     "skeptic": {
         "name": "The Skeptic",
-        "title": "🚨 THE SKEPTIC'S REVIEW",
+        "title": "🚨 THE SKEPTIC'S ANALYSIS",
+        "modes": {
+            "risk_analyst": "skeptic_risk_analyst.txt",
+            "legacy": None,  # Use old prompt
+        },
+        "default_mode": "risk_analyst",
         "prompt": """You are a Hostile Architecture Reviewer and Senior Engineering Skeptic.
 Your role is to find every possible flaw, fallacy, and failure mode in proposed technical plans.
 
@@ -359,7 +387,7 @@ State your confidence level explicitly (exploring/low/medium/high/certain).
     return consolidated, findings[-1][1], title, len(findings)
 
 
-def call_oracle(query, persona=None, custom_prompt=None, stance=None, model="openai/gpt-5.1"):
+def call_oracle(query, persona=None, custom_prompt=None, stance=None, model="openai/gpt-5.1", tier=None, mode=None):
     """
     Call OpenRouter API with specified prompt.
 
@@ -369,6 +397,8 @@ def call_oracle(query, persona=None, custom_prompt=None, stance=None, model="ope
         custom_prompt: Custom system prompt or None
         stance: Stance modifier (for/against/neutral) or None
         model: OpenRouter model to use
+        tier: Persona tier (exploration/production/critical) for judge
+        mode: Persona mode (editor/legacy) for critic/skeptic
 
     Returns:
         tuple: (content, reasoning, title)
@@ -381,8 +411,51 @@ def call_oracle(query, persona=None, custom_prompt=None, stance=None, model="ope
         # Map persona to system prompt
         if persona not in PERSONAS:
             raise ValueError(f"Unknown persona: {persona}. Choose from: {', '.join(PERSONAS.keys())}")
-        system_prompt = PERSONAS[persona]["prompt"]
-        title = PERSONAS[persona]["title"]
+
+        persona_config = PERSONAS[persona]
+        title = persona_config["title"]
+
+        # Check for tiered personas (judge)
+        if "tiers" in persona_config:
+            tier = tier or persona_config.get("default_tier", "production")
+            if tier not in persona_config["tiers"]:
+                raise ValueError(f"Unknown tier '{tier}' for {persona}. Choose from: {', '.join(persona_config['tiers'].keys())}")
+
+            # Try to load from file
+            tier_file = persona_config["tiers"][tier]
+            loaded_prompt = load_persona_file(tier_file)
+            if loaded_prompt:
+                system_prompt = loaded_prompt
+                title = f"{title} ({tier.upper()} TIER)"
+            else:
+                # Fallback to hardcoded
+                system_prompt = persona_config["prompt"]
+                logger.warning(f"Could not load {tier_file}, using legacy prompt")
+
+        # Check for mode-based personas (critic, skeptic)
+        elif "modes" in persona_config:
+            mode = mode or persona_config.get("default_mode", "legacy")
+            if mode not in persona_config["modes"]:
+                raise ValueError(f"Unknown mode '{mode}' for {persona}. Choose from: {', '.join(persona_config['modes'].keys())}")
+
+            mode_file = persona_config["modes"][mode]
+            if mode_file:
+                # Try to load from file
+                loaded_prompt = load_persona_file(mode_file)
+                if loaded_prompt:
+                    system_prompt = loaded_prompt
+                    title = f"{title} ({mode.upper()} MODE)"
+                else:
+                    # Fallback to hardcoded
+                    system_prompt = persona_config["prompt"]
+                    logger.warning(f"Could not load {mode_file}, using legacy prompt")
+            else:
+                # Legacy mode (use hardcoded)
+                system_prompt = persona_config["prompt"]
+
+        else:
+            # No tiers or modes, use default prompt
+            system_prompt = persona_config["prompt"]
     else:
         # No system prompt (consult mode)
         system_prompt = None
@@ -442,6 +515,20 @@ def main():
         "--stance",
         choices=STANCE_MODIFIERS.keys(),
         help=f"Stance modifier: {', '.join(STANCE_MODIFIERS.keys())} (applies to persona)"
+    )
+
+    # Tier selection (for judge)
+    parser.add_argument(
+        "--tier",
+        choices=["exploration", "production", "critical"],
+        help="Judge tier: exploration (low-stakes), production (medium-stakes), critical (high-stakes)"
+    )
+
+    # Mode selection (for critic/skeptic)
+    parser.add_argument(
+        "--mode",
+        choices=["editor", "risk_analyst", "legacy"],
+        help="Persona mode: editor/risk_analyst (constructive) or legacy (pessimistic)"
     )
 
     # Multi-step reasoning
@@ -534,7 +621,9 @@ def main():
                 persona=args.persona,
                 custom_prompt=args.custom_prompt,
                 stance=args.stance,
-                model=args.model
+                model=args.model,
+                tier=args.tier,
+                mode=args.mode
             )
 
         # Display results

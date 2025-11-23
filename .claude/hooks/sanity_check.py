@@ -61,5 +61,5 @@ if is_coding and using_risky_lib:
     sys.exit(0)
 
 # No warning needed
-print(json.dumps({"hookSpecificOutput": {"hookEventName": "UserPromptSubmit"}}))
+print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse"}}))
 sys.exit(0)

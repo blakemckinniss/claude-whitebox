@@ -1,26 +1,16 @@
 {
-  "session_id": "unknown",
-  "confidence": 20,
-  "risk": 0,
-  "turn_count": 4,
-  "tokens_estimated": 0,
-  "context_window_percent": 0,
-  "evidence_ledger": [],
-  "risk_events": [],
-  "confidence_history": [
+  "bash_calls": [
     {
       "turn": 0,
-      "confidence": 0,
-      "reason": "session_start",
-      "timestamp": "2025-11-23T11:27:52.731388"
+      "timestamp": 1763933593.573371
     },
     {
-      "turn": 1,
-      "confidence": 20,
-      "reason": "initial_assessment",
-      "timestamp": "2025-11-23T11:28:51.672511"
+      "turn": 0,
+      "timestamp": 1763933593.5736086
+    },
+    {
+      "turn": 0,
+      "timestamp": 1763933872.3515396
     }
-  ],
-  "read_files": {},
-  "initialized_at": "2025-11-23T11:27:52.731405"
+  ]
 }

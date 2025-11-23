@@ -1,0 +1,46 @@
+{
+  "version": "1.0",
+  "enabled": true,
+  "guardian": {
+    "enabled": true,
+    "max_fix_attempts": 3,
+    "test_on_write": true,
+    "test_on_edit": true,
+    "test_command": "pytest tests/ -v",
+    "timeout_seconds": 60
+  },
+  "committer": {
+    "enabled": true,
+    "dry_run": false,
+    "auto_push": false,
+    "require_tests_passing": true,
+    "require_quality_gates": true,
+    "quality_gates": [
+      "audit",
+      "void",
+      "upkeep"
+    ]
+  },
+  "documentarian": {
+    "enabled": true,
+    "watch_paths": [
+      "scripts/ops/",
+      ".claude/hooks/"
+    ],
+    "update_targets": [
+      "CLAUDE.md"
+    ],
+    "sync_cli_shortcuts": true
+  },
+  "janitor": {
+    "enabled": true,
+    "archive_threshold_days": 7,
+    "cleanup_frequency_turns": 50,
+    "archive_location": ".claude/memory/archive/"
+  },
+  "orchestrator": {
+    "enabled": true,
+    "coordination_mode": "sequential",
+    "escalation_threshold": 3
+  }
+}

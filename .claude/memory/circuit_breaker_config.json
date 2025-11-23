@@ -1,0 +1,54 @@
+{
+  "circuit_breakers": {
+    "hook_recursion": {
+      "enabled": true,
+      "threshold": 5,
+      "window_turns": 10,
+      "cooldown_base_seconds": 5
+    },
+    "tool_failure": {
+      "enabled": true,
+      "threshold": 3,
+      "window_turns": 5,
+      "cooldown_base_seconds": 10
+    },
+    "sequential_tools": {
+      "enabled": true,
+      "threshold": 10,
+      "window_turns": 1,
+      "cooldown_base_seconds": 5
+    },
+    "agent_spawn": {
+      "enabled": true,
+      "threshold": 5,
+      "window_turns": 10,
+      "cooldown_base_seconds": 10
+    },
+    "external_api": {
+      "enabled": true,
+      "threshold": 10,
+      "window_seconds": 60,
+      "session_max": 50,
+      "cooldown_base_seconds": 30
+    }
+  },
+  "memory_limits": {
+    "telemetry_max_lines": 1000,
+    "telemetry_max_kb": 50,
+    "telemetry_max_age_days": 7,
+    "telemetry_keep_rotations": 5,
+    "session_max_active": 10,
+    "session_max_age_days": 7,
+    "evidence_ledger_max": 100,
+    "tool_history_max": 50
+  },
+  "resource_limits": {
+    "max_concurrent_agents": 5,
+    "max_agents_per_session": 10,
+    "agent_spawn_cooldown_seconds": 10,
+    "api_rate_limit_per_minute": 10,
+    "api_session_max": 50,
+    "api_cost_warn_usd": 1.0,
+    "api_cost_block_usd": 5.0
+  }
+}

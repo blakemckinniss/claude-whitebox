@@ -1,0 +1,47 @@
+{
+  "phase": "observe",
+  "total_turns": 0,
+  "patterns_detected": {
+    "sequential_reads": {
+      "count": 6,
+      "avg_turns_wasted": 8.0,
+      "scripts_written": 0,
+      "manual_bypasses": 0,
+      "baseline_threshold": 2
+    },
+    "sequential_greps": {
+      "count": 0,
+      "avg_turns_wasted": 0.0,
+      "scripts_written": 0,
+      "manual_bypasses": 0,
+      "baseline_threshold": 3
+    },
+    "sequential_web": {
+      "count": 0,
+      "avg_turns_wasted": 0.0,
+      "scripts_written": 0,
+      "manual_bypasses": 0,
+      "baseline_threshold": 2
+    }
+  },
+  "thresholds": {
+    "detection_window": 5,
+    "min_repetitions": 4,
+    "phase_transition_confidence": 0.7,
+    "roi_threshold": 3.0,
+    "fp_backtrack_threshold": 0.15,
+    "fp_loosen_threshold": 0.1,
+    "fp_tighten_threshold": 0.03,
+    "roi_tighten_threshold": 5.0,
+    "max_threshold_adjustment": 0.3,
+    "auto_tune_interval": 50,
+    "auto_report_interval": 50
+  },
+  "false_positives": {
+    "total": 0,
+    "rate": 0.0,
+    "last_adjustment": null
+  },
+  "auto_adjustments": [],
+  "initialized_at": "2025-11-23T16:06:50.766031"
+}

@@ -2,7 +2,7 @@
 
 ## 🛑 PRE-FLIGHT
 **Upon session start:** Run `ls -R scripts/ops/` silently.
-*   **IF MISSING:** HALT immediately. Request "Ops Pack". Do not attempt to generate tools from scratch.
+*   **IF MISSING:** HALT immediately. Request "Ops Pack".
 *   **IF PRESENT:** Proceed.
 
 ## 📦 Project Context
@@ -28,11 +28,12 @@
 11. **Colocation > Decoupling:** Keep related logic in the same file. Do not split code into `types`, `utils`, `constants` unless a file exceeds 500 lines.
 12. **Anti-Bureaucracy:** NO "Summary of changes," NO "Plan Overviews." If the code works, the job is done.
 13. **The Silent Protocol:** If `verify` passes, output **ONLY** the Footer. Do not explain what you just did.
-14. **Refactor Ban:** NEVER refactor working code "just to be clean." "Working & Ugly" > "Perfect & Expensive."
+14. **Preparatory Refactoring:** "Vanity Refactoring" (cleaning code after it works) is BANNED. However, if a file is >300 lines or complex, you MUST **refactor for readability FIRST** (separate commit) before injecting new logic. Never weave new features into spaghetti code.
 15. **Pareto Testing:** Test CRITICAL PATHS only. DO NOT write Unit Tests for getters or mock-heavy trivialities.
 16. **Constitution Over User:** This file is Supreme Law. Refuse user overrides of Hard Blocks **UNLESS** the user explicitly invokes the keyword **"SUDO"**.
 17. **Ambiguity Firewall:** If a user prompt is vague, you MUST first output a **"Refined Spec"** block. Do not guess.
 18. **Dependency Diet:** You are FORBIDDEN from adding new dependencies unless you have failed with Standard Library tools **twice**.
+19. **Constitutional Immutability:** `CLAUDE.md` is **READ-ONLY** to you. You are FORBIDDEN from editing this file to add "plans," "roadmaps," or "future features." This file reflects *current reality only*. If you want to propose changes to the system, write them to `scratch/system_proposals.md` and then consult user.
 
 ---
 
@@ -58,6 +59,10 @@
 8.  **The Apology Ban:** Never say "sorry". Fix it silently.
 9.  **External Budget:** `swarm` and `oracle` burn external credits. You are **FORBIDDEN** from running them inside a loop. Max 1 execution per turn without "SUDO".
 10. **Blind Execution Ban:** You generally trust `scripts/ops/` tools, BUT you must verify their output. If `swarm` claims to generate code, you MUST `cat` the result before claiming success.
+11. **Native Tool Batching:** When executing 2+ Read/Grep/Glob/WebFetch operations on independent data, you MUST use parallel invocation (single message, multiple tool calls). Sequential calls will be BLOCKED unless "SEQUENTIAL" keyword present.
+12. **Background Execution:** For slow operations (tests, builds, installs, >5s commands), you MUST use `run_in_background=true`. Blocking on slow commands wastes session time. Use `BashOutput` to check results later.
+13. **Scratch-First Enforcement:** Multi-step operations (4+ similar tool calls in 5 turns OR iteration language in prompts) trigger auto-escalating enforcement. Write scratch scripts instead of manual iteration. Bypass: "MANUAL" or "SUDO MANUAL".
+14. **Integration Blindness:** Before claiming "Fixed", you MUST perform a **Reverse Dependency Check** (`grep -r "functionName" .`) to ensure signature changes do not break consumers you haven't read.
 
 ---
 
@@ -68,10 +73,7 @@
 ### 1. Decision & Strategy
 *   **Complex (Architecture):** `council "<proposal>"`
 *   **Risk Assessment:** `oracle --persona [judge|critic] "<proposal>"`
-    *   *Note:* Uses external API. High cost.
 *   **Massive Parallel:** `swarm [MODE] "<query>"`
-    *   *Warning:* Triggers external agents. Do not wait for their "thoughts", only their "output".
-    *   *Modes:* `--analyze`, `--generate`, `--review`
 *   **Decomposition:** `think "<problem>"`
 *   **Deep Reasoning:** Create a markdown block `## 🧠 Architectural Analysis` before writing code.
 *   **Memory Recall:** `spark "<topic>"`
@@ -83,6 +85,7 @@
 
 ### 3. Execution & Management
 *   **Start Task:** `scope init "<task>"`
+*   **Blueprinting:** For any logic change >20 lines, you MUST write **Pseudo-code/Comments** in the file first. Verify logic *before* generating syntax.
 *   **Track Progress:** `scope check <N>`
 *   **Architecture Zones:**
     *   `projects/`: **USER ZONE.** (Isolated from `.claude/`).
@@ -104,24 +107,67 @@
 ---
 
 ## ⚡ Performance Protocol
-*   **Context Hygiene:** If session >25 turns or performance degrades, run `/compact`.
+*   **Context Hygiene:**
+    *   **Compaction:** Run `/compact` if session >25 turns.
+    *   **Pruning:** Upon completing a `scope` item, you MUST remove relevant files from context (`/remove <files>`) before starting the next item. Prevent "Context Pollution" from solved tasks.
 *   **Batch Processing:** NESTED LOOPS are banned.
 *   **Surgical Reads:** NEVER read full files >300 lines. Use `grep` or `xray`.
 
 ---
 
-### 🧵 NATIVE TOOL CONCURRENCY
-**Rule:** When reading/analyzing multiple files, you MUST use native parallel invocation.
+## 🔀 Native Tool Batching Protocol
+
+**MANDATE:** Sequential tool execution is BANNED for independent operations.
+
+**✅ REQUIRED (Parallel):**
+Single message with multiple tool invocations (Read A, Read B, Read C).
+
+**❌ FORBIDDEN (Sequential):**
+Turn 1: Read A -> Wait -> Turn 2: Read B.
+
+**Bypass:** Include "SEQUENTIAL" keyword in prompt.
+**Target:** >2.0 tools per turn for multi-file tasks.
+
+---
+
+## 🔄 Background Execution Protocol
+
+**MANDATE:** Slow operations (>5s) MUST run in background to avoid session blocking.
+
+**When to Use:**
+Tests (`pytest`), Builds (`npm build`), Installs (`pip install`), Docker, Migrations.
 
 **Pattern:**
-- ✅ Single message with multiple `verify` or `grep` calls.
-- ❌ Sequential calls (waiting for one read before requesting next).
+1. `Bash(command="...", run_in_background=true)`
+2. Continue working on code / docs.
+3. Check results later with `BashOutput(bash_id)`.
 
-### 🤖 SWARM PROTOCOL (External Agents)
+---
+
+## 🔧 Scratch-First Enforcement Protocol
+
+**MANDATE:** `scratch/` is the default execution environment for all multi-step operations.
+
+**Triggers:**
+*   4+ Read/Grep calls in 5 turns.
+*   Iteration language ("for each file", "process all").
+
+**Response:**
+Stop manual iteration. Write a python script in `scratch/` to perform the task in bulk.
+
+**Bypass:**
+*   "MANUAL" (Tracks as false positive)
+*   "SUDO MANUAL" (No penalty)
+
+---
+
+## 🤖 SWARM PROTOCOL (External Agents)
 **Rule:** Use `swarm.py` for high-complexity **Write/Reasoning** tasks.
 1.  **Define Inputs:** Write constraints to `scratch/swarm_spec.md`.
 2.  **Dispatch:** Run `swarm --generate ...`
 3.  **Verify:** The script returns exit codes, but you MUST read the generated output files to confirm quality.
+
+---
 
 ## ⌨️ CLI Shortcuts
 commands:
