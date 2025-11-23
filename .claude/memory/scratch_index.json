@@ -1,0 +1,2233 @@
+{
+  "scratch/oracle_enhancements_demo.md": {
+    "size": 6913,
+    "modified": 1763864999.6701832,
+    "type": ".md",
+    "decisions": [
+      "Mission accomplished. Stole the good, skipped the bloat."
+    ],
+    "keywords": [
+      "oracle_enhancements_demo"
+    ]
+  },
+  "scratch/analyze_hook_dependencies.py": {
+    "size": 10762,
+    "modified": 1763864298.8461416,
+    "type": ".py",
+    "functions": [
+      "load_settings",
+      "analyze_hook_file",
+      "build_dependency_graph",
+      "create_execution_batches",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "re",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [
+      "hooks"
+    ],
+    "keywords": [
+      "analyze_hook_dependencies"
+    ]
+  },
+  "scratch/test_command_enforcement.py": {
+    "size": 8036,
+    "modified": 1763792807.6713014,
+    "type": ".py",
+    "functions": [
+      "run_hook",
+      "test_command_tracker",
+      "test_prerequisite_gate_pass",
+      "test_prerequisite_gate_block",
+      "test_read_before_edit",
+      "test_production_write_requires_quality",
+      "test_scratch_write_allowed",
+      "cleanup"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "subprocess",
+      "sys",
+      "pathlib",
+      "lib.epistemology",
+      "traceback"
+    ],
+    "patterns": [
+      "verification",
+      "hooks"
+    ],
+    "keywords": [
+      "test_command_enforcement"
+    ]
+  },
+  "scratch/optimization_implementation_summary.md": {
+    "size": 3735,
+    "modified": 1763864669.1941636,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "optimization_implementation_summary"
+    ]
+  },
+  "scratch/test_pattern_detection.py": {
+    "size": 9281,
+    "modified": 1763768446.8898969,
+    "type": ".py",
+    "functions": [
+      "test_hallucination_detection",
+      "test_insanity_detection",
+      "test_falsehood_detection",
+      "test_loop_detection",
+      "test_analyze_patterns",
+      "test_edge_cases"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "pathlib",
+      "lib.pattern_detection",
+      "traceback"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_pattern_detection"
+    ]
+  },
+  "scratch/performance_protocol_design.md": {
+    "size": 6691,
+    "modified": 1763857720.0533051,
+    "type": ".md",
+    "decisions": [
+      "Hard block for MANDATORY_PARALLEL, soft warn for SHOULD_SCRIPT\n\n2. **Should gate analyze planned actions from conversation?**\n   - LLM says \"I'll read file1, then file2, then file3\"\n   - Block BEFORE "
+    ],
+    "keywords": [
+      "performance_protocol_design"
+    ]
+  },
+  "scratch/hooks_comparison.md": {
+    "size": 4621,
+    "modified": 1763856185.925216,
+    "type": ".md",
+    "decisions": [
+      "Conclusion Need to identify which specific hooks were converted and which conversion failed."
+    ],
+    "keywords": [
+      "hooks_comparison"
+    ]
+  },
+  "scratch/convert_to_prompt_hooks.py": {
+    "size": 7010,
+    "modified": 1763851521.034472,
+    "type": ".py",
+    "functions": [
+      "generate_prompt_hooks_config",
+      "generate_hybrid_config",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "pathlib"
+    ],
+    "patterns": [
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "convert_to_prompt_hooks"
+    ]
+  },
+  "scratch/agent_vs_script_analysis.md": {
+    "size": 10006,
+    "modified": 1763857259.265279,
+    "type": ".md",
+    "decisions": [
+      "Recommendation s",
+      "\u274c TOO AGGRESSIVE - Loses valuable capabilities\n\n---\n\n### Option 2: REFACTOR (Pragmatic)\nKeep only agents that provide UNIQUE VALUE beyond script execution:\n\n**KEEP:**\n1. **sherlock** - Read-only tool "
+    ],
+    "keywords": [
+      "agent_vs_script_analysis"
+    ]
+  },
+  "scratch/speculative_council_patch.py": {
+    "size": 3970,
+    "modified": 1763864565.902158,
+    "type": ".py",
+    "functions": [
+      "generate_patch",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "pathlib"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "parallel_usage"
+    ],
+    "keywords": [
+      "speculative_council_patch"
+    ]
+  },
+  "scratch/reflexion_memory_implementation_notes.md": {
+    "size": 5067,
+    "modified": 1763864612.2501607,
+    "type": ".md",
+    "decisions": [
+      "Perfect for whitebox philosophy. Can upgrade to SQLite later if file-based becomes bottleneck."
+    ],
+    "keywords": [
+      "reflexion_memory_implementation_notes"
+    ]
+  },
+  "scratch/apply_quick_wins.py": {
+    "size": 8089,
+    "modified": 1763864105.9181316,
+    "type": ".py",
+    "functions": [
+      "update_parallel_defaults",
+      "update_swarm_defaults",
+      "add_parallel_agent_docs",
+      "create_hook_reminder",
+      "update_meta_cognition_hook",
+      "create_batch_oracle_stub",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "sys",
+      "re",
+      "pathlib"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "parallel_usage",
+      "hooks"
+    ],
+    "keywords": [
+      "apply_quick_wins"
+    ]
+  },
+  "scratch/race_condition_audit_report.md": {
+    "size": 6699,
+    "modified": 1763856892.7252564,
+    "type": ".md",
+    "decisions": [
+      "Recommendation s",
+      "Conclusion \u2705 **No race conditions exist** in current configuration.\n\n\u26a0\ufe0f **Risks are behavioral** (context pollution, instruction conflicts), not architectural.\n\n\ud83d\udd12 **File locking is NOT needed** (seque",
+      "- **DO NOT add more hooks** without removing others\n- **Monitor for instability:** context pollution, instruction conflicts, latency\n- **Keep baseline:** settings_baseline.json saved for rollback\n\n---"
+    ],
+    "keywords": [
+      "race_condition_audit_report"
+    ]
+  },
+  "scratch/zen_mcp_analysis.md": {
+    "size": 8284,
+    "modified": 1763864597.5061598,
+    "type": ".md",
+    "decisions": [
+      "MINIMAL VALUE. 2-3 specific patterns worth stealing, rest is MCP server bloat.\n\n---\n\n## \ud83c\udfaf Stealable Concepts\n\n### 1. **Confidence-Graduated Reasoning** (thinkdeep.py)\n**What:** Multi-step investigatio"
+    ],
+    "keywords": [
+      "zen_mcp_analysis"
+    ]
+  },
+  "scratch/prompt_templates.json": {
+    "size": 10525,
+    "modified": 1763851470.030469,
+    "type": ".json"
+  },
+  "scratch/IMPLEMENTATION_SUMMARY.md": {
+    "size": 3695,
+    "modified": 1763862524.1060402,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "implementation_summary"
+    ]
+  },
+  "scratch/fix_oracle_models.py": {
+    "size": 994,
+    "modified": 1763861835.2700002,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "decisions"
+    ],
+    "keywords": [
+      "fix_oracle_models"
+    ]
+  },
+  "scratch/test_enforcement_hooks.py": {
+    "size": 6294,
+    "modified": 1763760188.4334207,
+    "type": ".py",
+    "functions": [
+      "test_pre_advice_hook",
+      "test_absurdity_detector",
+      "test_pre_delegation",
+      "test_confidence_gate",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "subprocess",
+      "pathlib"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_enforcement_hooks"
+    ]
+  },
+  "scratch/test_prompt_hooks.md": {
+    "size": 3832,
+    "modified": 1763853657.0585961,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "test_prompt_hooks"
+    ]
+  },
+  "scratch/threading_audit.py": {
+    "size": 12044,
+    "modified": 1763863978.9581249,
+    "type": ".py",
+    "functions": [
+      "analyze_hooks_execution",
+      "analyze_oracle_parallelization",
+      "analyze_agent_delegation",
+      "analyze_file_operations",
+      "analyze_context_usage",
+      "generate_optimization_plan",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "json",
+      "re",
+      "pathlib"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "parallel_usage",
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "threading_audit"
+    ]
+  },
+  "scratch/test_digest_debug.sh": {
+    "size": 1174,
+    "modified": 1763691206.9717853,
+    "type": ".sh"
+  },
+  "scratch/test_multiperspective.py": {
+    "size": 4248,
+    "modified": 1763760766.4614532,
+    "type": ".py",
+    "functions": [
+      "test_delegation_hook",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "subprocess",
+      "json",
+      "pathlib"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_multiperspective"
+    ]
+  },
+  "scratch/quality_summary.md": {
+    "size": 6410,
+    "modified": 1763768081.8098767,
+    "type": ".md",
+    "decisions": [
+      "Recommendation s",
+      "Conclusion **Status:** \u2705 HEALTHY CODEBASE\n\n**Summary:**\n- 100% of files now properly formatted (Black)\n- 74% of files passed security scan (expected for CLI tools)\n- 76% of files passed type checking ",
+      "Most issues are stylistic and don't affect functionality. Critical ones to address:\n1. Remove unused imports (automated with `ruff --fix`)\n2. Remove unused variables\n3. The 3 intentional bare `except`"
+    ],
+    "keywords": [
+      "quality_summary"
+    ]
+  },
+  "scratch/oracle_complete_summary.md": {
+    "size": 11685,
+    "modified": 1763861025.809495,
+    "type": ".md",
+    "decisions": [
+      "Conclusion **Mission Accomplished:** Three-phase oracle refactor complete\n\n**Key Achievements:**\n1. **Phase 1:** Replaced 4 vestige scripts with oracle.py (-43% code)\n2. **Phase 2:** Extracted shared "
+    ],
+    "keywords": [
+      "oracle_complete_summary"
+    ]
+  },
+  "scratch/test_optimizations.sh": {
+    "size": 3816,
+    "modified": 1763864716.1421666,
+    "type": ".sh"
+  },
+  "scratch/steal_worthy_features.md": {
+    "size": 11262,
+    "modified": 1763864244.5221386,
+    "type": ".md",
+    "decisions": [
+      "Decision Criteria\nMigrate to SQLite only if:\n1. **Measured Latency:** File I/O >100ms for memory operations\n2. **Query Complexity:** Need to JOIN lessons + sessions frequently\n3. **Atomicity Issues:**",
+      "Conclusion **STEAL:** Reflexion Memory (Auto-learning from failures)\n**REJECT:** Natural Language Routing (use explicit commands or LLM tool-calling)\n**DEFER:** SQLite Memory (files work fine, revisit"
+    ],
+    "keywords": [
+      "steal_worthy_features"
+    ]
+  },
+  "scratch/oracle_demo.md": {
+    "size": 10932,
+    "modified": 1763859522.2414086,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "oracle_demo"
+    ]
+  },
+  "scratch/hook_categorization.json": {
+    "size": 7963,
+    "modified": 1763851374.9904644,
+    "type": ".json"
+  },
+  "scratch/restoration_summary.md": {
+    "size": 3339,
+    "modified": 1763856281.357223,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "restoration_summary"
+    ]
+  },
+  "scratch/parallelization_summary.md": {
+    "size": 7836,
+    "modified": 1763864165.0221357,
+    "type": ".md",
+    "decisions": [
+      "Recommendation s",
+      "Conclusion **Current threading usage: SUBOPTIMAL**\n\nWhile some components (swarm.py, council.py personas) use optimal parallelization, critical bottlenecks exist:\n\n1. Hook execution is entirely sequen"
+    ],
+    "keywords": [
+      "parallelization_summary"
+    ]
+  },
+  "scratch/retroactive_evidence.py": {
+    "size": 13543,
+    "modified": 1763792404.0352774,
+    "type": ".py",
+    "functions": [
+      "find_transcript",
+      "session_matches_transcript",
+      "parse_transcript",
+      "calculate_confidence",
+      "update_session_state",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "sys",
+      "pathlib",
+      "datetime",
+      "collections",
+      "lib.epistemology"
+    ],
+    "patterns": [
+      "verification",
+      "hooks"
+    ],
+    "keywords": [
+      "retroactive_evidence"
+    ]
+  },
+  "scratch/test_reflexion_memory.py": {
+    "size": 5482,
+    "modified": 1763864543.0941565,
+    "type": ".py",
+    "functions": [
+      "test_verify_failure",
+      "test_multiple_failures_then_success",
+      "test_consolidation",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "subprocess",
+      "sys",
+      "pathlib"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_reflexion_memory"
+    ]
+  },
+  "scratch/trace_collision.py": {
+    "size": 4503,
+    "modified": 1763856794.5932505,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json",
+      "pathlib"
+    ],
+    "patterns": [
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "trace_collision"
+    ]
+  },
+  "scratch/design_scratch_context_injection.md": {
+    "size": 2768,
+    "modified": 1763862249.962023,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "design_scratch_context_injection"
+    ]
+  },
+  "scratch/unification_recommendation.md": {
+    "size": 8026,
+    "modified": 1763857165.8852735,
+    "type": ".md",
+    "decisions": [
+      "Conclusion **START SMALL:** Merge pattern detectors only (Phase 1)\n\n**Rationale:**\n- 19 hooks is at stability threshold, not catastrophic\n- Context pollution is the real risk, not hook count\n- 2-4 hoo",
+      "DO NOT ATTEMPT\n\n---\n\n## Conclusion\n\n**START SMALL:** Merge pattern detectors only (Phase 1)\n\n**Rationale:**\n- 19 hooks is at stability threshold, not catastrophic\n- Context pollution is the real risk,"
+    ],
+    "keywords": [
+      "unification_recommendation"
+    ]
+  },
+  "scratch/epistemology_expanded.py": {
+    "size": 14211,
+    "modified": 1763793329.051335,
+    "type": ".py",
+    "functions": [
+      "detect_git_operation",
+      "detect_documentation_read",
+      "detect_test_file_write",
+      "detect_debt_cleanup",
+      "update_confidence_EXPANDED_LOGIC"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "re"
+    ],
+    "patterns": [
+      "verification",
+      "hooks"
+    ],
+    "keywords": [
+      "epistemology_expanded"
+    ]
+  },
+  "scratch/swarm_integration.md": {
+    "size": 12421,
+    "modified": 1763861275.8535075,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "swarm_integration"
+    ]
+  },
+  "scratch/oracle_swarm_design.md": {
+    "size": 11363,
+    "modified": 1763858700.4573612,
+    "type": ".md",
+    "decisions": [
+      "Recommendation Three-Tier Architecture\n\n```\nLayer 1: oracle.py (single-shot API call)\n\u251c\u2500\u2500 Simplest: one prompt \u2192 one response\n\u2514\u2500\u2500 Use: Quick consultation, slash commands\n\nLayer 2: council.py (multi-ro"
+    ],
+    "keywords": [
+      "oracle_swarm_design"
+    ]
+  },
+  "scratch/verify_hooks.py": {
+    "size": 1950,
+    "modified": 1763853614.4545937,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json",
+      "pathlib"
+    ],
+    "patterns": [
+      "hooks"
+    ],
+    "keywords": [
+      "verify_hooks"
+    ]
+  },
+  "scratch/oracle_refactor_summary.md": {
+    "size": 5859,
+    "modified": 1763859283.061394,
+    "type": ".md",
+    "decisions": [
+      "Conclusion Phase 1 complete: oracle.py successfully replaces 4 vestige scripts with cleaner, more flexible implementation.\n\n**Key Achievement:** 43% code reduction while maintaining 100% backward comp"
+    ],
+    "keywords": [
+      "oracle_refactor_summary"
+    ]
+  },
+  "scratch/analyze_race_conditions.py": {
+    "size": 4930,
+    "modified": 1763856553.9692369,
+    "type": ".py",
+    "functions": [
+      "analyze_hook_file",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "re",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "analyze_race_conditions"
+    ]
+  },
+  "scratch/agent_parallelism_examples.md": {
+    "size": 12730,
+    "modified": 1763858328.049338,
+    "type": ".md",
+    "decisions": [
+      "Conclusion **The Golden Rule:**\n> If a task involves >3 independent units of work, >500 lines each, use parallel agents in a single message.\n\n**The Economics:**\n- Agent latency: ~30 seconds\n- Sequenti"
+    ],
+    "keywords": [
+      "agent_parallelism_examples"
+    ]
+  },
+  "scratch/hook_dependency_graph.json": {
+    "size": 8065,
+    "modified": 1763864717.1101665,
+    "type": ".json"
+  },
+  "scratch/post_tool_command_suggester.py": {
+    "size": 10261,
+    "modified": 1763786163.7869189,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "sys",
+      "json",
+      "pathlib",
+      "lib.epistemology"
+    ],
+    "patterns": [
+      "verification",
+      "hooks"
+    ],
+    "keywords": [
+      "post_tool_command_suggester"
+    ]
+  },
+  "scratch/prototype_scratch_indexer.py": {
+    "size": 6552,
+    "modified": 1763862334.2580285,
+    "type": ".py",
+    "functions": [
+      "extract_python_signatures",
+      "extract_markdown_decisions",
+      "build_scratch_index",
+      "find_associations"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "ast",
+      "re",
+      "json",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "parallel_usage",
+      "verification",
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "prototype_scratch_indexer"
+    ]
+  },
+  "scratch/tree_grounding_analysis.json": {
+    "size": 2319,
+    "modified": 1763863070.2540724,
+    "type": ".json"
+  },
+  "scratch/claude_flow_analysis.md": {
+    "size": 7594,
+    "modified": 1763864107.8941317,
+    "type": ".md",
+    "decisions": [
+      "Conclusion **Steal:** Reflexion memory, Natural language routing\n**Maybe:** SQLite (only if file-based becomes bottleneck)\n**Avoid:** 64 agents, hive-mind, vector search, namespace isolation\n\n**Core I",
+      "Our current \"spawn agent when needed\" >> pre-built hive\n\n---\n\n## Recommended Theft Plan\n\n### Phase 1: Auto-Learning (Week 1)\n1. Implement detect_failure_pattern.py hook\n   - Triggers: verify.py exit c"
+    ],
+    "keywords": [
+      "claude_flow_analysis"
+    ]
+  },
+  "scratch/claude_md_addition.md": {
+    "size": 4265,
+    "modified": 1763853719.1626,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "claude_md_addition"
+    ]
+  },
+  "scratch/hook_audit.py": {
+    "size": 10697,
+    "modified": 1763851374.9744644,
+    "type": ".py",
+    "functions": [
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "pathlib"
+    ],
+    "patterns": [
+      "parallel_usage",
+      "hooks"
+    ],
+    "keywords": [
+      "hook_audit"
+    ]
+  },
+  "scratch/test_hook_output.py": {
+    "size": 3721,
+    "modified": 1763786989.678968,
+    "type": ".py",
+    "functions": [
+      "test_hook"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "subprocess",
+      "sys"
+    ],
+    "patterns": [
+      "verification",
+      "hooks"
+    ],
+    "keywords": [
+      "test_hook_output"
+    ]
+  },
+  "scratch/IMPLEMENTATION_COMPLETE.md": {
+    "size": 7371,
+    "modified": 1763853785.7826037,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "implementation_complete"
+    ]
+  },
+  "scratch/quality_analysis_report.json": {
+    "size": 187510,
+    "modified": 1763767997.1698713,
+    "type": ".json"
+  },
+  "scratch/find_true_races.py": {
+    "size": 4024,
+    "modified": 1763856826.2652524,
+    "type": ".py",
+    "functions": [
+      "check_writes_state",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "re",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [],
+    "keywords": [
+      "find_true_races"
+    ]
+  },
+  "scratch/speculative_council_implementation.md": {
+    "size": 2409,
+    "modified": 1763864566.578158,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "speculative_council_implementation"
+    ]
+  },
+  "scratch/update_settings.py": {
+    "size": 2643,
+    "modified": 1763857916.5173144,
+    "type": ".py",
+    "functions": [
+      "find_project_root"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "pathlib"
+    ],
+    "patterns": [
+      "hooks"
+    ],
+    "keywords": [
+      "update_settings"
+    ]
+  },
+  "scratch/pre_advice.py": {
+    "size": 3801,
+    "modified": 1763759954.7254076,
+    "type": ".py",
+    "functions": [
+      "find_project_root",
+      "load_confidence",
+      "is_strategic_question",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "re",
+      "sys",
+      "pathlib"
+    ],
+    "patterns": [
+      "hooks"
+    ],
+    "keywords": [
+      "pre_advice"
+    ]
+  },
+  "scratch/test_epistemology.py": {
+    "size": 8047,
+    "modified": 1763767424.4618385,
+    "type": ".py",
+    "functions": [
+      "test_session_initialization",
+      "test_initial_confidence_assessment",
+      "test_evidence_gathering",
+      "test_tier_gates",
+      "test_tier_names",
+      "test_penalties",
+      "cleanup_test_files"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "json",
+      "pathlib",
+      "lib.epistemology",
+      "lib.epistemology",
+      "traceback"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_epistemology"
+    ]
+  },
+  "scratch/deep_race_analysis.py": {
+    "size": 6761,
+    "modified": 1763856592.225239,
+    "type": ".py",
+    "functions": [
+      "get_hook_scripts",
+      "analyze_state_access",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "re",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "deep_race_analysis"
+    ]
+  },
+  "scratch/test_context_injection.py": {
+    "size": 5768,
+    "modified": 1763770227.861999,
+    "type": ".py",
+    "functions": [
+      "test_hook",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "json",
+      "subprocess",
+      "pathlib"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_context_injection"
+    ]
+  },
+  "scratch/test_auto_remember.py": {
+    "size": 2550,
+    "modified": 1763689635.7678661,
+    "type": ".py",
+    "functions": [
+      "extract_memory_triggers"
+    ],
+    "classes": [],
+    "imports": [
+      "re"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_auto_remember"
+    ]
+  },
+  "scratch/test_debt_tracker.py": {
+    "size": 2497,
+    "modified": 1763691005.9957955,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json",
+      "subprocess",
+      "tempfile",
+      "pathlib"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_debt_tracker"
+    ]
+  },
+  "scratch/agent_usage_diagnostic.py": {
+    "size": 9384,
+    "modified": 1763857397.3692865,
+    "type": ".py",
+    "functions": [
+      "find_project_root",
+      "parse_agent",
+      "analyze_agents",
+      "analyze_invocation_patterns",
+      "identify_barriers",
+      "generate_recommendations",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "json",
+      "re",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [
+      "verification",
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "agent_usage_diagnostic"
+    ]
+  },
+  "scratch/REFLEXION_MEMORY_QUICKSTART.md": {
+    "size": 7242,
+    "modified": 1763864783.2821705,
+    "type": ".md",
+    "decisions": [
+      "Perfect for whitebox. Can upgrade to SQLite later if needed.\n\n---\n\n## Examples\n\n### Example 1: Verify Failure\n```bash\n$ python3 scripts/ops/verify.py file_exists /tmp/missing.txt\n\u274c FALSE CLAIM: File/d"
+    ],
+    "keywords": [
+      "reflexion_memory_quickstart"
+    ]
+  },
+  "scratch/batch_quality_check.py": {
+    "size": 1632,
+    "modified": 1763866785.4542847,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "subprocess",
+      "sys"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "parallel_usage"
+    ],
+    "keywords": [
+      "batch_quality_check"
+    ]
+  },
+  "scratch/verify_agent_refactor.sh": {
+    "size": 3571,
+    "modified": 1763858095.625327,
+    "type": ".sh"
+  },
+  "scratch/integrate_optimizations.py": {
+    "size": 11064,
+    "modified": 1763864668.4501636,
+    "type": ".py",
+    "functions": [
+      "backup_settings",
+      "update_settings_json",
+      "register_oracle_batch",
+      "validate_components",
+      "generate_summary",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "os",
+      "json",
+      "pathlib",
+      "shutil"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "parallel_usage",
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "integrate_optimizations"
+    ]
+  },
+  "scratch/parallelization_roadmap.md": {
+    "size": 6778,
+    "modified": 1763864046.590129,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "parallelization_roadmap"
+    ]
+  },
+  "scratch/analyze_hook_unification.py": {
+    "size": 9248,
+    "modified": 1763857004.6772635,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "analyze_hook_unification"
+    ]
+  },
+  "scratch/absurdity_detector.py": {
+    "size": 5698,
+    "modified": 1763760059.6454139,
+    "type": ".py",
+    "functions": [
+      "find_project_root",
+      "detect_absurdity",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "re",
+      "sys",
+      "pathlib"
+    ],
+    "patterns": [
+      "hooks"
+    ],
+    "keywords": [
+      "absurdity_detector"
+    ]
+  },
+  "scratch/phase4_summary.md": {
+    "size": 16984,
+    "modified": 1763769498.0379562,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "phase4_summary"
+    ]
+  },
+  "scratch/test_session_digest.py": {
+    "size": 3551,
+    "modified": 1763691107.6677907,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json",
+      "subprocess",
+      "tempfile",
+      "pathlib"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_session_digest"
+    ]
+  },
+  "scratch/test_real_transcript.py": {
+    "size": 818,
+    "modified": 1763690002.3518462,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json",
+      "subprocess"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_real_transcript"
+    ]
+  },
+  "scratch/test_confidence_expansion.py": {
+    "size": 10601,
+    "modified": 1763793545.5913439,
+    "type": ".py",
+    "functions": [
+      "test_confidence_gains",
+      "test_confidence_penalties",
+      "test_git_detection",
+      "test_documentation_detection",
+      "test_test_file_detection",
+      "test_update_confidence_integration",
+      "test_tier_gate_penalties",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "pathlib",
+      "lib.epistemology"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_confidence_expansion"
+    ]
+  },
+  "scratch/reinforcement_system.py": {
+    "size": 18436,
+    "modified": 1763692099.3637376,
+    "type": ".py",
+    "functions": [
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "json",
+      "datetime",
+      "pathlib"
+    ],
+    "patterns": [
+      "verification",
+      "hooks"
+    ],
+    "keywords": [
+      "reinforcement_system"
+    ]
+  },
+  "scratch/batch_fix_tests.py": {
+    "size": 6645,
+    "modified": 1763686302.8600392,
+    "type": ".py",
+    "functions": [
+      "fix_test_file",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "pathlib",
+      "core"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "verification"
+    ],
+    "keywords": [
+      "batch_fix_tests"
+    ]
+  },
+  "scratch/confidence_system.py": {
+    "size": 14048,
+    "modified": 1763691706.227759,
+    "type": ".py",
+    "functions": [
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "json",
+      "datetime",
+      "pathlib"
+    ],
+    "patterns": [
+      "hooks"
+    ],
+    "keywords": [
+      "confidence_system"
+    ]
+  },
+  "scratch/oracle_analysis.md": {
+    "size": 6750,
+    "modified": 1763858430.573345,
+    "type": ".md",
+    "decisions": [
+      "Recommendation Option B (Generic oracle.py)\n\n**Rationale:**\n\n1. **council.py is the canonical multi-perspective tool** - designed for complex decisions\n2. **Single-shot queries need a simpler interfac"
+    ],
+    "keywords": [
+      "oracle_analysis"
+    ]
+  },
+  "scratch/test_coverage_audit.txt": {
+    "size": 1928,
+    "modified": 1763684718.672124,
+    "type": ".txt"
+  },
+  "scratch/verify_hook_integration.py": {
+    "size": 2166,
+    "modified": 1763862925.3900616,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json",
+      "os",
+      "subprocess"
+    ],
+    "patterns": [
+      "verification",
+      "hooks"
+    ],
+    "keywords": [
+      "verify_hook_integration"
+    ]
+  },
+  "scratch/apply_prompt_hooks.py": {
+    "size": 5831,
+    "modified": 1763853581.6545916,
+    "type": ".py",
+    "functions": [
+      "load_settings",
+      "load_prompt_hooks",
+      "remove_python_hooks",
+      "add_prompt_hooks",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "pathlib",
+      "sys"
+    ],
+    "patterns": [
+      "hooks"
+    ],
+    "keywords": [
+      "apply_prompt_hooks"
+    ]
+  },
+  "scratch/analyze_tree_grounding.py": {
+    "size": 7983,
+    "modified": 1763863067.1660724,
+    "type": ".py",
+    "functions": [
+      "get_tree_structure",
+      "analyze_file_distribution",
+      "estimate_token_cost",
+      "analyze_current_context_hooks",
+      "analyze_semantic_relevance",
+      "main",
+      "walk_tree"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "json",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "analyze_tree_grounding"
+    ]
+  },
+  "scratch/next_steps_meta_agents.md": {
+    "size": 11413,
+    "modified": 1763859019.9853778,
+    "type": ".md",
+    "decisions": [
+      "Decision Point: What to Build Next?\n\nYou have 3 options:"
+    ],
+    "keywords": [
+      "next_steps_meta_agents"
+    ]
+  },
+  "scratch/verification_report.md": {
+    "size": 4766,
+    "modified": 1763767822.6178632,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "verification_report"
+    ]
+  },
+  "scratch/test_reinforcement.py": {
+    "size": 7493,
+    "modified": 1763692195.331734,
+    "type": ".py",
+    "functions": [
+      "run_command",
+      "test_reinforcement_schedule",
+      "test_status_display",
+      "test_agent_bonus",
+      "test_loss_aversion",
+      "test_motivation_tips",
+      "test_reinforcement_log",
+      "test_list_command",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "json",
+      "subprocess",
+      "pathlib",
+      "traceback",
+      "traceback"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_reinforcement"
+    ]
+  },
+  "scratch/settings_snippet.json": {
+    "size": 9941,
+    "modified": 1763851521.050472,
+    "type": ".json"
+  },
+  "scratch/PROMPT_HOOKS_IMPLEMENTATION.md": {
+    "size": 9306,
+    "modified": 1763851605.8024776,
+    "type": ".md",
+    "decisions": [
+      "Decision Point\n\n**Recommendation:** Proceed with Phase 1 implementation.\n\n**Why:**\n- Low risk (keeping all critical gates as command-based)\n- High value (semantic understanding > keyword matching)\n- R",
+      "Proceed with Phase 1 implementation.\n\n**Why:**\n- Low risk (keeping all critical gates as command-based)\n- High value (semantic understanding > keyword matching)\n- Reversible (backup exists, easy rollb"
+    ],
+    "keywords": [
+      "prompt_hooks_implementation"
+    ]
+  },
+  "scratch/agent_refactor_plan.md": {
+    "size": 7970,
+    "modified": 1763857458.5492902,
+    "type": ".md",
+    "decisions": [
+      "Decision Tree (Post-Refactor)\n\n```\nUser action \u2192 Check triggers \u2192 Auto-invoke agent?\n\n\u250c\u2500 Large output (>1000 chars)\n\u2502  \u2514\u2500 Auto-spawn: researcher\n\u2502\n\u250c\u2500 Write to scripts/*\n\u2502  \u2514\u2500 Hard block \u2192 Force: scrip"
+    ],
+    "keywords": [
+      "agent_refactor_plan"
+    ]
+  },
+  "scratch/oracle_integration_strategy.md": {
+    "size": 14846,
+    "modified": 1763859346.841398,
+    "type": ".md",
+    "decisions": [
+      "Decision Making Speed\n\n**Before (sequential):**\n- Council: 45-90s\n- Individual advisors: 10-15s each\n- Total for 3 perspectives: 30-45s\n\n**After (oracle parallel):**\n- Oracle (any persona): 2-3s\n- 3 o"
+    ],
+    "keywords": [
+      "oracle_integration_strategy"
+    ]
+  },
+  "scratch/agent_refactor_summary.md": {
+    "size": 9871,
+    "modified": 1763858055.1133244,
+    "type": ".md",
+    "decisions": [
+      "Conclusion The agent refactor transforms agents from **rarely-used vestiges** to **actively-utilized specialists** through:\n\n1. **Auto-invocation hooks** (agents spawn automatically on patterns)\n2. **"
+    ],
+    "keywords": [
+      "agent_refactor_summary"
+    ]
+  },
+  "scratch/test_epistemological_protocol.py": {
+    "size": 5486,
+    "modified": 1763691785.3517537,
+    "type": ".py",
+    "functions": [
+      "run_command",
+      "test_detection_hook",
+      "test_gate_hook",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "json",
+      "subprocess",
+      "pathlib",
+      "traceback"
+    ],
+    "patterns": [
+      "verification",
+      "hooks"
+    ],
+    "keywords": [
+      "test_epistemological_protocol"
+    ]
+  },
+  "scratch/analyze_scratch_semantics.py": {
+    "size": 1812,
+    "modified": 1763862023.0460103,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "os",
+      "re"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "analyze_scratch_semantics"
+    ]
+  },
+  "scratch/scratch_context_hook.py": {
+    "size": 3260,
+    "modified": 1763862374.9820309,
+    "type": ".py",
+    "functions": [
+      "load_scratch_index",
+      "find_associations",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "json",
+      "os",
+      "pathlib",
+      "re"
+    ],
+    "patterns": [
+      "hooks"
+    ],
+    "keywords": [
+      "scratch_context_hook"
+    ]
+  },
+  "scratch/oracle_phase2_summary.md": {
+    "size": 5933,
+    "modified": 1763859781.6414227,
+    "type": ".md",
+    "decisions": [
+      "Conclusion Phase 2 complete: Extracted OpenRouter API logic to shared library (`scripts/lib/oracle.py`)\n\n**Key Achievement:** Single source of truth for all OpenRouter API calls, enabling future swarm"
+    ],
+    "keywords": [
+      "oracle_phase2_summary"
+    ]
+  },
+  "scratch/test_phase4.py": {
+    "size": 10327,
+    "modified": 1763769377.5539496,
+    "type": ".py",
+    "functions": [
+      "test_dangerous_command_detection",
+      "test_risk_tracking",
+      "test_token_estimation",
+      "test_user_commands",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "json",
+      "tempfile",
+      "pathlib",
+      "lib.epistemology",
+      "subprocess"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_phase4"
+    ]
+  },
+  "scratch/precise_unification_analysis.py": {
+    "size": 7096,
+    "modified": 1763857076.7852683,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "precise_unification_analysis"
+    ]
+  },
+  "scratch/oracle_phase3_summary.md": {
+    "size": 10496,
+    "modified": 1763860823.3374834,
+    "type": ".md",
+    "decisions": [
+      "Conclusion Phase 3 complete: swarm.py successfully implements massive parallel oracle invocation\n\n**Key Achievement:** 50x throughput increase unlocking new capabilities (hypothesis generation, code r"
+    ],
+    "keywords": [
+      "oracle_phase3_summary"
+    ]
+  },
+  "scratch/test_scratch_association.py": {
+    "size": 2202,
+    "modified": 1763862465.1580367,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "subprocess",
+      "json"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_scratch_association"
+    ]
+  },
+  "scratch/ruff_fix_summary.md": {
+    "size": 4509,
+    "modified": 1763768222.969885,
+    "type": ".md",
+    "decisions": [
+      "Recommendation **Action:** \u2705 **ACCEPT ALL CHANGES**\n\n**Reasoning:**\n- All changes are safe formatting improvements\n- No functionality affected\n- All tests passing\n- Improves code consistency\n- Better "
+    ],
+    "keywords": [
+      "ruff_fix_summary"
+    ]
+  },
+  "scratch/pre_delegation.py": {
+    "size": 4589,
+    "modified": 1763760132.8574176,
+    "type": ".py",
+    "functions": [
+      "find_project_root",
+      "load_confidence",
+      "is_advisor_call",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "sys",
+      "re",
+      "pathlib"
+    ],
+    "patterns": [
+      "hooks"
+    ],
+    "keywords": [
+      "pre_delegation"
+    ]
+  },
+  "scratch/.gitkeep": {
+    "size": 0,
+    "modified": 1763672771.6607437,
+    "type": ""
+  },
+  "scratch/test_post_tool_suggester.py": {
+    "size": 4732,
+    "modified": 1763786190.32292,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "json",
+      "subprocess",
+      "sys",
+      "pathlib"
+    ],
+    "patterns": [
+      "verification",
+      "hooks"
+    ],
+    "keywords": [
+      "test_post_tool_suggester"
+    ]
+  },
+  "scratch/generate_slash_commands.py": {
+    "size": 4167,
+    "modified": 1763688116.6839457,
+    "type": ".py",
+    "functions": [
+      "find_project_root",
+      "generate_command_file",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "pathlib"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "generate_slash_commands"
+    ]
+  },
+  "scratch/prompt_hooks_config.json": {
+    "size": 11243,
+    "modified": 1763851521.050472,
+    "type": ".json"
+  },
+  "scratch/test_deny_cases.py": {
+    "size": 3315,
+    "modified": 1763787015.3589673,
+    "type": ".py",
+    "functions": [
+      "test_hook"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "subprocess",
+      "sys"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "test_deny_cases"
+    ]
+  },
+  "scratch/validate_current_config.py": {
+    "size": 4588,
+    "modified": 1763856699.5452447,
+    "type": ".py",
+    "functions": [
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "json",
+      "pathlib",
+      "collections"
+    ],
+    "patterns": [
+      "hooks",
+      "decisions"
+    ],
+    "keywords": [
+      "validate_current_config"
+    ]
+  },
+  "scratch/phase3_summary.md": {
+    "size": 9130,
+    "modified": 1763768633.5019069,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "phase3_summary"
+    ]
+  },
+  "scratch/generate_protocol_tests.py": {
+    "size": 6631,
+    "modified": 1763684786.4921196,
+    "type": ".py",
+    "functions": [
+      "generate_test_template",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "os",
+      "sys",
+      "pathlib",
+      "core"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "verification"
+    ],
+    "keywords": [
+      "generate_protocol_tests"
+    ]
+  },
+  "scratch/claude_audit_report.md": {
+    "size": 7825,
+    "modified": 1763692601.4717119,
+    "type": ".md",
+    "decisions": [
+      "Run `chmod +x .claude/hooks/*.py` for consistency.\n\n### 3. Memory System\n**Status:** \u26a0\ufe0f HEALTHY (Formatting issue)\n\n**Memory Files:**\n- `active_context.md`: \u2705 Valid (86 lines)\n- `lessons.md`: \u2705 Valid "
+    ],
+    "keywords": [
+      "claude_audit_report"
+    ]
+  },
+  "scratch/meta_agents_design.md": {
+    "size": 12818,
+    "modified": 1763858583.6653543,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "meta_agents_design"
+    ]
+  },
+  "scratch/session_summary.md": {
+    "size": 7954,
+    "modified": 1763864696.3461652,
+    "type": ".md",
+    "decisions": [
+      "Perfect for whitebox philosophy. Can upgrade later if needed.\n\n---\n\n## Documents Created\n\n1. **scratch/claude_flow_analysis.md** - Detailed comparison, feature matrix\n2. **scratch/steal_worthy_feature",
+      "Build boring, effective systems. Add complexity only when metrics demand it.\n\n---\n\n## Part 2: Reflexion Memory Implementation\n\n### Components Created (5 files)\n\n1. **.claude/hooks/detect_failure_auto_"
+    ],
+    "keywords": [
+      "session_summary"
+    ]
+  },
+  "scratch/build_performance_gate.py": {
+    "size": 4549,
+    "modified": 1763857796.229308,
+    "type": ".py",
+    "functions": [],
+    "classes": [],
+    "imports": [],
+    "patterns": [],
+    "keywords": [
+      "build_performance_gate"
+    ]
+  },
+  "scratch/performance_protocol_summary.md": {
+    "size": 6258,
+    "modified": 1763858345.5253391,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "performance_protocol_summary"
+    ]
+  },
+  "scratch/implement_protocol_tests.py": {
+    "size": 25637,
+    "modified": 1763685050.456108,
+    "type": ".py",
+    "functions": [
+      "generate_simple_cli_test",
+      "generate_openrouter_cli_test",
+      "generate_test_implementation",
+      "generate_memory_io_test",
+      "generate_tavily_cli_test",
+      "generate_audit_cli_test",
+      "generate_scaffolder_test",
+      "generate_browser_lib_test",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "os",
+      "pathlib",
+      "typing",
+      "core"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "verification"
+    ],
+    "keywords": [
+      "implement_protocol_tests"
+    ]
+  },
+  "scratch/__pycache__/council_engine.cpython-312.pyc": {
+    "size": 19826,
+    "modified": 1763849710.7224061,
+    "type": ".pyc"
+  },
+  "scratch/__pycache__/recruiter.cpython-312.pyc": {
+    "size": 8484,
+    "modified": 1763849710.7224061,
+    "type": ".pyc"
+  },
+  "scratch/__pycache__/persona_parser.cpython-312.pyc": {
+    "size": 13786,
+    "modified": 1763849284.6143816,
+    "type": ".pyc"
+  },
+  "scratch/archive/protocol_development/hooks_alignment_analysis.md": {
+    "size": 6124,
+    "modified": 1763790365.443161,
+    "type": ".md",
+    "decisions": [
+      "Conclusion Your hooks implementation is **well-architected** and follows the official Claude Agent SDK patterns. The only issue is a legacy naming convention in `confidence_gate.py` that predates the "
+    ],
+    "keywords": [
+      "hooks_alignment_analysis"
+    ]
+  },
+  "scratch/archive/protocol_development/confidence_expansion_summary.md": {
+    "size": 9910,
+    "modified": 1763793689.3953516,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "confidence_expansion_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/graduated_tier_implementation_summary.md": {
+    "size": 12363,
+    "modified": 1763794400.9753923,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "graduated_tier_implementation_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/ARBITER_IMPLEMENTATION.md": {
+    "size": 11428,
+    "modified": 1763761762.8295114,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "arbiter_implementation"
+    ]
+  },
+  "scratch/archive/protocol_development/ANTI_SYCOPHANCY_IMPLEMENTATION.md": {
+    "size": 5739,
+    "modified": 1763760351.4814303,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "anti_sycophancy_implementation"
+    ]
+  },
+  "scratch/archive/protocol_development/PATTERN_DETECTION_SUMMARY.md": {
+    "size": 9974,
+    "modified": 1763786339.3749282,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "pattern_detection_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/hooks_final_summary.md": {
+    "size": 14943,
+    "modified": 1763792814.8913019,
+    "type": ".md",
+    "decisions": [
+      "Conclusion **Status:** \u2705 ALL 65 GAPS FIXED\n\n**Production Readiness:** FULL - All critical issues resolved\n\n**Quality Level:** Enterprise-grade error handling and logging\n\n**Philosophy Validated:**\n> \""
+    ],
+    "keywords": [
+      "hooks_final_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/REINFORCEMENT_LAYER_SUMMARY.md": {
+    "size": 14079,
+    "modified": 1763692290.1637287,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "reinforcement_layer_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/graduated_tier_design.md": {
+    "size": 15211,
+    "modified": 1763793937.2993681,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "graduated_tier_design"
+    ]
+  },
+  "scratch/archive/protocol_development/hooks_enforcement_analysis.md": {
+    "size": 10406,
+    "modified": 1763790767.6071837,
+    "type": ".md",
+    "decisions": [
+      "Conclusion **Current State:**\n- 6 advisory hooks firing warnings (can be ignored)\n- 4 blocking hooks enforcing hard requirements\n- 2 powerful blocking hooks WRITTEN BUT INACTIVE\n\n**After Phase 1:**\n- "
+    ],
+    "keywords": [
+      "hooks_enforcement_analysis"
+    ]
+  },
+  "scratch/archive/protocol_development/pattern_detection_reference.md": {
+    "size": 7921,
+    "modified": 1763786277.3109248,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "pattern_detection_reference"
+    ]
+  },
+  "scratch/archive/protocol_development/OPTIMAL_COUNCIL_DESIGN.md": {
+    "size": 9261,
+    "modified": 1763762325.353543,
+    "type": ".md",
+    "decisions": [
+      "Implement the 5+1 Council (Five Hats + Arbiter) as the unified, research-proven decision-making system."
+    ],
+    "keywords": [
+      "optimal_council_design"
+    ]
+  },
+  "scratch/archive/protocol_development/context_injection_implementation_summary.md": {
+    "size": 13640,
+    "modified": 1763770336.074005,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "context_injection_implementation_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/context_injection_analysis.md": {
+    "size": 11861,
+    "modified": 1763769775.6339734,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "context_injection_analysis"
+    ]
+  },
+  "scratch/archive/protocol_development/void_gap_analysis.md": {
+    "size": 11889,
+    "modified": 1763792096.5392606,
+    "type": ".md",
+    "decisions": [
+      "Conclusion **Void Analysis Verdict:** \u2705 PASSED with 65 improvement opportunities\n\n**Current State:** Production-ready with known polish gaps\n**Priority Fixes:** 3 critical security issues (fail-open v"
+    ],
+    "keywords": [
+      "void_gap_analysis"
+    ]
+  },
+  "scratch/archive/protocol_development/auto_commit_summary.md": {
+    "size": 6959,
+    "modified": 1763794841.0314195,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "auto_commit_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/EPISTEMOLOGICAL_PROTOCOL_SUMMARY.md": {
+    "size": 8489,
+    "modified": 1763691882.7397506,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "epistemological_protocol_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/hooks_fix_summary.md": {
+    "size": 12810,
+    "modified": 1763791701.6992383,
+    "type": ".md",
+    "decisions": [
+      "Conclusion **Status:** \u2705 **ALL HOOKS ALIGNED & ACTIVATED**\n\n**Compliance:** 100% aligned with official Claude Code hooks documentation\n\n**Enforcement:** Full confidence pyramid enforced (0%, 31%, 40%,"
+    ],
+    "keywords": [
+      "hooks_fix_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/HOOK_FIXES_SUMMARY.md": {
+    "size": 3494,
+    "modified": 1763787059.494971,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "hook_fixes_summary"
+    ]
+  },
+  "scratch/archive/protocol_development/confidence_expansion_plan.md": {
+    "size": 10355,
+    "modified": 1763793228.3433282,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "confidence_expansion_plan"
+    ]
+  },
+  "scratch/archive/protocol_development/auto_commit_design.md": {
+    "size": 7858,
+    "modified": 1763794607.1034045,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "auto_commit_design"
+    ]
+  },
+  "scratch/archive/protocol_development/command_enforcement_design.md": {
+    "size": 18276,
+    "modified": 1763792630.7192922,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "command_enforcement_design"
+    ]
+  },
+  "scratch/archive/protocol_development/PATTERN_DETECTION_FLOWCHART.md": {
+    "size": 16685,
+    "modified": 1763786406.138931,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "pattern_detection_flowchart"
+    ]
+  },
+  "scratch/archive/protocol_development/MULTIPERSPECTIVE_ENFORCEMENT.md": {
+    "size": 9709,
+    "modified": 1763760845.7214587,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "multiperspective_enforcement"
+    ]
+  },
+  "scratch/archive/council_development/persona_output_schema.md": {
+    "size": 5690,
+    "modified": 1763848866.2023578,
+    "type": ".md",
+    "decisions": [
+      "VERDICT (Required)\n- **PROCEED**: Approve the proposal unconditionally\n- **CONDITIONAL_GO**: Approve with specific conditions that must be met\n- **STOP**: Reject the proposal\n- **ABSTAIN**: Cannot mak"
+    ],
+    "keywords": [
+      "persona_output_schema"
+    ]
+  },
+  "scratch/archive/council_development/IMPLEMENTATION_STATUS.md": {
+    "size": 10949,
+    "modified": 1763849414.510389,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "implementation_status"
+    ]
+  },
+  "scratch/archive/council_development/persona_config_schema.json": {
+    "size": 2341,
+    "modified": 1763847435.9662757,
+    "type": ".json"
+  },
+  "scratch/archive/council_development/council_final.py": {
+    "size": 18282,
+    "modified": 1763848198.8663197,
+    "type": ".py",
+    "functions": [
+      "load_persona_library",
+      "load_presets",
+      "resolve_personas",
+      "load_model_pool",
+      "assign_models_to_personas",
+      "call_persona",
+      "call_arbiter",
+      "list_personas",
+      "list_presets",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "os",
+      "json",
+      "random",
+      "subprocess",
+      "concurrent.futures",
+      "pathlib",
+      "core",
+      "context_builder",
+      "recruiter"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "parallel_usage",
+      "decisions"
+    ],
+    "keywords": [
+      "council_final"
+    ]
+  },
+  "scratch/archive/council_development/council_v2.py": {
+    "size": 15441,
+    "modified": 1763847862.6983008,
+    "type": ".py",
+    "functions": [
+      "load_persona_library",
+      "load_presets",
+      "resolve_personas",
+      "load_model_pool",
+      "assign_models_to_personas",
+      "call_persona",
+      "call_arbiter",
+      "list_personas",
+      "list_presets",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "os",
+      "json",
+      "random",
+      "subprocess",
+      "concurrent.futures",
+      "pathlib",
+      "core",
+      "context_builder"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "parallel_usage",
+      "decisions"
+    ],
+    "keywords": [
+      "council_v2"
+    ]
+  },
+  "scratch/archive/council_development/COUNCIL_REFACTOR_SUMMARY.md": {
+    "size": 7955,
+    "modified": 1763848310.9703264,
+    "type": ".md",
+    "decisions": [
+      "Decision **RECOMMENDED: Unified Persona Library Architecture**\n\nReplace both `balanced_council.py` and `council.py` with single flexible system."
+    ],
+    "keywords": [
+      "council_refactor_summary"
+    ]
+  },
+  "scratch/archive/council_development/DEPLOYMENT_GUIDE.md": {
+    "size": 9708,
+    "modified": 1763849976.8703816,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "deployment_guide"
+    ]
+  },
+  "scratch/archive/council_development/README_COUNCIL.md": {
+    "size": 7798,
+    "modified": 1763850087.3303916,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "readme_council"
+    ]
+  },
+  "scratch/archive/council_development/unified_council.py": {
+    "size": 13559,
+    "modified": 1763847546.6622815,
+    "type": ".py",
+    "functions": [
+      "load_persona_config",
+      "load_model_pool",
+      "assign_models_to_personas",
+      "call_persona",
+      "call_arbiter",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "sys",
+      "os",
+      "json",
+      "random",
+      "subprocess",
+      "concurrent.futures",
+      "pathlib",
+      "core",
+      "context_builder"
+    ],
+    "patterns": [
+      "oracle_usage",
+      "parallel_usage",
+      "decisions"
+    ],
+    "keywords": [
+      "unified_council"
+    ]
+  },
+  "scratch/.claude/memory/debt_ledger.jsonl": {
+    "size": 1112,
+    "modified": 1763851656.9624808,
+    "type": ".jsonl"
+  }
+}

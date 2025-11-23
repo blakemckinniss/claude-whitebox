@@ -267,16 +267,16 @@ class InformationGatherer:
         if not terms:
             return {"success": False, "reason": "Could not extract search terms"}
 
-        # Try to grep for terms
+        # Try to search for terms using ripgrep (rg)
         for term in terms[:3]:  # Try first 3 terms
             try:
-                # Build include patterns
-                include_args = []
+                # Build glob patterns for rg
+                glob_args = []
                 for pattern in self.file_patterns:
-                    include_args.extend(["--include", pattern])
+                    glob_args.extend(["--glob", pattern])
 
                 result = subprocess.run(
-                    ["grep", "-r", "-i"] + include_args + [term, str(self.project_root)],
+                    ["rg", "-i", "--max-count", "10"] + glob_args + [term, str(self.project_root)],
                     capture_output=True,
                     text=True,
                     timeout=5
@@ -288,7 +288,7 @@ class InformationGatherer:
                     return {
                         "success": True,
                         "data": "\n".join(lines),
-                        "source": f"codebase grep for '{term}'"
+                        "source": f"codebase search for '{term}'"
                     }
             except Exception:
                 continue

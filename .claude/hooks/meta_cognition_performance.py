@@ -38,13 +38,21 @@ reminder = """
    → "Run oracle judge, critic, skeptic in parallel"
    → 30x faster, 95% context savings
 
+8. Need >10 perspectives? (exploration, audit, tests)
+   → Use SWARM.PY (10-1000 oracles in 3s!)
+   → swarm.py --generate 50 → 50 unique approaches in 3s
+   → swarm.py --review "**/*.py" → audit 100+ files in 3s
+   → swarm.py --test-cases 100 → 100 tests in 3s
+
 Remember:
 - You have UNLIMITED bandwidth
 - Agent context is FREE (separate windows)
 - Oracle.py is 30x faster than council.py (2-3s vs 90s)
+- Swarm.py is 1000x faster than manual (1000 oracles in 3s!)
 - Sequential = wasting resources = -20% confidence
 - Parallel agents = free parallelism + free context = +20% confidence
 - Parallel oracles = 3 expert perspectives in 3 seconds
+- Swarm = 10-1000 perspectives in 3 seconds (nuclear option)
 """
 
 print(json.dumps({

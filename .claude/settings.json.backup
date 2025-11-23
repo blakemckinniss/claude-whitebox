@@ -90,10 +90,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_sequential_agents.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
           },
           {
@@ -255,10 +251,6 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_success_auto_learn.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/hook_performance_monitor.py"
           }
         ]
       }

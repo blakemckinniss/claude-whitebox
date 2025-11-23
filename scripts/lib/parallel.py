@@ -43,7 +43,7 @@ logger = logging.getLogger("Whitebox.Parallel")
 def run_parallel(
     func: Callable,
     items: List[Any],
-    max_workers: int = 10,
+    max_workers: int = 50,
     desc: str = "Processing",
     fail_fast: bool = False,
 ) -> List[Tuple[Any, Any, Exception]]:
@@ -122,7 +122,7 @@ def run_parallel(
 
 
 def batch_map(
-    func: Callable, items: List[Any], max_workers: int = 10, desc: str = "Processing"
+    func: Callable, items: List[Any], max_workers: int = 50, desc: str = "Processing"
 ) -> List[Any]:
     """
     Simpler interface: returns only successful results, logs errors.
@@ -153,7 +153,7 @@ def batch_map(
 def batch_filter(
     predicate: Callable[[Any], bool],
     items: List[Any],
-    max_workers: int = 10,
+    max_workers: int = 50,
     desc: str = "Filtering",
 ) -> List[Any]:
     """
@@ -198,7 +198,7 @@ def optimal_workers(item_count: int, io_bound: bool = True) -> int:
 
     if io_bound:
         # I/O-bound: can use many threads
-        return min(item_count, 50)
+        return min(item_count, 100)
     else:
         # CPU-bound: limit to CPU count
         cpu_count = os.cpu_count() or 4

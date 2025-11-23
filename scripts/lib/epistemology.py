@@ -854,6 +854,70 @@ def apply_penalty(session_id: str, penalty_type: str, turn: int, reason: str) ->
     return new_confidence
 
 
+def apply_reward(session_id: str, reward_type: str, turn: int, reason: str) -> int:
+    """
+    Apply confidence reward (opposite of penalty)
+
+    Returns:
+        int: New confidence after reward
+    """
+    state = load_session_state(session_id)
+    if not state:
+        state = initialize_session_state(session_id)
+
+    reward = CONFIDENCE_GAINS.get(reward_type, 10)
+
+    old_confidence = state["confidence"]
+    new_confidence = min(100, old_confidence + reward)  # Cap at 100
+    state["confidence"] = new_confidence
+
+    # Record reward in evidence ledger
+    reward_entry = {
+        "turn": turn,
+        "tool": "REWARD",
+        "target": reward_type,
+        "boost": reward,
+        "timestamp": datetime.now().isoformat(),
+    }
+    state["evidence_ledger"].append(reward_entry)
+
+    # Record in confidence history
+    history_entry = {
+        "turn": turn,
+        "confidence": new_confidence,
+        "reason": f"{reward_type}: {reason}",
+        "timestamp": datetime.now().isoformat(),
+    }
+    state["confidence_history"].append(history_entry)
+
+    # Save state
+    save_session_state(session_id, state)
+
+    # Update global state
+    try:
+        with open(STATE_FILE, "w") as f:
+            json.dump(
+                {
+                    "current_confidence": new_confidence,
+                    "reinforcement_log": state["evidence_ledger"][-10:],
+                    "last_reset": state["initialized_at"],
+                    "total_gains": sum(
+                        e["boost"] for e in state["evidence_ledger"] if e["boost"] > 0
+                    ),
+                    "total_losses": sum(
+                        e["boost"] for e in state["evidence_ledger"] if e["boost"] < 0
+                    ),
+                    "confidence": new_confidence,
+                },
+                f,
+                indent=2,
+            )
+    except:
+        pass
+
+    return new_confidence
+
+
 # Risk Management
 
 

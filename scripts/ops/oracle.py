@@ -43,6 +43,45 @@ from core import setup_script, finalize, logger, handle_debug
 from oracle import call_oracle_single, OracleAPIError
 
 # ============================================================
+# STANCE MODIFIERS
+# ============================================================
+
+STANCE_MODIFIERS = {
+    "for": """You are advocating FOR this proposal.
+
+Be supportive but HONEST. You MUST be direct and say "this is a bad idea" when it truly is.
+Your job is not blind advocacy - it's to find the BEST case for this approach while acknowledging real flaws.
+
+Focus on:
+- Potential benefits and opportunities
+- How to maximize success if pursued
+- What conditions would make this work
+- Honest assessment of feasibility""",
+
+    "against": """You are arguing AGAINST this proposal.
+
+Be critical but FAIR. You must acknowledge when ideas are fundamentally sound even while critiquing them.
+Your job is not reflexive opposition - it's to find genuine risks and weaknesses.
+
+Focus on:
+- Real risks and failure modes
+- What could go wrong in practice
+- Alternative approaches that might be better
+- Honest assessment of concerns vs paranoia""",
+
+    "neutral": """You are providing BALANCED analysis.
+
+True balance means ACCURATE representation, even when evidence strongly points in one direction.
+Do not artificially manufacture "both sides" when one approach is clearly superior.
+
+Focus on:
+- Objective evaluation of tradeoffs
+- Evidence-based assessment
+- Clear statement when evidence favors one side
+- Honest acknowledgment of uncertainty"""
+}
+
+# ============================================================
 # PERSONA SYSTEM PROMPTS
 # ============================================================
 
@@ -179,7 +218,148 @@ Be ruthless. Be specific. Cite line numbers or specifics from the plan."""
 }
 
 
-def call_oracle(query, persona=None, custom_prompt=None, model="google/gemini-2.0-flash-thinking-exp"):
+def extract_confidence(content):
+    """
+    Extract confidence level from oracle response.
+
+    Returns:
+        str: One of ["exploring", "low", "medium", "high", "certain"] or None
+    """
+    import re
+    content_lower = content.lower()
+
+    # Look for explicit confidence statements
+    confidence_match = re.search(
+        r'confidence[:\s]+(exploring|low|medium|high|very high|certain)',
+        content_lower
+    )
+    if confidence_match:
+        conf = confidence_match.group(1)
+        if conf == "very high":
+            return "certain"
+        return conf
+
+    # Heuristic: check for uncertainty markers
+    uncertainty_markers = ["unclear", "uncertain", "need more", "requires further", "unclear"]
+    certainty_markers = ["definitely", "clearly", "certain", "conclusive", "obvious"]
+
+    if any(marker in content_lower for marker in uncertainty_markers):
+        return "low"
+    if any(marker in content_lower for marker in certainty_markers):
+        return "high"
+
+    # Default to medium if unclear
+    return "medium"
+
+
+def consolidate_findings(findings):
+    """
+    Consolidate multi-step reasoning findings.
+
+    Args:
+        findings: List of (content, reasoning, confidence) tuples
+
+    Returns:
+        str: Consolidated findings
+    """
+    sections = []
+
+    # Add step-by-step analysis
+    for i, (content, reasoning, confidence) in enumerate(findings, 1):
+        sections.append(f"### Step {i} (Confidence: {confidence})")
+        if reasoning:
+            sections.append(f"**Reasoning:** {reasoning}")
+        sections.append(content)
+        sections.append("")
+
+    # Add synthesis
+    sections.append("### Final Synthesis")
+    final_content = findings[-1][0]  # Last step's content
+    final_confidence = findings[-1][2]
+    sections.append(f"**Final Confidence:** {final_confidence}")
+    sections.append(final_content)
+
+    return "\n".join(sections)
+
+
+def call_oracle_multi_step(
+    query,
+    persona=None,
+    custom_prompt=None,
+    stance=None,
+    max_steps=5,
+    target_confidence="high",
+    model="openai/gpt-5.1"
+):
+    """
+    Multi-step reasoning with confidence gating.
+
+    Args:
+        query: User's question/proposal
+        persona: Persona name or None
+        custom_prompt: Custom system prompt or None
+        stance: Stance modifier (for/against/neutral) or None
+        max_steps: Maximum reasoning steps
+        target_confidence: Stop when this confidence reached
+        model: OpenRouter model to use
+
+    Returns:
+        tuple: (consolidated_content, reasoning, title, steps_taken)
+    """
+    # Confidence hierarchy
+    confidence_levels = ["exploring", "low", "medium", "high", "certain"]
+    target_idx = confidence_levels.index(target_confidence)
+
+    findings = []
+    context = []
+
+    logger.info(f"Starting multi-step reasoning (max {max_steps} steps, target: {target_confidence})")
+
+    for step in range(1, max_steps + 1):
+        # Build step prompt
+        if step == 1:
+            step_query = query
+        else:
+            # Include previous findings as context
+            step_query = f"""Previous analysis:
+{chr(10).join(f"Step {i}: {content[:200]}..." for i, (content, _, _) in enumerate(findings, 1))}
+
+Continue deeper analysis:
+{query}
+
+State your confidence level explicitly (exploring/low/medium/high/certain).
+"""
+
+        # Call oracle for this step
+        logger.info(f"  Step {step}/{max_steps}...")
+        content, reasoning, title = call_oracle(
+            query=step_query,
+            persona=persona,
+            custom_prompt=custom_prompt,
+            stance=stance,
+            model=model
+        )
+
+        # Extract confidence
+        confidence = extract_confidence(content)
+        findings.append((content, reasoning, confidence))
+
+        logger.info(f"    Confidence: {confidence}")
+
+        # Check if we've reached target confidence
+        if confidence in confidence_levels:
+            conf_idx = confidence_levels.index(confidence)
+            if conf_idx >= target_idx:
+                logger.info(f"  Target confidence '{target_confidence}' reached at step {step}")
+                break
+
+    # Consolidate findings
+    consolidated = consolidate_findings(findings)
+
+    return consolidated, findings[-1][1], title, len(findings)
+
+
+def call_oracle(query, persona=None, custom_prompt=None, stance=None, model="openai/gpt-5.1"):
     """
     Call OpenRouter API with specified prompt.
 
@@ -187,6 +367,7 @@ def call_oracle(query, persona=None, custom_prompt=None, model="google/gemini-2.
         query: User's question/proposal
         persona: Persona name (judge, critic, skeptic) or None
         custom_prompt: Custom system prompt or None
+        stance: Stance modifier (for/against/neutral) or None
         model: OpenRouter model to use
 
     Returns:
@@ -206,6 +387,24 @@ def call_oracle(query, persona=None, custom_prompt=None, model="google/gemini-2.
         # No system prompt (consult mode)
         system_prompt = None
         title = "🧠 ORACLE CONSULTATION"
+
+    # Apply stance modifier if provided
+    if stance:
+        if stance not in STANCE_MODIFIERS:
+            raise ValueError(f"Unknown stance: {stance}. Choose from: {', '.join(STANCE_MODIFIERS.keys())}")
+
+        stance_text = STANCE_MODIFIERS[stance]
+
+        if system_prompt:
+            # Prepend stance to existing prompt
+            system_prompt = f"{stance_text}\n\n{system_prompt}"
+        else:
+            # Use stance as the only system prompt
+            system_prompt = stance_text
+
+        # Update title to reflect stance
+        stance_emoji = {"for": "👍", "against": "👎", "neutral": "⚖️"}
+        title = f"{stance_emoji.get(stance, '🔮')} {title}"
 
     # Call shared library function
     logger.debug(f"Calling OpenRouter with model: {model}")
@@ -238,6 +437,27 @@ def main():
         help="General consultation (no system prompt)"
     )
 
+    # Stance modifier
+    parser.add_argument(
+        "--stance",
+        choices=STANCE_MODIFIERS.keys(),
+        help=f"Stance modifier: {', '.join(STANCE_MODIFIERS.keys())} (applies to persona)"
+    )
+
+    # Multi-step reasoning
+    parser.add_argument(
+        "--steps",
+        type=int,
+        metavar="N",
+        help="Enable multi-step reasoning (max N steps)"
+    )
+    parser.add_argument(
+        "--target-confidence",
+        choices=["exploring", "low", "medium", "high", "certain"],
+        default="high",
+        help="Stop when this confidence level reached (default: high)"
+    )
+
     # Query
     parser.add_argument(
         "query",
@@ -248,8 +468,8 @@ def main():
     # Model selection
     parser.add_argument(
         "--model",
-        default="google/gemini-2.0-flash-thinking-exp",
-        help="OpenRouter model to use (default: gemini-2.0-flash-thinking-exp)"
+        default="openai/gpt-5.1",
+        help="OpenRouter model to use (default: gpt-5.1)"
     )
 
     args = parser.parse_args()
@@ -272,26 +492,50 @@ def main():
         logger.warning("⚠️  DRY RUN: Would send the following to OpenRouter:")
         logger.info(f"Query: {query}")
         logger.info(f"Persona: {args.persona or 'None (custom or consult)'}")
+        logger.info(f"Stance: {args.stance or 'None'}")
         logger.info(f"Custom prompt: {args.custom_prompt or 'None'}")
+        logger.info(f"Multi-step: {args.steps or 'No (single-shot)'}")
+        if args.steps:
+            logger.info(f"Target confidence: {args.target_confidence}")
         logger.info(f"Model: {args.model}")
         finalize(success=True)
 
     try:
         # Log invocation
         if args.persona:
-            logger.info(f"Consulting {PERSONAS[args.persona]['name']} ({args.model})...")
+            persona_name = PERSONAS[args.persona]['name']
+            stance_label = f" ({args.stance})" if args.stance else ""
+            logger.info(f"Consulting {persona_name}{stance_label} ({args.model})...")
         elif args.custom_prompt:
             logger.info(f"Consulting oracle with custom prompt ({args.model})...")
         else:
             logger.info(f"General consultation ({args.model})...")
 
-        # Call oracle
-        content, reasoning, title = call_oracle(
-            query=query,
-            persona=args.persona,
-            custom_prompt=args.custom_prompt,
-            model=args.model
-        )
+        # Determine if multi-step or single-shot
+        if args.steps:
+            # Multi-step reasoning
+            content, reasoning, title, steps_taken = call_oracle_multi_step(
+                query=query,
+                persona=args.persona,
+                custom_prompt=args.custom_prompt,
+                stance=args.stance,
+                max_steps=args.steps,
+                target_confidence=args.target_confidence,
+                model=args.model
+            )
+
+            # Add step count to title
+            title = f"{title} (Multi-Step: {steps_taken} steps)"
+
+        else:
+            # Single-shot
+            content, reasoning, title = call_oracle(
+                query=query,
+                persona=args.persona,
+                custom_prompt=args.custom_prompt,
+                stance=args.stance,
+                model=args.model
+            )
 
         # Display results
         print("\n" + "=" * 70)

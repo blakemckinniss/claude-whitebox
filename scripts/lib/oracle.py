@@ -23,7 +23,7 @@ class OracleAPIError(Exception):
 
 def call_openrouter(
     messages: List[Dict[str, str]],
-    model: str = "google/gemini-2.0-flash-thinking-exp",
+    model: str = "openai/gpt-5.1",
     timeout: int = 120,
     enable_reasoning: bool = True
 ) -> Dict:
@@ -102,7 +102,7 @@ def call_oracle_single(
     query: str,
     persona: Optional[str] = None,
     custom_prompt: Optional[str] = None,
-    model: str = "google/gemini-2.0-flash-thinking-exp",
+    model: str = "openai/gpt-5.1",
     timeout: int = 120
 ) -> Tuple[str, str, str]:
     """
@@ -150,7 +150,7 @@ def call_oracle_single(
 def call_arbiter(
     proposal: str,
     deliberation_context: str,
-    model: str = "google/gemini-2.0-flash-thinking-exp",
+    model: str = "openai/gpt-5.1",
     timeout: int = 60
 ) -> Dict:
     """
@@ -230,25 +230,25 @@ REASONING: [Your synthesis of the multi-round deliberation, noting conviction pa
 
 
 # Convenience functions for common use cases
-def oracle_judge(query: str, persona_prompt: str, model: str = "google/gemini-2.0-flash-thinking-exp") -> str:
+def oracle_judge(query: str, persona_prompt: str, model: str = "openai/gpt-5.1") -> str:
     """Quick judge consultation"""
     content, _, _ = call_oracle_single(query, custom_prompt=persona_prompt, model=model)
     return content
 
 
-def oracle_critic(query: str, persona_prompt: str, model: str = "google/gemini-2.0-flash-thinking-exp") -> str:
+def oracle_critic(query: str, persona_prompt: str, model: str = "openai/gpt-5.1") -> str:
     """Quick critic consultation"""
     content, _, _ = call_oracle_single(query, custom_prompt=persona_prompt, model=model)
     return content
 
 
-def oracle_skeptic(query: str, persona_prompt: str, model: str = "google/gemini-2.0-flash-thinking-exp") -> str:
+def oracle_skeptic(query: str, persona_prompt: str, model: str = "openai/gpt-5.1") -> str:
     """Quick skeptic consultation"""
     content, _, _ = call_oracle_single(query, custom_prompt=persona_prompt, model=model)
     return content
 
 
-def oracle_consult(query: str, model: str = "google/gemini-2.0-flash-thinking-exp") -> str:
+def oracle_consult(query: str, model: str = "openai/gpt-5.1") -> str:
     """Quick general consultation (no system prompt)"""
     content, _, _ = call_oracle_single(query, model=model)
     return content

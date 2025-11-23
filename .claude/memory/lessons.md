@@ -93,3 +93,5 @@ Council Protocol Gap Analysis: Root cause of vague council output (INVESTIGATE v
 
 ### 2025-11-22 02:36
 The DRY Fallacy in Prompt Engineering: Software engineering's DRY (Don't Repeat Yourself) principle DOES NOT apply to LLM prompts. In code, redundancy = technical debt. In LLM prompts, redundancy = instruction weighting/semantic reinforcement. Gemini's CLAUDE.md critique exposed TWO types of redundancy: (1) Semantic redundancy (protocol philosophy repeated in different contexts for behavioral reinforcement) = KEEP, (2) Structural redundancy (command tables listed 3x identically) + Implementation noise (Python hook names, JSON schemas, file paths) = REMOVE. Result: 856 lines → 325 lines (62% reduction) with 0% information loss by removing structural duplication while preserving semantic weight. Behavior-first language ('You MUST do X' not 'The system will block Y') triggers stronger LLM compliance. Single source of truth for data, but intentional repetition for behavioral rules.
+
+

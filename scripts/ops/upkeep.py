@@ -256,6 +256,72 @@ def check_scratch(dry_run):
         return True
 
 
+def consolidate_lessons(dry_run):
+    """Consolidate auto-learned lessons (Reflexion Memory)"""
+    print("\n" + "=" * 70)
+    print("🧠 [JANITOR] Consolidating Auto-Learned Lessons...")
+    print("=" * 70)
+
+    if dry_run:
+        print("  [DRY RUN] Would consolidate duplicate auto-learned lessons")
+        return True
+
+    try:
+        result = subprocess.run(
+            [sys.executable, os.path.join(_project_root, "scripts", "ops", "consolidate_lessons.py")],
+            capture_output=True,
+            text=True,
+            cwd=_project_root,
+        )
+
+        if result.returncode == 0:
+            print(f"  {result.stdout.strip()}")
+            return True
+        else:
+            print(f"  ⚠️  Consolidation failed (non-critical): {result.stderr[:100]}")
+            return True  # Non-blocking
+    except Exception as e:
+        print(f"  ⚠️  Failed to consolidate lessons: {e}")
+        return True  # Non-blocking
+
+
+def rebuild_scratch_index(dry_run):
+    """Rebuild scratch/ semantic index for associative memory"""
+    print("\n" + "=" * 70)
+    print("🗂️  [JANITOR] Rebuilding Scratch Index...")
+    print("=" * 70)
+
+    if dry_run:
+        print("  [DRY RUN] Would rebuild scratch index")
+        return True
+
+    try:
+        # Run indexer
+        result = subprocess.run(
+            [sys.executable, os.path.join(_project_root, "scratch", "prototype_scratch_indexer.py")],
+            capture_output=True,
+            text=True,
+            cwd=_project_root,
+        )
+
+        if result.returncode == 0:
+            # Extract file count from output
+            import re
+            match = re.search(r'Indexed (\d+) files', result.stdout)
+            if match:
+                count = match.group(1)
+                print(f"  ✅ Rebuilt index with {count} files")
+            else:
+                print("  ✅ Index rebuilt successfully")
+            return True
+        else:
+            print(f"  ⚠️  Index rebuild failed (non-critical): {result.stderr[:100]}")
+            return True  # Non-critical failure
+    except Exception as e:
+        print(f"  ⚠️  Index rebuild failed (non-critical): {e}")
+        return True  # Non-critical failure
+
+
 def log_maintenance(dry_run):
     """Log that maintenance was performed."""
     print("\n" + "=" * 70)
@@ -317,7 +383,13 @@ def main():
         if not check_scratch(args.dry_run):
             issues_found.append("Old scratch files need attention")
 
-        # 4. Log Maintenance
+        # 4. Rebuild Scratch Index
+        rebuild_scratch_index(args.dry_run)
+
+        # 5. Consolidate Auto-Learned Lessons
+        consolidate_lessons(args.dry_run)
+
+        # 6. Log Maintenance
         if not log_maintenance(args.dry_run):
             issues_found.append("Maintenance logging failed")
 
