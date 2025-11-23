@@ -4,4 +4,4 @@ argument-hint: [question]
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/consult.py "$ARGUMENTS"`
+!`python3 scripts/ops/oracle.py "$ARGUMENTS"`

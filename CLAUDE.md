@@ -39,11 +39,11 @@ Examples:
 | Script | When YOU Run It | What It Returns |
 |--------|-----------------|-----------------|
 | `python3 scripts/ops/council.py "<proposal>"` | Architecture decisions, library choices, migrations, strategy | Multi-round deliberation → PROCEED/CONDITIONAL_GO/STOP |
-| `python3 scripts/ops/judge.py "<proposal>"` | Quick ROI check before starting work | Value/cost assessment |
-| `python3 scripts/ops/critic.py "<idea>"` | Before agreeing with user's plan | Attack assumptions, find flaws |
-| `python3 scripts/ops/skeptic.py "<proposal>"` | Before implementing risky changes | Failure modes, edge cases |
+| `python3 scripts/ops/oracle.py --persona judge "<proposal>"` | Quick ROI check before starting work | Value/cost assessment |
+| `python3 scripts/ops/oracle.py --persona critic "<idea>"` | Before agreeing with user's plan | Attack assumptions, find flaws |
+| `python3 scripts/ops/oracle.py --persona skeptic "<proposal>"` | Before implementing risky changes | Failure modes, edge cases |
 | `python3 scripts/ops/think.py "<problem>"` | Overwhelmed by complexity | Sequential decomposition |
-| `python3 scripts/ops/consult.py "<question>"` | Need expert knowledge beyond training data | High-reasoning model advice |
+| `python3 scripts/ops/oracle.py "<question>"` | Need expert knowledge beyond training data | High-reasoning model advice |
 
 ### 🔎 Investigation (Information Gathering)
 | Script | When YOU Run It | What It Returns |
@@ -429,8 +429,8 @@ At the end of every significant response, append this block:
 **Decision Making (You run these):**
 ```bash
 python3 scripts/ops/council.py "<proposal>"          # Multi-round deliberation
-python3 scripts/ops/judge.py "<proposal>"            # Quick ROI check
-python3 scripts/ops/critic.py "<idea>"               # Red team review
+python3 scripts/ops/oracle.py --persona judge "<proposal>"            # Quick ROI check
+python3 scripts/ops/oracle.py --persona critic "<idea>"               # Red team review
 python3 scripts/ops/think.py "<problem>"             # Decompose complexity
 ```
 

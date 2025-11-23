@@ -4,4 +4,4 @@ argument-hint: [proposal]
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/skeptic.py "$ARGUMENTS"`
+!`python3 scripts/ops/oracle.py --persona skeptic "$ARGUMENTS"`

@@ -4,4 +4,4 @@ argument-hint: [idea]
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/critic.py "$ARGUMENTS"`
+!`python3 scripts/ops/oracle.py --persona critic "$ARGUMENTS"`
