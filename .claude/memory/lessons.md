@@ -101,3 +101,4 @@ The DRY Fallacy in Prompt Engineering: Software engineering's DRY (Don't Repeat 
 Project Architecture: Created projects/ directory as USER ZONE for future projects. Template structure: projects/.template/{src,tests,docs,data}. Projects are isolated from .claude/ implementation (gitignored except template). Architecture zones now: projects/ (user work), scratch/ (temp), scripts/ops/ (prod tools), .claude/memory/ (brain), .claude/hooks/ (system). Each user project manages its own git repo independently.
 
 
+

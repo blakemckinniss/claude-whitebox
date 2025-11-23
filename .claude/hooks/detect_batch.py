@@ -88,7 +88,7 @@ if batch_detected:
                         "PERFORMANCE PROTOCOL: Use `scripts.lib.parallel` to multi-thread this operation.\n"
                         "Example:\n"
                         "  from parallel import run_parallel\n"
-                        '  results = run_parallel(process_func, items, max_workers=10, desc="Processing")'
+                        '  results = run_parallel(process_func, items, max_workers=50, desc="Processing")'
                     ),
                 }
             }

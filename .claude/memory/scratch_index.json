@@ -75,6 +75,17 @@
       "optimization_implementation_summary"
     ]
   },
+  "scratch/EXEC_SUMMARY.md": {
+    "size": 3329,
+    "modified": 1763915724.5811124,
+    "type": ".md",
+    "decisions": [
+      "Start with subprocess timeouts (30min, high safety), then tackle hook consolidation.\n\n---\n\n**All analysis complete. Ready to implement fixes.**"
+    ],
+    "keywords": [
+      "exec_summary"
+    ]
+  },
   "scratch/test_pattern_detection.py": {
     "size": 9281,
     "modified": 1763768446.8898969,
@@ -99,6 +110,15 @@
     ],
     "keywords": [
       "test_pattern_detection"
+    ]
+  },
+  "scratch/OPTIMIZATION_ACTION_PLAN.md": {
+    "size": 10430,
+    "modified": 1763915694.0811102,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "optimization_action_plan"
     ]
   },
   "scratch/performance_protocol_design.md": {
@@ -155,6 +175,15 @@
     ],
     "keywords": [
       "agent_vs_script_analysis"
+    ]
+  },
+  "scratch/QUICK_WINS.md": {
+    "size": 1609,
+    "modified": 1763915741.7131128,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "quick_wins"
     ]
   },
   "scratch/speculative_council_patch.py": {
@@ -254,6 +283,19 @@
     "decisions": [],
     "keywords": [
       "implementation_summary"
+    ]
+  },
+  "scratch/threading_optimization_summary.md": {
+    "size": 10983,
+    "modified": 1763915582.1691027,
+    "type": ".md",
+    "decisions": [
+      "Recommendation s",
+      "Conclusion **Current Performance:**\n- Hooks: 1050ms latency per prompt (CRITICAL)\n- Agents: Sequential (suboptimal)\n- Reliability: 32 timeout risks\n\n**Optimized Performance:**\n- Hooks: 350ms (consolid",
+      "Implement Option B immediately (no Claude Code changes required), pursue Option A long-term.\n\n---\n\n### 2. Subprocess Timeout Missing (PRIORITY 2)\n\n**Problem:**\n- 32 subprocess calls across codebase la"
+    ],
+    "keywords": [
+      "threading_optimization_summary"
     ]
   },
   "scratch/fix_oracle_models.py": {
@@ -530,6 +572,40 @@
       "unification_recommendation"
     ]
   },
+  "scratch/analyze_script_patterns.py": {
+    "size": 11012,
+    "modified": 1763915504.601098,
+    "type": ".py",
+    "functions": [
+      "analyze_script",
+      "generate_report",
+      "main",
+      "__init__",
+      "analyze",
+      "check_sequential_loops",
+      "check_subprocess_usage",
+      "check_parallel_usage",
+      "check_threading_patterns",
+      "check_file_iteration"
+    ],
+    "classes": [
+      "ScriptAnalysis"
+    ],
+    "imports": [
+      "re",
+      "pathlib",
+      "typing",
+      "sys",
+      "parallel"
+    ],
+    "patterns": [
+      "parallel_usage",
+      "decisions"
+    ],
+    "keywords": [
+      "analyze_script_patterns"
+    ]
+  },
   "scratch/epistemology_expanded.py": {
     "size": 14211,
     "modified": 1763793329.051335,
@@ -552,6 +628,38 @@
     ],
     "keywords": [
       "epistemology_expanded"
+    ]
+  },
+  "scratch/hook_parallelization_prototype.py": {
+    "size": 8386,
+    "modified": 1763915428.9610932,
+    "type": ".py",
+    "functions": [
+      "execute_hook",
+      "categorize_hooks",
+      "execute_hooks_parallel",
+      "benchmark_comparison",
+      "generate_implementation_guide",
+      "main",
+      "__init__"
+    ],
+    "classes": [
+      "HookResult"
+    ],
+    "imports": [
+      "json",
+      "subprocess",
+      "time",
+      "concurrent.futures",
+      "typing",
+      "pathlib"
+    ],
+    "patterns": [
+      "parallel_usage",
+      "hooks"
+    ],
+    "keywords": [
+      "hook_parallelization_prototype"
     ]
   },
   "scratch/swarm_integration.md": {
@@ -758,6 +866,15 @@
       "test_hook_output"
     ]
   },
+  "scratch/README_THREADING_AUDIT.md": {
+    "size": 7060,
+    "modified": 1763915962.3131263,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "readme_threading_audit"
+    ]
+  },
   "scratch/IMPLEMENTATION_COMPLETE.md": {
     "size": 7371,
     "modified": 1763853785.7826037,
@@ -842,6 +959,15 @@
     ],
     "keywords": [
       "pre_advice"
+    ]
+  },
+  "scratch/THREADING_BEST_PRACTICES.md": {
+    "size": 6532,
+    "modified": 1763915898.853122,
+    "type": ".md",
+    "decisions": [],
+    "keywords": [
+      "threading_best_practices"
     ]
   },
   "scratch/test_epistemology.py": {
@@ -985,6 +1111,11 @@
     "keywords": [
       "agent_usage_diagnostic"
     ]
+  },
+  "scratch/script_analysis_detailed.txt": {
+    "size": 7667,
+    "modified": 1763915508.2890983,
+    "type": ".txt"
   },
   "scratch/REFLEXION_MEMORY_QUICKSTART.md": {
     "size": 7242,
@@ -1635,6 +1766,31 @@
     ],
     "keywords": [
       "test_post_tool_suggester"
+    ]
+  },
+  "scratch/add_subprocess_timeouts.py": {
+    "size": 5727,
+    "modified": 1763915617.0411038,
+    "type": ".py",
+    "functions": [
+      "find_subprocess_calls_without_timeout",
+      "add_timeout_to_line",
+      "fix_file",
+      "main"
+    ],
+    "classes": [],
+    "imports": [
+      "re",
+      "sys",
+      "pathlib",
+      "typing",
+      "argparse"
+    ],
+    "patterns": [
+      "verification"
+    ],
+    "keywords": [
+      "add_subprocess_timeouts"
     ]
   },
   "scratch/generate_slash_commands.py": {

@@ -202,7 +202,7 @@ MANDATORY CODE PATTERN:
   results = run_parallel(
       process_item,
       items,
-      max_workers=10,
+      max_workers=50,
       desc="Processing items"
   )
 
