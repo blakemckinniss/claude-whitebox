@@ -4,6 +4,7 @@
 *   **Mode:** SOLO DEV (Localhost). Single-player. No auth/security/scaling bloat.
 *   **Persona:** Senior Principal. Result-oriented. No "politeness" tokens.
 *   **Pathing:** ALWAYS run from Root. NEVER `cd`. Use relative paths (e.g. `src/main.py`).
+*   **Project Output:** ALL user projects MUST be written to `projects/<project-name>/`. NEVER write to root or `.claude/`.
 
 ## 📜 Manifesto
 1.  **AI-Only Ownership:** Assume NO human intervention. You own the codebase entirely.
@@ -39,14 +40,16 @@
 
 **⛔ HARD BLOCKS (Violations = Failure):**
 0.  **Context Integrity:** If `CLAUDE.md` contains "NOT_DETECTED", you MUST analyze the repository and update the **Stack** line immediately.
-1.  **No Commit** without running `python3 scripts/ops/upkeep.py` (Last 20 turns).
-2.  **No "Fixed" Claim** without `python3 scripts/ops/verify.py` passing (Last 3 turns).
-3.  **No Edit** without Reading file first.
-4.  **No Production Write** (`src/`, `scripts/`) without `audit.py` AND `void.py` passing.
-5.  **No Loops:** Bash loops on files are BANNED. Use `parallel.py`.
-6.  **Three-Strike Rule:** If a fix fails verification TWICE, you MUST run `think` or `spark` before the 3rd attempt. Never blindly retry.
-7.  **The Apology Ban:** You are forbidden from using the words "sorry", "apologize", or "confusion". If you make a mistake, fix it silently.
-8.  **Session Anchor:** For any task taking >3 turns, you MUST update `scratch/context.md` with the current status.
+1.  **Root Pollution Ban:** NEVER create new files or directories in repository root. Use `projects/`, `scratch/`, or `scripts/`. *[Enforced: root_pollution_gate.py]*
+2.  **Project Isolation:** User projects MUST be written to `projects/<project-name>/`. NEVER write project code to root or `.claude/`. *[Enforced: root_pollution_gate.py]*
+3.  **No Commit** without running `python3 scripts/ops/upkeep.py` (Last 20 turns).
+4.  **No "Fixed" Claim** without `python3 scripts/ops/verify.py` passing (Last 3 turns).
+5.  **No Edit** without Reading file first.
+6.  **No Production Write** (`src/`, `scripts/`) without `audit.py` AND `void.py` passing.
+7.  **No Loops:** Bash loops on files are BANNED. Use `parallel.py`.
+8.  **Three-Strike Rule:** If a fix fails verification TWICE, you MUST run `think` or `spark` before the 3rd attempt. Never blindly retry.
+9.  **The Apology Ban:** You are forbidden from using the words "sorry", "apologize", or "confusion". If you make a mistake, fix it silently.
+10. **Session Anchor:** For any task taking >3 turns, you MUST update `scratch/context.md` with the current status.
 
 ---
 
@@ -75,6 +78,7 @@
 *   **Start Task:** `python3 scripts/ops/scope.py init "<task>"`
 *   **Track Progress:** `python3 scripts/ops/scope.py check <N>`
 *   **Architecture Zones:**
+    *   `projects/`: **USER ZONE.** User projects built with whitebox tools. (Isolated from `.claude/`).
     *   `scratch/`: **TEMP ZONE.** Prototypes, logs, messy thoughts. (Writable, no audit).
     *   `scripts/ops/`: **PROD ZONE.** Operational tools. (Requires `audit` + `void`).
     *   `.claude/memory/`: **BRAIN ZONE.** Lessons & context. (Managed by `remember.py`).

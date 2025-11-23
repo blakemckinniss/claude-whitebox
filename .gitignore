@@ -2,6 +2,11 @@
 scratch/*
 !scratch/.gitkeep
 
+# User projects (each project manages its own git)
+projects/*
+!projects/.template
+!projects/README.md
+
 # Python cache
 __pycache__/
 *.py[cod]
