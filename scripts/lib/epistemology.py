@@ -5,8 +5,11 @@ Provides utilities for the Dual-Metric Epistemological Protocol
 """
 import json
 import re
+import logging
+import fcntl
+import time
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple
 
 # Paths
@@ -774,6 +777,9 @@ def update_confidence(
     }
     state["confidence_history"].append(history_entry)
 
+    # Prune history to prevent unbounded growth
+    state = prune_session_history(state)
+
     # Save state
     save_session_state(session_id, state)
 
@@ -838,6 +844,9 @@ def apply_penalty(session_id: str, penalty_type: str, turn: int, reason: str) ->
     }
     state["confidence_history"].append(history_entry)
 
+    # Prune history to prevent unbounded growth
+    state = prune_session_history(state)
+
     # Save state
     save_session_state(session_id, state)
 
@@ -901,6 +910,9 @@ def apply_reward(session_id: str, reward_type: str, turn: int, reason: str) -> i
         "timestamp": datetime.now().isoformat(),
     }
     state["confidence_history"].append(history_entry)
+
+    # Prune history to prevent unbounded growth
+    state = prune_session_history(state)
 
     # Save state
     save_session_state(session_id, state)
@@ -1210,3 +1222,155 @@ def check_command_prerequisite(
             )
 
     return True, None
+
+
+# ==============================================================================
+# RETENTION POLICY & CONCURRENT SAFETY ADDITIONS
+# Added 2025-11-23 to fix root causes identified by void.py analysis
+# ==============================================================================
+
+# Constants for retention policy
+MAX_SESSION_AGE_DAYS = 7
+MAX_HISTORY_LENGTH = 100
+
+# Setup logging (errors only, don't pollute stdout)
+logging.basicConfig(
+    level=logging.WARNING,
+    format='%(asctime)s | %(levelname)s | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+
+class FileLock:
+    """
+    Context manager for file locking to prevent concurrent write corruption.
+
+    Usage:
+        with FileLock(file_path):
+            with open(file_path, 'w') as f:
+                json.dump(data, f)
+    """
+
+    def __init__(self, file_path: Path, timeout: float = 2.0):
+        self.file_path = file_path
+        self.timeout = timeout
+        self.lock_file = file_path.with_suffix(file_path.suffix + '.lock')
+        self.fd = None
+
+    def __enter__(self):
+        """Acquire exclusive lock with timeout"""
+        start_time = time.time()
+        while True:
+            try:
+                self.lock_file.parent.mkdir(parents=True, exist_ok=True)
+                self.fd = open(self.lock_file, 'w')
+                fcntl.flock(self.fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return self
+            except (IOError, OSError):
+                if time.time() - start_time > self.timeout:
+                    logging.error(f"Lock timeout for {self.lock_file}")
+                    raise TimeoutError(f"Could not acquire lock for {self.file_path}")
+                time.sleep(0.05)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Release lock"""
+        if self.fd:
+            try:
+                fcntl.flock(self.fd.fileno(), fcntl.LOCK_UN)
+                self.fd.close()
+                self.lock_file.unlink(missing_ok=True)
+            except Exception as e:
+                logging.warning(f"Error releasing lock: {e}")
+
+
+def prune_session_history(state: Dict, max_length: int = MAX_HISTORY_LENGTH) -> Dict:
+    """
+    Prune evidence_ledger, confidence_history, risk_events to prevent unbounded growth.
+
+    Args:
+        state: Session state dict
+        max_length: Maximum entries to keep
+
+    Returns:
+        Modified state dict with pruned history
+    """
+    if "evidence_ledger" in state and len(state["evidence_ledger"]) > max_length:
+        old_len = len(state["evidence_ledger"])
+        state["evidence_ledger"] = state["evidence_ledger"][-max_length:]
+        logging.info(f"Pruned evidence_ledger: {old_len} → {max_length}")
+
+    if "confidence_history" in state and len(state["confidence_history"]) > max_length:
+        old_len = len(state["confidence_history"])
+        state["confidence_history"] = state["confidence_history"][-max_length:]
+        logging.info(f"Pruned confidence_history: {old_len} → {max_length}")
+
+    if "risk_events" in state and len(state["risk_events"]) > max_length:
+        old_len = len(state["risk_events"])
+        state["risk_events"] = state["risk_events"][-max_length:]
+        logging.info(f"Pruned risk_events: {old_len} → {max_length}")
+
+    return state
+
+
+def cleanup_old_sessions(max_age_days: int = MAX_SESSION_AGE_DAYS, dry_run: bool = False) -> Dict[str, list]:
+    """
+    Delete session state files older than max_age_days.
+
+    Args:
+        max_age_days: Maximum age in days
+        dry_run: If True, only report what would be deleted
+
+    Returns:
+        Dict with 'deleted', 'kept', 'errors' lists
+    """
+    cutoff_date = datetime.now() - timedelta(days=max_age_days)
+    deleted = []
+    kept = []
+    errors = []
+
+    for session_file in MEMORY_DIR.glob("session_*_state.json"):
+        try:
+            mtime = datetime.fromtimestamp(session_file.stat().st_mtime)
+            age_days = (datetime.now() - mtime).days
+
+            if mtime < cutoff_date:
+                if dry_run:
+                    logging.info(f"[DRY-RUN] Would delete: {session_file.name} ({age_days} days old)")
+                else:
+                    session_file.unlink()
+                    logging.info(f"Deleted old session: {session_file.name} ({age_days} days old)")
+                deleted.append(session_file.name)
+            else:
+                kept.append(session_file.name)
+
+        except Exception as e:
+            logging.error(f"Error processing {session_file.name}: {e}")
+            errors.append(f"{session_file.name}: {str(e)}")
+
+    return {"deleted": deleted, "kept": kept, "errors": errors}
+
+
+def delete_session_state(session_id: str) -> bool:
+    """
+    Delete session state file for given session_id.
+    Fills the CRUD gap (create/read/update existed, delete was missing).
+
+    Args:
+        session_id: Session identifier
+
+    Returns:
+        bool: True if deleted, False if not found or error
+    """
+    state_file = get_session_state_file(session_id)
+
+    if not state_file.exists():
+        logging.warning(f"Session file not found: {session_id}")
+        return False
+
+    try:
+        state_file.unlink()
+        logging.info(f"Deleted session: {session_id}")
+        return True
+    except Exception as e:
+        logging.error(f"Error deleting session {session_id}: {e}")
+        return False

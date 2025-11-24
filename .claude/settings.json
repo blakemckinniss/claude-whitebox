@@ -478,7 +478,8 @@
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_janitor.py"
           }
         ]
-      }
+      },
+      ".claude/hooks/session_cleanup.py"
     ]
   }
 }
