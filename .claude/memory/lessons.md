@@ -144,3 +144,6 @@ Fixed PreToolUse:Bash hook errors. Three hooks had incorrect output formats: (1)
 
 ### 2025-11-23 21:16
 ASSUMPTION FIREWALL PROTOCOL - User input = ground truth. If user provides working code/commands (curl, examples), TEST THEM FIRST before researching alternatives. Research = supplementary context, never override user examples. When research contradicts user input, HALT and ask which is correct. Never implement solutions that diverge from user-provided working examples without explicit confirmation. See scratch/assumption_failure_analysis.md for catastrophic failure case study.
+
+### 2025-11-23 21:55
+Root cause analysis pattern: When void.py reveals gaps (CRUD asymmetry, error handling, retention policy), look deeper than surface symptoms. Example: Memory directory unbounded growth was SYMPTOM (fixed with gitignore), but ROOT CAUSE was missing cleanup/pruning in epistemology.py. Solution: Created retention policy scripts (scratch/fix_epistemology_gaps.py) and documented migration path (scratch/epistemology_patches.py). Fix the library, not just the symptoms.
