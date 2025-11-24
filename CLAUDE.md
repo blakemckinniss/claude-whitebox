@@ -104,6 +104,7 @@
 *   **Command Check:** `verify command_success "<command>"`
 *   **Security:** `audit <file>` (Blocks secrets/injection).
 *   **Completeness:** `void <file>` (Blocks stubs/TODOs).
+*   **Auto-Void:** Automatic completeness checks on Stop lifecycle (confidence-based).
 
 ### 5. Memory & Upkeep
 *   **Store Lesson:** `remember add [lessons|decisions] "<text>"`
