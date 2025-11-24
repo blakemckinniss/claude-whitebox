@@ -3,7 +3,7 @@
   "total_turns": 0,
   "patterns_detected": {
     "ignorance_coding": {
-      "count": 168,
+      "count": 169,
       "avg_turns_wasted": 3.0,
       "scripts_written": 0,
       "manual_bypasses": 0,
