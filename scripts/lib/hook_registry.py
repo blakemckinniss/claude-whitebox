@@ -125,6 +125,8 @@ class HookRegistry:
         Returns:
             Dict with validation results
         """
+        import sys
+
         health = {
             "syntax_valid": False,
             "imports_valid": False,
@@ -153,7 +155,6 @@ class HookRegistry:
             return health  # Skip further checks if syntax invalid
 
         # 2. Import check (try importing the module)
-        import sys
         sys.path.insert(0, str(self.hooks_dir))
         try:
             module_name = hook_path.stem
@@ -219,20 +220,33 @@ class HookRegistry:
 
         return categorized
 
-    def save_registry(self, hooks: Dict[str, dict]):
-        """Persist registry to disk."""
-        registry = {
-            "last_updated": datetime.now().isoformat(),
-            "total_hooks": len(hooks),
-            "hooks": hooks,
-            "by_event_type": self.categorize_by_event(hooks)
-        }
+    def save_registry(self, hooks: Dict[str, dict]) -> bool:
+        """
+        Persist registry to disk.
 
-        # Ensure directory exists
-        self.registry_path.parent.mkdir(parents=True, exist_ok=True)
+        Returns:
+            bool: True if save succeeded, False otherwise
+        """
+        try:
+            registry = {
+                "last_updated": datetime.now().isoformat(),
+                "total_hooks": len(hooks),
+                "hooks": hooks,
+                "by_event_type": self.categorize_by_event(hooks)
+            }
 
-        with open(self.registry_path, 'w') as f:
-            json.dump(registry, f, indent=2)
+            # Ensure directory exists
+            self.registry_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(self.registry_path, 'w') as f:
+                json.dump(registry, f, indent=2)
+
+            return True
+
+        except (IOError, OSError, PermissionError) as e:
+            # Log error but don't crash
+            print(f"Error saving registry: {e}", file=sys.stderr)
+            return False
 
     def load_registry(self) -> Optional[dict]:
         """Load registry from disk."""
