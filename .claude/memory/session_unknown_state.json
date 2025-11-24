@@ -1,8 +1,8 @@
 {
   "session_id": "unknown",
-  "confidence": 20,
+  "confidence": 0,
   "risk": 0,
-  "turn_count": 6,
+  "turn_count": 0,
   "tokens_estimated": 0,
   "context_window_percent": 0,
   "evidence_ledger": [],
@@ -12,145 +12,9 @@
       "turn": 0,
       "confidence": 0,
       "reason": "session_start",
-      "timestamp": "2025-11-23T21:14:48.322310"
-    },
-    {
-      "turn": 1,
-      "confidence": 20,
-      "reason": "initial_assessment",
-      "timestamp": "2025-11-23T21:16:27.728562"
+      "timestamp": "2025-11-23T21:26:57.053156"
     }
   ],
   "read_files": {},
-  "initialized_at": "2025-11-23T21:14:48.322321",
-  "bash_calls": [
-    {
-      "turn": 0,
-      "timestamp": 1763950552.84679
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950554.7516851
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950562.0507002
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950578.9201584
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950580.8072455
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950587.363268
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950595.015378
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950604.126224
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950739.5009139
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950745.2597327
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950782.3974645
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950796.6248953
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950808.2446835
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950824.2899506
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950828.2794812
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950852.08911
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950860.4105723
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950866.6703079
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950875.0325341
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950890.8968828
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950903.9059448
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950927.148441
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950942.645671
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950947.2150512
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763950995.581804
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763951017.3827639
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763951025.820454
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763951041.8381965
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763951125.244186
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763951136.5998583
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763951170.76341
-    },
-    {
-      "turn": 0,
-      "timestamp": 1763951190.9506757
-    }
-  ]
+  "initialized_at": "2025-11-23T21:26:57.053170"
 }

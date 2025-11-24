@@ -917,3 +917,6 @@
 {"timestamp": 1763951138.1585982, "session_id": "c43d7a38-a525-4300-b9a5-05107061ffec", "tool": "Bash", "event": "tool_use"}
 {"timestamp": 1763951141.9734788, "session_id": "bb4a1eac-b752-4187-8c42-30ce71700ea5", "tool": "Edit", "event": "tool_use"}
 {"timestamp": 1763951171.4299235, "session_id": "bb4a1eac-b752-4187-8c42-30ce71700ea5", "tool": "Bash", "event": "tool_use"}
+{"timestamp": 1763951191.5798404, "session_id": "59b708ee-80c9-4bd2-aadb-8c4f97517581", "tool": "Bash", "event": "tool_use"}
+{"timestamp": 1763951207.2947161, "session_id": "7d676c78-9e92-4e77-8e1f-57561f2da04a", "tool": "Write", "event": "tool_use"}
+{"timestamp": 1763951215.3122404, "session_id": "59b708ee-80c9-4bd2-aadb-8c4f97517581", "tool": "Bash", "event": "tool_use"}
