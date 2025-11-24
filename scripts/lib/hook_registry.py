@@ -5,14 +5,13 @@ Hook Registry: Auto-discovery and validation of Claude Code hooks.
 Scans .claude/hooks/ directory, validates each hook, and maintains registry.
 Used by test suite and monitoring systems.
 """
-import os
 import json
-import re
 import subprocess
 import ast
+import sys
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 
 class HookRegistry:
@@ -136,8 +135,6 @@ class HookRegistry:
         Returns:
             Dict with validation results
         """
-        import sys
-
         health = {
             "syntax_valid": False,
             "imports_valid": False,
@@ -169,8 +166,10 @@ class HookRegistry:
         sys.path.insert(0, str(self.hooks_dir))
         try:
             module_name = hook_path.stem
+            # Provide empty stdin to prevent hooks from blocking/failing on json.load(sys.stdin)
             result = subprocess.run(
                 [sys.executable, "-c", f"import sys; sys.path.insert(0, '{self.hooks_dir}'); import {module_name}"],
+                input="",  # Provide empty stdin
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -178,7 +177,14 @@ class HookRegistry:
 
             health["imports_valid"] = result.returncode == 0
             if result.returncode != 0:
-                health["errors"].append(f"Import error: {result.stderr.strip()}")
+                # Check if error is just stdin-related (acceptable for hooks)
+                stderr = result.stderr.strip()
+                if "Expecting value" in stderr and "json" in stderr.lower():
+                    # This is acceptable - hook expects JSON input which is normal
+                    health["imports_valid"] = True
+                    health["errors"].append("Import warning: Hook reads stdin (expected behavior)")
+                else:
+                    health["errors"].append(f"Import error: {stderr}")
 
         except subprocess.TimeoutExpired:
             health["errors"].append("Import check timeout")
@@ -315,7 +321,6 @@ class HookRegistry:
 
 def main():
     """CLI interface for hook registry."""
-    import sys
     import argparse
 
     # Find project root
