@@ -11433,3 +11433,7 @@
 {"timestamp": 1763958908.2296038, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
 {"timestamp": 1763958908.7880564, "session_id": "43f486b3-78a1-4fb6-89b0-32c872afa20c", "tool": "Write", "event": "tool_use"}
 {"timestamp": 1763958909.1461368, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763958909.792178, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763958909.8075597, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763958910.0986388, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763958910.1790733, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
