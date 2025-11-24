@@ -50,7 +50,17 @@ def parse_transcript(transcript_path: str) -> List[Dict]:
             for line in f:
                 if line.strip():
                     messages.append(json.loads(line))
-    except (FileNotFoundError, json.JSONDecodeError):
+    except FileNotFoundError:
+        print(
+            f"⚠️  WARNING: Transcript file not found: {transcript_path}",
+            file=sys.stderr,
+        )
+        return []
+    except json.JSONDecodeError as e:
+        print(
+            f"⚠️  WARNING: Transcript file corrupted: {e} - completeness checks skipped",
+            file=sys.stderr,
+        )
         return []
     return messages
 
@@ -118,9 +128,16 @@ def extract_modified_python_files(
     return sorted(list(modified_files))
 
 
-def run_void_check(file_path: Path, project_root: Path) -> Optional[Dict]:
+def run_void_check(
+    file_path: Path, project_root: Path, timeout: int = 30
+) -> Optional[Dict]:
     """
     Run void.py on a file (stub-only mode to avoid Oracle costs).
+
+    Args:
+        file_path: Path to file to check
+        project_root: Project root directory
+        timeout: Subprocess timeout in seconds (default: 30)
 
     Returns:
         Dict with results or None if check failed:
@@ -133,6 +150,11 @@ def run_void_check(file_path: Path, project_root: Path) -> Optional[Dict]:
     """
     void_script = project_root / "scripts" / "ops" / "void.py"
     if not void_script.exists():
+        # CRITICAL: void.py is missing - warn to stderr
+        print(
+            f"⚠️  WARNING: void.py not found at {void_script} - completeness checks disabled",
+            file=sys.stderr,
+        )
         return None
 
     try:
@@ -140,7 +162,7 @@ def run_void_check(file_path: Path, project_root: Path) -> Optional[Dict]:
             [sys.executable, str(void_script), str(file_path), "--stub-only"],
             capture_output=True,
             text=True,
-            timeout=10,
+            timeout=timeout,
             cwd=str(project_root),
         )
 
@@ -167,7 +189,17 @@ def run_void_check(file_path: Path, project_root: Path) -> Optional[Dict]:
             "stubs": stubs,
         }
 
-    except (subprocess.TimeoutExpired, subprocess.SubprocessError):
+    except subprocess.TimeoutExpired:
+        print(
+            f"⚠️  WARNING: void.py timed out on {file_path.name} (>{timeout}s) - skipping",
+            file=sys.stderr,
+        )
+        return None
+    except subprocess.SubprocessError as e:
+        print(
+            f"⚠️  WARNING: void.py failed on {file_path.name}: {e}",
+            file=sys.stderr,
+        )
         return None
 
 
@@ -237,6 +269,10 @@ def main():
         # Default to CERTAINTY policy (safe fallback)
         confidence = 75
         tier_name = "CERTAINTY"
+        print(
+            f"ℹ️  INFO: Session state not found, using default policy (CERTAINTY, 75%)",
+            file=sys.stderr,
+        )
     else:
         confidence = state.get("confidence", 0)
         tier_name, _ = get_confidence_tier(confidence)
