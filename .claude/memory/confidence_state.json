@@ -1,5 +1,5 @@
 {
-  "current_confidence": 2,
+  "current_confidence": 4,
   "reinforcement_log": [
     {
       "turn": 0,
@@ -21,10 +21,17 @@
       "target": "tier_violation",
       "boost": -10,
       "timestamp": "2025-11-23T23:33:53.219302"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "/test",
+      "boost": 2,
+      "timestamp": "2025-11-23T23:33:53.329019"
     }
   ],
   "last_reset": "2025-11-23T23:33:52.886544",
-  "total_gains": 12,
+  "total_gains": 14,
   "total_losses": -10,
-  "confidence": 2
+  "confidence": 4
 }
