@@ -7,10 +7,24 @@
       "target": "tier_violation",
       "boost": -10,
       "timestamp": "2025-11-24T08:28:53.837291"
+    },
+    {
+      "turn": 0,
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-24T08:28:53.943853"
+    },
+    {
+      "turn": 0,
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-24T08:28:54.108394"
     }
   ],
   "last_reset": "2025-11-24T08:28:53.835063",
   "total_gains": 0,
-  "total_losses": -10,
+  "total_losses": -30,
   "confidence": 0
 }
