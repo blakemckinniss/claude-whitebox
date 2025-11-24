@@ -10,7 +10,7 @@
       "baseline_threshold": 3
     },
     "blocking_on_slow": {
-      "count": 1,
+      "count": 2,
       "avg_turns_wasted": 1.0,
       "scripts_written": 0,
       "manual_bypasses": 0,
