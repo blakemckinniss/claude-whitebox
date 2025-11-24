@@ -1,5 +1,5 @@
 {
-  "current_confidence": 0,
+  "current_confidence": 12,
   "reinforcement_log": [
     {
       "turn": 0,
@@ -7,10 +7,31 @@
       "target": "tier_violation",
       "boost": -10,
       "timestamp": "2025-11-23T23:30:01.900216"
+    },
+    {
+      "turn": 0,
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-23T23:30:01.967879"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "/test",
+      "boost": 10,
+      "timestamp": "2025-11-23T23:30:02.023717"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "/test",
+      "boost": 2,
+      "timestamp": "2025-11-23T23:30:02.031970"
     }
   ],
   "last_reset": "2025-11-23T23:30:01.664663",
-  "total_gains": 0,
-  "total_losses": -10,
-  "confidence": 0
+  "total_gains": 12,
+  "total_losses": -20,
+  "confidence": 12
 }
