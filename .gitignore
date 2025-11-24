@@ -19,3 +19,21 @@ __pycache__/
 .venv
 env/
 venv/
+
+# Claude Memory: Runtime State (Session-specific, per-user)
+.claude/memory/session_*_state.json
+.claude/memory/active_context.md
+.claude/memory/upkeep_log.md
+.claude/memory/performance_dashboard.md
+.claude/memory/*_telemetry.jsonl
+.claude/memory/debt_ledger.jsonl
+.claude/memory/context_audit/
+.claude/memory/deliberations/
+.claude/memory/session_digests/
+.claude/memory/*_enforcement_state.json
+.claude/memory/tier_gate_state.json
+.claude/memory/confidence_state.json
+.claude/memory/auto_commit_state.json
+.claude/memory/circuit_breaker_state.json
+.claude/memory/circuit_breaker_incidents.jsonl
+.claude/memory/hook_test_results.json

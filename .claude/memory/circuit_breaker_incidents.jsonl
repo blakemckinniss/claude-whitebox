@@ -1,2 +1,0 @@
-{"timestamp": "2025-11-23T14:31:36.973753", "circuit": "unknown", "reason": "Test failure 3", "turn": 3, "metadata": {"trip_count": 1, "backoff_level": 1, "cooldown_seconds": 20}}
-{"timestamp": "2025-11-23T14:51:42.549972", "circuit": "unknown", "reason": "Test failure 3", "turn": 3, "metadata": {"trip_count": 1, "backoff_level": 1, "cooldown_seconds": 20}}
