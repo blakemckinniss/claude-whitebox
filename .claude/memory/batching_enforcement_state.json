@@ -10,8 +10,8 @@
       "baseline_threshold": 2
     },
     "sequential_greps": {
-      "count": 0,
-      "avg_turns_wasted": 0.0,
+      "count": 1,
+      "avg_turns_wasted": 2.0,
       "scripts_written": 0,
       "manual_bypasses": 0,
       "baseline_threshold": 3
