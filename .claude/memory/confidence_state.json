@@ -6,10 +6,10 @@
       "tool": "Read",
       "target": "/test",
       "boost": 10,
-      "timestamp": "2025-11-23T23:36:59.204948"
+      "timestamp": "2025-11-23T23:36:59.711116"
     }
   ],
-  "last_reset": "2025-11-23T23:36:59.193762",
+  "last_reset": "2025-11-23T23:36:59.642813",
   "total_gains": 10,
   "total_losses": 0,
   "confidence": 10
