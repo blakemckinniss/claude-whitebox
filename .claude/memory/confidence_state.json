@@ -3,28 +3,14 @@
   "reinforcement_log": [
     {
       "turn": 0,
-      "tool": "Read",
-      "target": "/test",
-      "boost": 10,
-      "timestamp": "2025-11-23T23:34:23.548083"
-    },
-    {
-      "turn": 0,
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T23:34:23.750590"
-    },
-    {
-      "turn": 0,
-      "tool": "PENALTY",
-      "target": "tier_violation",
-      "boost": -10,
-      "timestamp": "2025-11-23T23:34:23.803598"
+      "timestamp": "2025-11-23T23:34:24.257113"
     }
   ],
-  "last_reset": "2025-11-23T23:34:23.538469",
-  "total_gains": 10,
-  "total_losses": -20,
+  "last_reset": "2025-11-23T23:34:23.971704",
+  "total_gains": 0,
+  "total_losses": -10,
   "confidence": 0
 }
