@@ -69,3 +69,6 @@ Adopted The Cartesian Protocol for meta-cognition. Rationale: LLMs are people-pl
 
 ### 2025-11-20 17:46
 Adopted The MacGyver Protocol for improvisation and resilience. Rationale: LLMs give up when tools are missing ('please install X'). MacGyver Protocol enforces Living off the Land (LotL) - use ONLY what's available. inventory.py scans system capabilities. macgyver agent has LotL mindset baked in. Fallback chain: stdlib → binaries → raw I/O → creative workarounds. Never surrender, always find a solution.
+
+### 2025-11-23 21:32
+Memory directory split: .claude/memory/ now contains only SDK configuration (lessons, decisions, synapses, configs) in git. Runtime state (session_*_state.json, telemetry.jsonl, enforcement state) is gitignored as it's per-user and grows unbounded. Rationale: SDK config defines system behavior (shareable), runtime state is transient per-user data.

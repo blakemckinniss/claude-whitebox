@@ -215,6 +215,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/test_hooks_background.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/session_init.py"
           },
           {
@@ -228,6 +232,10 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_analyzer.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/report_hook_issues.py"
           }
         ]
       }
