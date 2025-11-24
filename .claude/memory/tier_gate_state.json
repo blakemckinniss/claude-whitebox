@@ -3,7 +3,7 @@
   "total_turns": 0,
   "patterns_detected": {
     "ignorance_coding": {
-      "count": 70,
+      "count": 1,
       "avg_turns_wasted": 3.0,
       "scripts_written": 0,
       "manual_bypasses": 0,
@@ -36,5 +36,5 @@
     "last_adjustment": null
   },
   "auto_adjustments": [],
-  "initialized_at": "2025-11-24T08:28:08.938984"
+  "initialized_at": "2025-11-24T08:28:53.569533"
 }
