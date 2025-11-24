@@ -1,30 +1,16 @@
 {
-  "current_confidence": 0,
+  "current_confidence": 10,
   "reinforcement_log": [
-    {
-      "turn": 0,
-      "tool": "PENALTY",
-      "target": "tier_violation",
-      "boost": -10,
-      "timestamp": "2025-11-23T23:32:23.111927"
-    },
     {
       "turn": 0,
       "tool": "Read",
       "target": "/test",
       "boost": 10,
-      "timestamp": "2025-11-23T23:32:23.318533"
-    },
-    {
-      "turn": 0,
-      "tool": "PENALTY",
-      "target": "tier_violation",
-      "boost": -10,
-      "timestamp": "2025-11-23T23:32:23.366817"
+      "timestamp": "2025-11-23T23:32:23.884666"
     }
   ],
-  "last_reset": "2025-11-23T23:32:23.096870",
+  "last_reset": "2025-11-23T23:32:23.873339",
   "total_gains": 10,
-  "total_losses": -20,
-  "confidence": 0
+  "total_losses": 0,
+  "confidence": 10
 }
