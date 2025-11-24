@@ -3,8 +3,8 @@
   "total_turns": 0,
   "patterns_detected": {
     "sequential_reads": {
-      "count": 35,
-      "avg_turns_wasted": 5.285714285714286,
+      "count": 37,
+      "avg_turns_wasted": 5.108108108108108,
       "scripts_written": 0,
       "manual_bypasses": 0,
       "baseline_threshold": 2
