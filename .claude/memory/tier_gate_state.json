@@ -3,8 +3,8 @@
   "total_turns": 0,
   "patterns_detected": {
     "ignorance_coding": {
-      "count": 67,
-      "avg_turns_wasted": 3.0,
+      "count": 0,
+      "avg_turns_wasted": 0.0,
       "scripts_written": 0,
       "manual_bypasses": 0,
       "baseline_threshold": 1
@@ -36,5 +36,5 @@
     "last_adjustment": null
   },
   "auto_adjustments": [],
-  "initialized_at": "2025-11-24T08:31:32.130218"
+  "initialized_at": "2025-11-24T08:32:11.884056"
 }
