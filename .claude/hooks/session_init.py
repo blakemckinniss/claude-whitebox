@@ -25,12 +25,30 @@ session_id = input_data.get("sessionId", "unknown")
 # Initialize session state
 state = initialize_session_state(session_id)
 
+# Extract actual values from initialized state
+confidence = state.get("confidence", 0)
+risk = state.get("risk", 0)
+
+# Determine tier based on actual confidence
+if confidence <= 30:
+    tier = "IGNORANCE TIER"
+elif confidence <= 50:
+    tier = "HYPOTHESIS TIER"
+elif confidence <= 70:
+    tier = "WORKING TIER"
+elif confidence <= 85:
+    tier = "CERTAINTY TIER"
+elif confidence <= 94:
+    tier = "TRUSTED TIER"
+else:
+    tier = "EXPERT TIER"
+
 # Output initialization message
 message = f"""SYSTEM OVERRIDE: EPISTEMOLOGICAL PROTOCOL ACTIVE
 
 🎯 Dual-Metric System Initialized:
-   • Confidence: 0% (IGNORANCE TIER)
-   • Risk: 0%
+   • Confidence: {confidence}% ({tier})
+   • Risk: {risk}%
    • Session ID: {session_id[:8]}...
 
 📊 Confidence Tiers:
