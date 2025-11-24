@@ -10652,3 +10652,6 @@
 {"timestamp": 1763958604.4506087, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
 {"timestamp": 1763958605.9926834, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
 {"timestamp": 1763958606.032312, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763958606.388493, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763958606.6591103, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763958606.7423086, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
