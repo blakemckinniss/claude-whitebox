@@ -1,0 +1,185 @@
+{
+  "semantic_signals": {
+    "research_needed": {
+      "patterns": [
+        "(?:latest|current|updated|new|2024|2025) (?:version|api|docs|features)",
+        "(?:how does|how to).+(?:work|use) (?:in|with) \\w+",
+        "(?:playwright|fastapi|react|nextjs|tailwind|anthropic|openai|langchain)",
+        "(?:compatible|support|available) (?:in|with)",
+        "(?:documentation|docs) for"
+      ],
+      "nudge_template": "🔬 RESEARCH SIGNAL: This involves recent libraries/APIs (training cutoff: Jan 2025).\n   • Your knowledge may be stale\n   • Use: /research '{query}' (live web search)\n   • Example: /research 'Playwright auto-waiting 2025'\n   • Prevents hallucinating outdated APIs",
+      "confidence_threshold": 50,
+      "priority": "high"
+    },
+    "browser_automation": {
+      "patterns": [
+        "(?:scrape|scraping|crawl|crawling|extract|extracting)",
+        "(?:login|fill|submit|click).+(?:form|button|element|page|site)",
+        "(?:javascript|dynamic|spa|react).+(?:content|site|page)",
+        "(?:screenshot|pdf|headless|browser|selenium|puppeteer)",
+        "(?:automation|automate).+(?:browser|web|site)"
+      ],
+      "nudge_template": "🎭 PLAYWRIGHT SIGNAL: This requires browser automation.\n   • Static scraping (requests/BeautifulSoup) WILL FAIL on JS sites\n   • Use: python3 scripts/ops/playwright.py '{task}'\n   • Scaffolds complete solution in scratch/ (zero friction)\n   • Handles: login, waits, screenshots, PDFs automatically",
+      "confidence_threshold": 0,
+      "priority": "critical"
+    },
+    "xy_problem": {
+      "patterns": [
+        "(?:can|how).+(?:make|do|create).+(?:so that|because|in order to)",
+        "(?:trying to|want to|need to).+but.+(?:not working|failing|error)",
+        "(?:workaround|hack) (?:for|to)",
+        "(?:is there a way to).+(?:without|avoid)"
+      ],
+      "nudge_template": "🎯 XY PROBLEM ALERT: You stated HOW, but not WHY.\n   • What is the ACTUAL end goal?\n   • Is there a simpler path to achieve it?\n   • Meta-question: Should I ask user for clarification?\n   • Often the stated problem is not the real problem",
+      "confidence_threshold": 0,
+      "priority": "high"
+    },
+    "decision_complexity": {
+      "patterns": [
+        "(?:should|shall) (?:we|i) (?:use|choose|migrate|switch|add|adopt)",
+        "(?:better|best|recommend|suggest).+(?:approach|library|tool|framework|way)",
+        "(?:vs|versus|or|between).+(?:and|,)",
+        "(?:worth|trade.?off|pros.?cons)",
+        "(?:migrate|migration|switch|switching|move|moving).+(?:to|from)"
+      ],
+      "nudge_template": "⚖️ DECISION COMPLEXITY: Strategic choice detected.\n   • Single advisor = confirmation bias\n   • Use: python3 scripts/ops/balanced_council.py '{proposal}'\n   • 6 perspectives (Six Thinking Hats) → clear verdict\n   • Time: ~60s for comprehensive analysis\n   • Prevents groupthink and blind spots",
+      "confidence_threshold": 40,
+      "priority": "high"
+    },
+    "api_uncertainty": {
+      "patterns": [
+        "(?:methods|functions|attributes|api|properties).+(?:available|exist|support|have)",
+        "(?:how to call|how to use).+(?:method|function|class|api)",
+        "(?:pandas|boto3|fastapi|sqlalchemy|requests|anthropic|openai)\\.",
+        "(?:does|can).+(?:have|support) (?:a|an) (?:method|function|attribute)",
+        "what (?:methods|functions|properties)"
+      ],
+      "nudge_template": "🔬 API UNCERTAINTY: Don't guess method signatures.\n   • Use: /probe {library}.{object}\n   • Shows actual runtime API (not guesses)\n   • Example: /probe pandas.DataFrame\n   • Prevents hallucinated methods (anti-gaslighting)",
+      "confidence_threshold": 0,
+      "priority": "critical"
+    },
+    "iteration_detected": {
+      "patterns": [
+        "(?:for each|for all|process all|iterate|loop|batch)",
+        "(?:multiple|several|many|all).+(?:files|items|records|entries)",
+        "\\d+ (?:files|items|times|steps|operations)",
+        "(?:one by one|sequentially|in sequence)"
+      ],
+      "nudge_template": "🔁 ITERATION DETECTED: Manual loops are banned.\n   • Write script to scratch/ using parallel.py\n   • Prevents: token waste, slow execution, manual errors\n   • Pattern: Write once, execute in parallel (max_workers=50)\n   • Scratch-First Enforcement will block manual iteration",
+      "confidence_threshold": 0,
+      "priority": "high"
+    },
+    "verification_gap": {
+      "patterns": [
+        "(?:fixed|done|completed|working|solved|resolved)",
+        "(?:should|will|now) (?:work|pass|succeed)",
+        "(?:i've|i have) (?:updated|changed|modified|fixed)",
+        "(?:no longer|not) (?:failing|broken|erroring)"
+      ],
+      "nudge_template": "⚠️ VERIFICATION GAP: Claims require proof.\n   • Before 'Fixed': /verify command_success '{test}'\n   • Reality Check Protocol: Exit code 0 = truth\n   • Examples:\n     - /verify file_exists 'config.json'\n     - /verify grep_text 'app.py' --expected 'DEBUG = False'\n     - /verify command_success 'pytest tests/'\n   • Anti-gaslighting enforcement: LLMs hallucinate success",
+      "confidence_threshold": 0,
+      "priority": "critical"
+    },
+    "production_gate": {
+      "patterns": [
+        "scripts/ops/\\w+\\.py",
+        "(?:production|deploy|release|commit|push)",
+        "(?:ready|finished).+(?:feature|implementation|code)",
+        "(?:promote|move).+(?:to|into) (?:scripts|production)"
+      ],
+      "nudge_template": "🛡️ QUALITY GATE: Production code requires validation.\n   • /audit {file} (security: secrets, injection, hardcoded creds)\n   • /void {file} (completeness: stubs, TODOs, missing CRUD)\n   • Both must pass before scripts/ops/ writes\n   • Gatekeeper hook will block deadly sins",
+      "confidence_threshold": 70,
+      "priority": "critical"
+    },
+    "complexity_smell": {
+      "patterns": [
+        "(?:complicated|complex|difficult|hard|tricky|confusing)",
+        "(?:workaround|hack|manual|custom).+(?:solution|fix|implementation)",
+        "(?:lot of|many|lots of).+(?:steps|changes|files|modifications)",
+        "(?:nested|deep|multiple).+(?:loops|conditions|levels)"
+      ],
+      "nudge_template": "💡 COMPLEXITY SMELL: If it feels hard, there might be a simpler way.\n   • Inversion: What if we DON'T do this at all?\n   • Deletion: Can we delete code instead of adding?\n   • Tool fit: Is there an existing tool/library for this?\n   • Meta-question: Are we over-engineering?\n   • Occam's Razor: Simplest solution is usually best",
+      "confidence_threshold": 30,
+      "priority": "medium"
+    },
+    "test_strategy": {
+      "patterns": [
+        "(?:test|testing|verify|validate|check).+(?:works|correct|valid)",
+        "(?:unit|integration|e2e|end.to.end|spec)",
+        "(?:coverage|assertions|mock|fixture)",
+        "(?:write|add|create).+(?:test|spec)"
+      ],
+      "nudge_template": "🧪 TEST STRATEGY: Pareto testing - critical paths only.\n   • Don't test: getters, setters, trivial code\n   • Do test: edge cases, integration, business logic\n   • Anti-pattern: Mock-heavy tests (brittle, low value)\n   • Use: pytest for simplicity, avoid over-mocking\n   • Philosophy: 20% of tests catch 80% of bugs",
+      "confidence_threshold": 50,
+      "priority": "medium"
+    },
+    "parallel_opportunity": {
+      "patterns": [
+        "(?:and then|after that|next|followed by).+(?:and then|after|next)",
+        "(?:first|then|finally|lastly)",
+        "(?:step \\d+|\\d+\\.|1\\)|2\\))",
+        "(?:sequential|one after another|in order)"
+      ],
+      "nudge_template": "⚡ PARALLELIZATION OPPORTUNITY: Can these run concurrently?\n   • Native tool batching: Single message, multiple tool calls\n   • Independent operations CAN run in parallel\n   • Example: Read 3 files → 1 message with 3 Read calls\n   • 3x faster, same result\n   • Sequential execution is token waste unless dependent",
+      "confidence_threshold": 0,
+      "priority": "medium"
+    }
+  },
+  "context_aware_nudges": {
+    "low_confidence_coding": {
+      "condition": "confidence < 30 AND ('Write' in recent_tools OR 'Edit' in recent_tools)",
+      "nudge_template": "🚫 IGNORANCE TIER VIOLATION: Confidence {confidence}% (IGNORANCE TIER).\n   • Allowed: Read, Research, Probe, Questions\n   • Blocked: Coding, Edits, Production changes\n   • Must reach 31%+ before coding\n   • Gather evidence first (read files, research, probe APIs)",
+      "priority": "critical"
+    },
+    "tool_loop": {
+      "condition": "tool_count >= 4 in last_5_turns",
+      "nudge_template": "🔁 LOOP DETECTED: {tool_name} used {count}x in 5 turns.\n   • This is a token waste pattern\n   • Write a scratch script instead\n   • Use parallel.py for bulk operations\n   • Scratch-First Protocol will escalate to hard block",
+      "priority": "high"
+    },
+    "unverified_claim": {
+      "condition": "'fixed' in last_message AND 'verify' not in last_10_tools",
+      "nudge_template": "⚠️ UNVERIFIED CLAIM: 'Fixed' without verification.\n   • Run: /verify command_success '{test_command}'\n   • Reality Check Protocol: Claims need proof\n   • Exit code 0 = truth, your words = hypothesis\n   • Anti-gaslighting: LLMs hallucinate success",
+      "priority": "critical"
+    },
+    "external_budget": {
+      "condition": "('swarm' in command OR 'oracle' in command) AND turn_count < 5",
+      "nudge_template": "💰 EXTERNAL BUDGET: {tool} burns API credits.\n   • Use for complex tasks only (not exploration)\n   • Verify necessity before running\n   • Alternative: Can parallel.py + stdlib solve this?\n   • Rule: Max 1 swarm/oracle call per turn without SUDO",
+      "priority": "high"
+    },
+    "missing_upkeep": {
+      "condition": "'commit' in command AND 'upkeep' not in last_20_tools",
+      "nudge_template": "🧹 MISSING UPKEEP: git commit requires /upkeep first.\n   • Updates: tool index, requirements.txt, scratch cleanup\n   • Prevents: drift, stale deps, context pollution\n   • Command: python3 scripts/ops/upkeep.py\n   • Hard Block: Will trigger if you attempt commit",
+      "priority": "critical"
+    },
+    "no_read_before_edit": {
+      "condition": "'Edit' in current_tool AND file not in read_files_this_session",
+      "nudge_template": "📖 READ-FIRST VIOLATION: Attempting Edit without Read.\n   • You must Read file before editing\n   • Prevents: overwriting unknown content, context errors\n   • Hard Block: Edit will fail without prior Read\n   • Pattern: Read → Understand → Edit",
+      "priority": "critical"
+    }
+  },
+  "metacognitive_questions": [
+    "🤔 What is the user REALLY trying to achieve? (Goal beyond stated task)",
+    "🎯 Is there a simpler way to accomplish this? (Occam's Razor)",
+    "🔬 Do I actually understand this problem? (Confidence check)",
+    "🧪 How will I verify this works? (Test plan)",
+    "⚖️ What are the hidden assumptions here? (Blind spots)",
+    "💡 What tool/protocol fits this task best? (Tool selection)",
+    "🚫 What could go wrong? (Risk analysis)",
+    "🗑️ Can I delete code instead of adding? (Inversion)",
+    "📚 Is my knowledge current for this? (Staleness check)",
+    "🔁 Am I repeating myself? (Iteration smell)",
+    "🏗️ Is this the right level of abstraction? (Architecture)",
+    "🔐 Are there security implications? (Threat model)",
+    "📊 What are the performance implications? (Scalability)",
+    "🧩 How does this integrate with existing code? (Integration)",
+    "📝 What edge cases am I missing? (Completeness)"
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "description": "Meta-cognition patterns for proactive tool/protocol suggestions and self-reflective prompts",
+    "question_rotation_probability": 0.15,
+    "max_nudges_per_turn": 3,
+    "cache_ttl_seconds": 300
+  }
+}

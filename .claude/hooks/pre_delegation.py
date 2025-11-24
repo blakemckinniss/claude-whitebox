@@ -301,7 +301,7 @@ USE: balanced_council.py for comprehensive Six Thinking Hats consultation.
     # Allow delegation
     print(
         json.dumps(
-            {"hookSpecificOutput": {"hookEventName": "PreToolUse", "action": "allow"}}
+            {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}}
         )
     )
     sys.exit(0)

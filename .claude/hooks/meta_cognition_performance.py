@@ -7,7 +7,22 @@ Injects questions to check before acting
 import sys
 import json
 
-input_data = json.load(sys.stdin)
+try:
+
+
+    input_data = json.load(sys.stdin)
+
+
+except json.JSONDecodeError as e:
+
+
+    # Per official docs: "Validate and sanitize inputs"
+
+
+    print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+
+
+    sys.exit(1)
 
 # Meta-cognition checklist injected into context
 reminder = """

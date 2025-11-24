@@ -122,6 +122,10 @@ CONFIDENCE_GAINS = {
     "use_parallel_py": 25,
     "parallel_agent_delegation": 15,
     "agent_free_context": 20,  # Using agents for free context parallelism
+    # Browser automation (appropriate tool usage)
+    "use_playwright": 15,
+    "setup_playwright": 20,
+    "browser_instead_requests": 25,  # Using browser for JS sites instead of requests
 }
 
 CONFIDENCE_PENALTIES = {
@@ -690,6 +694,14 @@ def update_confidence(
             boost = CONFIDENCE_GAINS["probe_api"]
         elif "scripts/ops/audit.py" in command:
             boost = CONFIDENCE_GAINS["run_audit"]
+        elif "scripts/ops/playwright.py" in command or "/playwright" in command:
+            # Setup gets higher boost, check gets standard
+            if "--setup" in command or "--autonomous" in command:
+                boost = CONFIDENCE_GAINS["setup_playwright"]
+            else:
+                boost = CONFIDENCE_GAINS["use_playwright"]
+        elif "get_browser_session" in command or "from browser import" in command:
+            boost = CONFIDENCE_GAINS["use_playwright"]
         elif "pytest" in command or "python -m pytest" in command:
             boost = CONFIDENCE_GAINS["run_tests"]
         elif "scripts/ops/council.py" in command:

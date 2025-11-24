@@ -85,10 +85,13 @@ See CLAUDE.md § MacGyver Protocol (Living off the Land)
 """
 
     print(json.dumps({
-        "allow": False,
-        "message": message
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": message
+        }
     }))
-    sys.exit(1)  # Block the operation
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

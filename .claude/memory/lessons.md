@@ -138,3 +138,9 @@ Project Architecture: Created projects/ directory as USER ZONE for future projec
 
 
 
+
+### 2025-11-23 20:27
+Fixed PreToolUse:Bash hook errors. Three hooks had incorrect output formats: (1) detect_install.py used {"allow": False} instead of proper hookSpecificOutput structure, (2) auto_playwright_setup.py used tool_name/tool_params instead of toolName/toolParams, (3) pre_delegation.py used "action": "allow" instead of "permissionDecision": "allow". All PreToolUse hooks MUST return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow|deny", "permissionDecisionReason": "..."}}
+
+### 2025-11-23 21:16
+ASSUMPTION FIREWALL PROTOCOL - User input = ground truth. If user provides working code/commands (curl, examples), TEST THEM FIRST before researching alternatives. Research = supplementary context, never override user examples. When research contradicts user input, HALT and ask which is correct. Never implement solutions that diverge from user-provided working examples without explicit confirmation. See scratch/assumption_failure_analysis.md for catastrophic failure case study.

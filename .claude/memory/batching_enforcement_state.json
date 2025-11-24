@@ -3,8 +3,8 @@
   "total_turns": 0,
   "patterns_detected": {
     "sequential_reads": {
-      "count": 6,
-      "avg_turns_wasted": 8.0,
+      "count": 3,
+      "avg_turns_wasted": 2.3333333333333335,
       "scripts_written": 0,
       "manual_bypasses": 0,
       "baseline_threshold": 2
@@ -43,5 +43,5 @@
     "last_adjustment": null
   },
   "auto_adjustments": [],
-  "initialized_at": "2025-11-23T16:06:50.766031"
+  "initialized_at": "2025-11-23T21:18:14.118985"
 }

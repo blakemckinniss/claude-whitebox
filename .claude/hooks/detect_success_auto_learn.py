@@ -9,6 +9,24 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 
+def validate_file_path(file_path: str) -> bool:
+    """
+    Validate file path to prevent path traversal attacks.
+    Per official docs: "Block path traversal - Check for .. in file paths"
+    """
+    if not file_path:
+        return True
+
+    # Normalize path to resolve any . or .. components
+    normalized = str(Path(file_path).resolve())
+
+    # Check for path traversal attempts
+    if '..' in file_path:
+        return False
+
+    return True
+
+
 MEMORY_DIR = Path(__file__).resolve().parent.parent / "memory"
 SESSION_FILE = MEMORY_DIR / "session_unknown_state.json"
 REMEMBER_CMD = (
@@ -97,6 +115,11 @@ if tool_name == "Bash":
 # Detect novel scratch scripts (potential promotion candidates)
 elif tool_name == "Write":
     file_path = input_data.get("toolInput", {}).get("file_path", "")
+    
+    # Validate file path (per official docs security best practices)
+    if file_path and not validate_file_path(file_path):
+        print(f"Security: Path traversal detected in {file_path}", file=sys.stderr)
+        sys.exit(2)
     if "/scratch/" in file_path and file_path.endswith(".py"):
         script_name = Path(file_path).name
 

@@ -11,6 +11,37 @@
         ]
       },
       {
+        "matcher": "(Read|Write|Edit)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/file_operation_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/hook_documentation_enforcer.py"
+          }
+        ]
+      },
+      {
+        "matcher": "(Write|Edit)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/assumption_firewall.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/org_drift_gate.py"
+          }
+        ]
+      },
+      {
         "matcher": "Write",
         "hooks": [
           {
@@ -20,6 +51,10 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/root_pollution_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_flat_enforcer.py"
           },
           {
             "type": "command",
@@ -85,6 +120,10 @@
           },
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_flat_enforcer.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_install.py"
           },
           {
@@ -118,6 +157,10 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_parallel_bash.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_playwright_setup.py"
           }
         ]
       },
@@ -194,7 +237,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_prompt_check.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_init.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/introspector.py"
           },
           {
             "type": "command",
@@ -280,6 +331,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_telemetry.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_logical_fallacy.py"
           },
           {
@@ -353,6 +408,10 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_enforcer.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/org_drift_telemetry.py"
           },
           {
             "type": "command",

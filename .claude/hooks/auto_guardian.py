@@ -13,6 +13,24 @@ import subprocess
 import time
 from pathlib import Path
 
+def validate_file_path(file_path: str) -> bool:
+    """
+    Validate file path to prevent path traversal attacks.
+    Per official docs: "Block path traversal - Check for .. in file paths"
+    """
+    if not file_path:
+        return True
+
+    # Normalize path to resolve any . or .. components
+    normalized = str(Path(file_path).resolve())
+
+    # Check for path traversal attempts
+    if '..' in file_path:
+        return False
+
+    return True
+
+
 # Find project root
 PROJECT_DIR = Path.cwd()
 while not (PROJECT_DIR / "scripts" / "lib").exists() and PROJECT_DIR != PROJECT_DIR.parent:
@@ -128,6 +146,11 @@ def main():
         sys.exit(0)
 
     file_path = tool_input.get("file_path", "")
+    
+    # Validate file path (per official docs security best practices)
+    if file_path and not validate_file_path(file_path):
+        print(f"Security: Path traversal detected in {file_path}", file=sys.stderr)
+        sys.exit(2)
 
     # Check if this file warrants testing
     if not should_test(tool_name, file_path):

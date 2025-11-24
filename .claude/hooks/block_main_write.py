@@ -16,6 +16,24 @@ import sys
 import json
 import os
 
+def validate_file_path(file_path: str) -> bool:
+    """
+    Validate file path to prevent path traversal attacks.
+    Per official docs: "Block path traversal - Check for .. in file paths"
+    """
+    if not file_path:
+        return True
+
+    # Normalize path to resolve any . or .. components
+    normalized = str(Path(file_path).resolve())
+
+    # Check for path traversal attempts
+    if '..' in file_path:
+        return False
+
+    return True
+
+
 def main():
     # Read hook input from stdin
     try:

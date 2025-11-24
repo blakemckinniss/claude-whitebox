@@ -143,7 +143,10 @@ def main():
     """Main analysis logic"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception:
         sys.exit(0)
 
     prompt = data.get("prompt", "")

@@ -1,0 +1,44 @@
+{
+  "tool_calls": [
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947546.086571
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947557.8151658
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947557.8155692
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947557.8214455
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947567.9347394
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947567.9357188
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947592.421973
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947592.4231498
+    }
+  ]
+}

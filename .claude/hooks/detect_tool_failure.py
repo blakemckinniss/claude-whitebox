@@ -81,7 +81,10 @@ def main():
     try:
         # Load input
         input_data = json.load(sys.stdin)
-    except:
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception:
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "PostToolUse",

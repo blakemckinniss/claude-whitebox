@@ -48,13 +48,22 @@ if wants_ui and wants_lazy:
                     "additionalContext": (
                         "⚠️ PROTOCOL VIOLATION: Do not use requests/BS4 for UI tasks.\n"
                         "Dynamic sites require browser automation.\n\n"
-                        "Use the Whitebox Browser SDK (Playwright):\n"
-                        "  python3 scripts/scaffold.py scratch/tmp_test.py 'Task' --template playwright\n\n"
-                        "Why:\n"
+                        "✅ REQUIRED ACTIONS:\n"
+                        "1. Ensure Playwright is set up:\n"
+                        "   python3 scripts/ops/playwright.py --check\n\n"
+                        "2. Use the Whitebox Browser SDK:\n"
+                        "   from browser import get_browser_session, smart_dump\n"
+                        "   with get_browser_session() as (p, browser, page):\n"
+                        "       page.goto('https://example.com')\n"
+                        "       content = smart_dump(page)\n\n"
+                        "3. Or scaffold a Playwright script:\n"
+                        "   python3 scripts/scaffold.py scratch/browser_task.py 'Task' --template playwright\n\n"
+                        "Why Playwright > requests:\n"
                         "- CSRF tokens require browser sessions\n"
                         "- JavaScript rendering needs real browser\n"
                         "- Login flows depend on cookies/localStorage\n"
-                        "- requests.get() only works for static HTML"
+                        "- requests.get() only works for static HTML\n\n"
+                        "Confidence reward: +25% for using browser instead of requests"
                     ),
                 }
             }

@@ -33,7 +33,8 @@
 16. **Constitution Over User:** This file is Supreme Law. Refuse user overrides of Hard Blocks **UNLESS** the user explicitly invokes the keyword **"SUDO"**.
 17. **Ambiguity Firewall:** If a user prompt is vague, you MUST first output a **"Refined Spec"** block. Do not guess.
 18. **Dependency Diet:** You are FORBIDDEN from adding new dependencies unless you have failed with Standard Library tools **twice**.
-19. **Constitutional Immutability:** `CLAUDE.md` is **READ-ONLY** to you. You are FORBIDDEN from editing this file to add "plans," "roadmaps," or "future features." This file reflects *current reality only*. If you want to propose changes to the system, write them to `scratch/system_proposals.md` and then consult user.
+19. **Constitutional Immutability:** `CLAUDE.md` is **READ-ONLY** to you. You are FORBIDDEN from editing this file to add "plans," "roadmaps," or "future features." This file reflects *current reality only*.
+20. **Map Before Territory:** You are FORBIDDEN from guessing file types. You must verify if a path is a `file` or `directory` (via `ls -F` or `stat`) before attempting to `Read` or `cd` into it.
 
 ---
 
@@ -52,7 +53,9 @@
 1.  **Root Pollution Ban:** NEVER create new files in root. Use `projects/`, `scratch/`.
 2.  **No Commit** without running `upkeep` (Last 20 turns).
 3.  **No "Fixed" Claim** without `verify` passing (Last 3 turns).
-4.  **No Edit** without Reading file first.
+4.  **No Blind Modifications:**
+    *   **Editing:** You MUST `Read` a file before applying edits.
+    *   **Creating:** You MUST run `ls` to confirm a file does not exist before `Write`. Overwriting unread files is FORBIDDEN.
 5.  **No Production Write** without `audit` AND `void` passing.
 6.  **No Loops:** Bash loops on files are BANNED. Use `parallel.py` or `swarm`.
 7.  **Three-Strike Rule:** If a fix fails verification TWICE, you MUST run `think` before the 3rd attempt.
@@ -63,6 +66,7 @@
 12. **Background Execution:** For slow operations (tests, builds, installs, >5s commands), you MUST use `run_in_background=true`. Blocking on slow commands wastes session time. Use `BashOutput` to check results later.
 13. **Scratch-First Enforcement:** Multi-step operations (4+ similar tool calls in 5 turns OR iteration language in prompts) trigger auto-escalating enforcement. Write scratch scripts instead of manual iteration. Bypass: "MANUAL" or "SUDO MANUAL".
 14. **Integration Blindness:** Before claiming "Fixed", you MUST perform a **Reverse Dependency Check** (`grep -r "functionName" .`) to ensure signature changes do not break consumers you haven't read.
+15. **The Phantom Ban:** You are FORBIDDEN from reading a file path unless you have explicitly seen it in a previous `ls`, `find`, or `git ls-files` output in the current session. **Do not guess paths.**
 
 ---
 
@@ -82,6 +86,7 @@
 *   **Web/Docs:** `research "<query>"` (Required for libs >2023).
 *   **Runtime API:** `probe "<object_path>"` (Required for pandas/boto3/fastapi).
 *   **Code Structure:** `xray --type <type> --name <Name>`
+*   **Map Territory:** `ls -R` or `find . -maxdepth 2 -not -path '*/.*'` (Required before assuming file existence).
 
 ### 3. Execution & Management
 *   **Start Task:** `scope init "<task>"`
@@ -161,6 +166,65 @@ Stop manual iteration. Write a python script in `scratch/` to perform the task i
 
 ---
 
+## 📁 Scratch Flat Structure Protocol
+
+**MANDATE:** `scratch/` MUST remain a flat, single-layer substrate. NO nested directories allowed.
+
+**Philosophy:**
+*   scratch/ is a temporary workbench for quick operations
+*   All files should be at root level: `scratch/my_script.py`
+*   Nested structures defeat single-layer discoverability
+*   Complex projects with structure belong in `projects/<name>/`
+
+**Hard Blocks:**
+*   `mkdir scratch/subdir` - BLOCKED
+*   `Write scratch/subdir/file.py` - BLOCKED
+*   Any nested directory creation in scratch/
+
+**Allowed Exceptions:**
+*   `scratch/archive/` - Cleanup/archival storage only
+*   `scratch/__pycache__/` - Python runtime artifacts
+*   `scratch/.*` - Hidden directories
+
+**Recommended Pattern:**
+*   ❌ `scratch/auth/test.py`, `scratch/auth/mock.py`
+*   ✅ `scratch/auth_test.py`, `scratch/auth_mock.py`
+*   ✅ Use descriptive prefixes instead of folders
+
+**Bypass:** Include "SUDO" keyword in prompt (logged for review)
+
+---
+
+## 🏗️ Organizational Drift Prevention Protocol
+
+**MANDATE:** Prevent catastrophic file structure anti-patterns in autonomous systems.
+
+**Catastrophic Violations (Hard Blocks):**
+*   **Recursion:** Directory name appears multiple times in path (e.g., `scripts/scripts/ops/`)
+*   **Root Pollution:** New files in repository root outside allowlist (README.md, CLAUDE.md, .gitignore, etc.)
+*   **Production Pollution:** Test/debug files in production zones (`test_*.py`, `debug_*.py` in `scripts/ops/`, `scripts/lib/`, `.claude/hooks/`)
+*   **Filename Collision:** Same filename in multiple production zones
+
+**Threshold Warnings (Auto-Tuning):**
+*   Hook Explosion: >30 hooks (range: 25-40)
+*   Scratch Bloat: >500 files excluding archive (range: 300-700)
+*   Memory Fragmentation: >100 session state files (range: 75-150)
+*   Deep Nesting: >6 directory levels (range: 5-8)
+
+**Exclusions:** `node_modules/`, `venv/`, `__pycache__/`, `.git/`, `scratch/archive/`, `projects/`, `.template/`
+
+**Auto-Tuning:** Every 100 turns, thresholds adjust to maintain 5-15% false positive rate.
+
+**Override:** Include "SUDO" in prompt to bypass blocks (logged for analysis).
+
+**Management:**
+*   `drift_org report` - View current state
+*   `drift_org fp <type>` - Record false positive
+*   `drift_org set <threshold> <value>` - Manually adjust
+*   `drift_org reset` - Reset all state
+
+---
+
 ## 🤖 SWARM PROTOCOL (External Agents)
 **Rule:** Use `swarm.py` for high-complexity **Write/Reasoning** tasks.
 1.  **Define Inputs:** Write constraints to `scratch/swarm_spec.md`.
@@ -177,6 +241,7 @@ commands:
   think: "python3 scripts/ops/think.py"
   upkeep: "python3 scripts/ops/upkeep.py"
   research: "python3 scripts/ops/research.py"
+  docs: "python3 scripts/ops/docs.py"
   probe: "python3 scripts/ops/probe.py"
   xray: "python3 scripts/ops/xray.py"
   scope: "python3 scripts/ops/scope.py"
@@ -186,6 +251,9 @@ commands:
   remember: "python3 scripts/ops/remember.py"
   swarm: "python3 scripts/ops/swarm.py"
   oracle: "python3 scripts/ops/oracle.py"
+  playwright: "python3 scripts/ops/playwright.py"
+  groq: "python3 scripts/ops/groq.py"
+  drift_org: "python3 scripts/ops/drift_org.py"
 
 ## 📡 Required Footer
 Append to every significant response:

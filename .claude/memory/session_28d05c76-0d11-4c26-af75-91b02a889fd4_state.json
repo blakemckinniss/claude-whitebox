@@ -1,0 +1,54 @@
+{
+  "tool_calls": [
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763946905.119609
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763946912.5041928
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763946912.5077317
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947008.569589
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947008.5705268
+    },
+    {
+      "tool": "Glob",
+      "turn": 0,
+      "timestamp": 1763947124.2769303
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947131.1297677
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947131.1307657
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947324.482313
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947324.4833503
+    }
+  ]
+}

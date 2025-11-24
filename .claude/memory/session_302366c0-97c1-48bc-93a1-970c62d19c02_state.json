@@ -1,0 +1,19 @@
+{
+  "tool_calls": [
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763946992.3046227
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947162.9500687
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947162.9511218
+    }
+  ]
+}

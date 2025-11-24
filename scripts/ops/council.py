@@ -183,17 +183,27 @@ def call_timekeeper(proposal, scripts_dir):
 
 
 def call_persona_with_context(persona_key, persona_def, context, model, scripts_dir):
-    """Call persona script with context"""
-    script = persona_def["script"]
-    prompt = persona_def["prompt_template"].format(proposal=context)
-
+    """Call persona via oracle.py (using --persona or --custom-prompt)"""
     logger.info(f"  {persona_def['emoji']} {persona_def['role']} ({model})...")
 
-    script_path = os.path.join(scripts_dir, script)
+    oracle_path = os.path.join(scripts_dir, "oracle.py")
+
+    # oracle.py only supports these hardcoded personas
+    ORACLE_NATIVE_PERSONAS = ["judge", "critic", "skeptic"]
 
     try:
+        # Build command based on persona support
+        if persona_key in ORACLE_NATIVE_PERSONAS:
+            # Use native --persona flag (context gets passed as query)
+            cmd = ["python3", oracle_path, "--persona", persona_key, context, "--model", model]
+        else:
+            # Use --custom-prompt for other personas
+            # Extract system prompt by removing {proposal} placeholder
+            system_prompt = persona_def["prompt_template"].replace("{proposal}", "CONTEXT PROVIDED BELOW")
+            cmd = ["python3", oracle_path, "--custom-prompt", system_prompt, context, "--model", model]
+
         result = subprocess.run(
-            ["python3", script_path, prompt, "--model", model],
+            cmd,
             capture_output=True,
             text=True,
             timeout=120,
@@ -203,7 +213,7 @@ def call_persona_with_context(persona_key, persona_def, context, model, scripts_
             logger.error(f"Persona {persona_key} failed: {result.stderr}")
             # Return minimal valid output
             return parse_persona_output(
-                f"VERDICT: ABSTAIN\nCONFIDENCE: 0\nREASONING: Script execution failed",
+                f"VERDICT: ABSTAIN\nCONFIDENCE: 0\nREASONING: Oracle call failed",
                 persona_key
             )
 

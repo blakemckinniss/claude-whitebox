@@ -1,0 +1,104 @@
+{
+  "tool_calls": [
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763947953.753487
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948246.7934144
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948246.7945564
+    },
+    {
+      "tool": "Glob",
+      "turn": 0,
+      "timestamp": 1763948586.66176
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948602.1048248
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948602.1059432
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948639.88316
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948639.8842483
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948684.6520514
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948684.653102
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763949325.644812
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763949325.6461942
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763950025.6197042
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763950025.6209476
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763950098.5592113
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763950098.5605016
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763950161.4279456
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763950161.4288783
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763950178.119185
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763950178.1202304
+    }
+  ]
+}

@@ -9,6 +9,24 @@ import json
 import re
 from pathlib import Path
 
+def validate_file_path(file_path: str) -> bool:
+    """
+    Validate file path to prevent path traversal attacks.
+    Per official docs: "Block path traversal - Check for .. in file paths"
+    """
+    if not file_path:
+        return True
+
+    # Normalize path to resolve any . or .. components
+    normalized = str(Path(file_path).resolve())
+
+    # Check for path traversal attempts
+    if '..' in file_path:
+        return False
+
+    return True
+
+
 # Load input
 try:
     input_data = json.load(sys.stdin)

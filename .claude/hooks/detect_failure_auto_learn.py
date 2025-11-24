@@ -8,6 +8,24 @@ import json
 import subprocess  # nosec B404 - internal tool execution only
 from pathlib import Path
 
+def validate_file_path(file_path: str) -> bool:
+    """
+    Validate file path to prevent path traversal attacks.
+    Per official docs: "Block path traversal - Check for .. in file paths"
+    """
+    if not file_path:
+        return True
+
+    # Normalize path to resolve any . or .. components
+    normalized = str(Path(file_path).resolve())
+
+    # Check for path traversal attempts
+    if '..' in file_path:
+        return False
+
+    return True
+
+
 MEMORY_DIR = Path(__file__).resolve().parent.parent / "memory"
 LESSONS_FILE = MEMORY_DIR / "lessons.md"
 REMEMBER_CMD = (
@@ -92,6 +110,11 @@ elif tool_name == "Edit":
     error = extract_tool_error(tool_result)
     if error and "read" in error.lower():
         file_path = input_data.get("toolInput", {}).get("file_path", "unknown")
+        
+        # Validate file path (per official docs security best practices)
+        if file_path and not validate_file_path(file_path):
+            print(f"Security: Path traversal detected in {file_path}", file=sys.stderr)
+            sys.exit(2)
         lesson = f"Edit rejected: Attempted to edit {file_path} without reading first"
         if auto_learn_failure("edit", file_path, lesson):
             lessons_learned.append(f"📝 Auto-learned: {lesson}")

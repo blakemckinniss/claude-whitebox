@@ -1,0 +1,34 @@
+{
+  "tool_calls": [
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948757.5452697
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948835.8618968
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948835.8630335
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948954.0694482
+    },
+    {
+      "tool": "Read",
+      "turn": 0,
+      "timestamp": 1763948954.0706074
+    },
+    {
+      "tool": "Grep",
+      "turn": 0,
+      "timestamp": 1763949057.0647218
+    }
+  ]
+}

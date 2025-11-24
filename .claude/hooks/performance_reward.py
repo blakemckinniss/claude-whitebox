@@ -12,7 +12,45 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from lib.epistemology import load_session_state, apply_reward
 
-input_data = json.load(sys.stdin)
+def validate_file_path(file_path: str) -> bool:
+    """
+    Validate file path to prevent path traversal attacks.
+    Per official docs: "Block path traversal - Check for .. in file paths"
+    """
+    if not file_path:
+        return True
+
+    # Normalize path to resolve any . or .. components
+    normalized = str(Path(file_path).resolve())
+
+    # Check for path traversal attempts
+    if '..' in file_path:
+        return False
+
+    return True
+
+
+try:
+
+
+
+    input_data = json.load(sys.stdin)
+
+
+
+except json.JSONDecodeError as e:
+
+
+
+    # Per official docs: "Validate and sanitize inputs"
+
+
+
+    print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+
+
+
+    sys.exit(1)
 session_id = input_data.get("sessionId", "unknown")
 tool_name = input_data.get("toolName", "")
 tool_params = input_data.get("toolParams", {})

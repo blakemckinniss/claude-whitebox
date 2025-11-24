@@ -17,7 +17,10 @@ from lib.epistemology import load_session_state
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except json.JSONDecodeError as e:
+    print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+    sys.exit(1)
+except Exception:
     print(
         json.dumps(
             {

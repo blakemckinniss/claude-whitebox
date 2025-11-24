@@ -27,6 +27,24 @@ from auto_tuning import AutoTuner
 from meta_learning import record_manual_bypass, check_exception_rule
 from epistemology import load_session_state, get_confidence_tier
 
+def validate_file_path(file_path: str) -> bool:
+    """
+    Validate file path to prevent path traversal attacks.
+    Per official docs: "Block path traversal - Check for .. in file paths"
+    """
+    if not file_path:
+        return True
+
+    # Normalize path to resolve any . or .. components
+    normalized = str(Path(file_path).resolve())
+
+    # Check for path traversal attempts
+    if '..' in file_path:
+        return False
+
+    return True
+
+
 # Pattern definitions
 TIER_PATTERNS = {'ignorance_coding': {'threshold': 1, 'suggested_action': 'Gather evidence (Read/Research/Probe) to reach HYPOTHESIS tier (31%+)'}, 'hypothesis_production': {'threshold': 1, 'suggested_action': 'Reach CERTAINTY tier (71%+) before modifying production code'}}
 

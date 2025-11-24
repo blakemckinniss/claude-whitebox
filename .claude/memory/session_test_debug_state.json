@@ -1,0 +1,21 @@
+{
+  "session_id": "test_debug",
+  "confidence": 0,
+  "risk": 0,
+  "turn_count": 0,
+  "tokens_estimated": 0,
+  "context_window_percent": 0,
+  "evidence_ledger": [],
+  "risk_events": [],
+  "confidence_history": [
+    {
+      "turn": 0,
+      "confidence": 0,
+      "reason": "session_start",
+      "timestamp": "2025-11-23T20:18:48.736972"
+    }
+  ],
+  "read_files": {},
+  "initialized_at": "2025-11-23T20:18:48.736982",
+  "files_read": []
+}
