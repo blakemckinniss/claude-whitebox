@@ -1,65 +1,51 @@
 {
-  "current_confidence": 18,
+  "current_confidence": 10,
   "reinforcement_log": [
     {
       "turn": 0,
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T23:37:41.059178"
+      "timestamp": "2025-11-23T23:37:42.775360"
     },
     {
       "turn": 0,
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T23:37:41.084823"
+      "timestamp": "2025-11-23T23:37:42.835235"
     },
     {
       "turn": 0,
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T23:37:41.086810"
+      "timestamp": "2025-11-23T23:37:42.869838"
+    },
+    {
+      "turn": 0,
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-23T23:37:42.900808"
+    },
+    {
+      "turn": 0,
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-23T23:37:42.906067"
     },
     {
       "turn": 0,
       "tool": "Read",
       "target": "/test",
       "boost": 10,
-      "timestamp": "2025-11-23T23:37:42.091337"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "/test",
-      "boost": 2,
-      "timestamp": "2025-11-23T23:37:42.136918"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "/test",
-      "boost": 2,
-      "timestamp": "2025-11-23T23:37:42.169880"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "/test",
-      "boost": 2,
-      "timestamp": "2025-11-23T23:37:42.202301"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "/test",
-      "boost": 2,
-      "timestamp": "2025-11-23T23:37:42.208007"
+      "timestamp": "2025-11-23T23:37:43.265595"
     }
   ],
-  "last_reset": "2025-11-23T23:37:40.833392",
-  "total_gains": 18,
-  "total_losses": -30,
-  "confidence": 18
+  "last_reset": "2025-11-23T23:37:42.636325",
+  "total_gains": 10,
+  "total_losses": -50,
+  "confidence": 10
 }
