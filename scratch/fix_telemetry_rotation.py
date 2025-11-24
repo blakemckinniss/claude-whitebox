@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""Fix telemetry rotation to use tail instead of readlines()"""
+
+code = '''#!/usr/bin/env python3
 """
 Performance Telemetry Collector (PostToolUse)
 Silently logs hook execution times to structured JSONL file
@@ -39,7 +42,7 @@ entry = {
 try:
     # Append entry
     with open(LOG_FILE, 'a') as f:
-        f.write(json.dumps(entry) + "\n")
+        f.write(json.dumps(entry) + "\\n")
 
     # Rotate if >10k lines (1% sampling to avoid overhead)
     import random
@@ -63,3 +66,9 @@ output = {
 }
 print(json.dumps(output))
 sys.exit(0)
+'''
+
+with open('.claude/hooks/performance_telemetry_collector.py', 'w') as f:
+    f.write(code)
+
+print("✅ Fixed performance_telemetry_collector.py - now uses tail instead of readlines()")
