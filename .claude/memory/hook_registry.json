@@ -1,0 +1,1302 @@
+{
+  "last_updated": "2025-11-23T21:26:59.034791",
+  "total_hooks": 85,
+  "hooks": {
+    "assumption_firewall.py": {
+      "path": ".claude/hooks/assumption_firewall.py",
+      "filename": "assumption_firewall.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:55.720163",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "ASSUMPTION FIREWALL - PreToolUse Hook"
+    },
+    "hook_performance_monitor.py": {
+      "path": ".claude/hooks/hook_performance_monitor.py",
+      "filename": "hook_performance_monitor.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:55.757972",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Hook Performance Monitor"
+    },
+    "detect_tool_failure.py": {
+      "path": ".claude/hooks/detect_tool_failure.py",
+      "filename": "detect_tool_failure.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:55.797413",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Post-Tool-Use Hook: Detects tool failures and triggers auto-fix system"
+    },
+    "performance_analyzer.py": {
+      "path": ".claude/hooks/performance_analyzer.py",
+      "filename": "performance_analyzer.py",
+      "event_type": "SessionStart",
+      "last_scan": "2025-11-23T21:26:55.844610",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Performance Analyzer (SessionStart)"
+    },
+    "performance_reward.py": {
+      "path": ".claude/hooks/performance_reward.py",
+      "filename": "performance_reward.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:55.879480",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": false,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": [
+          "Import error: Error: Invalid JSON input: Expecting value: line 1 column 1 (char 0)"
+        ]
+      },
+      "description": "Performance Reward Hook: Detects and rewards parallel execution patterns"
+    },
+    "auto_researcher.py": {
+      "path": ".claude/hooks/auto_researcher.py",
+      "filename": "auto_researcher.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:55.918062",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Auto-Researcher Hook (PostToolUse)"
+    },
+    "ban_stubs.py": {
+      "path": ".claude/hooks/ban_stubs.py",
+      "filename": "ban_stubs.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:55.953259",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Ban Stubs Hook: Prevents Write operations containing stub code"
+    },
+    "best_practice_enforcer.py": {
+      "path": ".claude/hooks/best_practice_enforcer.py",
+      "filename": "best_practice_enforcer.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:55.986355",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Best Practice Enforcer Hook: Strong assertions for common mistakes"
+    },
+    "block_mcp.py": {
+      "path": ".claude/hooks/block_mcp.py",
+      "filename": "block_mcp.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:56.016755",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      }
+    },
+    "pattern_detector.py": {
+      "path": ".claude/hooks/pattern_detector.py",
+      "filename": "pattern_detector.py",
+      "event_type": null,
+      "last_scan": "2025-11-23T21:26:56.048247",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Pattern Detector Hook: Detects anti-patterns at session stop"
+    },
+    "evidence_tracker.py": {
+      "path": ".claude/hooks/evidence_tracker.py",
+      "filename": "evidence_tracker.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:56.085302",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Evidence Tracker Hook: Tracks tool usage and updates confidence"
+    },
+    "performance_telemetry_collector.py": {
+      "path": ".claude/hooks/performance_telemetry_collector.py",
+      "filename": "performance_telemetry_collector.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:56.120720",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Performance Telemetry Collector (PostToolUse)"
+    },
+    "enforce_workflow.py": {
+      "path": ".claude/hooks/enforce_workflow.py",
+      "filename": "enforce_workflow.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:56.157914",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      }
+    },
+    "pre_write_audit.py": {
+      "path": ".claude/hooks/pre_write_audit.py",
+      "filename": "pre_write_audit.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:56.190789",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": false,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": [
+          "Import error: Error: Invalid JSON input: Expecting value: line 1 column 1 (char 0)"
+        ]
+      },
+      "description": "Pre-Write Audit Hook: Blocks Write tool if code contains deadly sins"
+    },
+    "command_suggester.py": {
+      "path": ".claude/hooks/command_suggester.py",
+      "filename": "command_suggester.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:56.222636",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Command Suggester Hook: Suggests related commands based on keywords"
+    },
+    "intervention.py": {
+      "path": ".claude/hooks/intervention.py",
+      "filename": "intervention.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:56.258071",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Intervention Hook: Detects bikeshedding and \"Not Invented Here\" syndrome"
+    },
+    "auto_commit_telemetry.py": {
+      "path": ".claude/hooks/auto_commit_telemetry.py",
+      "filename": "auto_commit_telemetry.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:56.290092",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Auto-Commit Telemetry Hook (PostToolUse)"
+    },
+    "ecosystem_mapper.py": {
+      "path": ".claude/hooks/ecosystem_mapper.py",
+      "filename": "ecosystem_mapper.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:56.329145",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Ecosystem Mapper Hook: Shows complete toolchains for task categories"
+    },
+    "detect_parallel_bash.py": {
+      "path": ".claude/hooks/detect_parallel_bash.py",
+      "filename": "detect_parallel_bash.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:56.362019",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Parallel Bash Detector (PreToolUse:Bash)"
+    },
+    "confidence_init.py": {
+      "path": ".claude/hooks/confidence_init.py",
+      "filename": "confidence_init.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:56.399471",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Confidence Initialization Hook: Assesses initial confidence on first prompt"
+    },
+    "introspector.py": {
+      "path": ".claude/hooks/introspector.py",
+      "filename": "introspector.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:56.440052",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "THE INTROSPECTOR HOOK"
+    },
+    "detect_install.py": {
+      "path": ".claude/hooks/detect_install.py",
+      "filename": "detect_install.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:56.479794",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Detect Install Hook (PreToolUse)"
+    },
+    "enforce_reasoning_rigor.py": {
+      "path": ".claude/hooks/enforce_reasoning_rigor.py",
+      "filename": "enforce_reasoning_rigor.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:56.511735",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "REASONING RIGOR ENFORCEMENT HOOK"
+    },
+    "performance_gate_v1_backup.py": {
+      "path": ".claude/hooks/performance_gate_v1_backup.py",
+      "filename": "performance_gate_v1_backup.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:56.546407",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": false,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": [
+          "Import error: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/home/jinx/workspace/claude-whitebox/.claude/hooks/performance_gate_v1_backup.py\", line 8, in <module>\n    input_data = json.load(sys.stdin)\n                 ^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n           ^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+        ]
+      },
+      "description": "Performance Gate Hook: META-COGNITION for parallel execution"
+    },
+    "org_drift_telemetry.py": {
+      "path": ".claude/hooks/org_drift_telemetry.py",
+      "filename": "org_drift_telemetry.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:56.623207",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Organizational Drift Telemetry (PostToolUse Hook)"
+    },
+    "detect_gaslight.py": {
+      "path": ".claude/hooks/detect_gaslight.py",
+      "filename": "detect_gaslight.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:56.656558",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Detect Gaslight Hook: Detects user frustration indicating AI gaslighting"
+    },
+    "trigger_skeptic.py": {
+      "path": ".claude/hooks/trigger_skeptic.py",
+      "filename": "trigger_skeptic.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:56.687820",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Trigger Skeptic Hook: Warns when risky/destructive operations are about to be performed"
+    },
+    "force_playwright.py": {
+      "path": ".claude/hooks/force_playwright.py",
+      "filename": "force_playwright.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:56.720319",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": false,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": [
+          "Import error: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/home/jinx/workspace/claude-whitebox/.claude/hooks/force_playwright.py\", line 13, in <module>\n    data = json.load(sys.stdin)\n           ^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n           ^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+        ]
+      },
+      "description": "Force Playwright Hook: Prevents using requests/BS4 for UI tasks."
+    },
+    "anti_sycophant.py": {
+      "path": ".claude/hooks/anti_sycophant.py",
+      "filename": "anti_sycophant.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:56.805110",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Anti-Sycophant Hook: Detects opinion requests and forces consultation with The Critic"
+    },
+    "command_tracker.py": {
+      "path": ".claude/hooks/command_tracker.py",
+      "filename": "command_tracker.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:56.836881",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Command Tracker Hook: Tracks workflow command execution"
+    },
+    "detect_sequential_agents.py": {
+      "path": ".claude/hooks/detect_sequential_agents.py",
+      "filename": "detect_sequential_agents.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:56.874144",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Sequential Agent Detection Hook"
+    },
+    "detect_logical_fallacy.py": {
+      "path": ".claude/hooks/detect_logical_fallacy.py",
+      "filename": "detect_logical_fallacy.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:56.907042",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "LOGICAL FALLACY DETECTOR HOOK"
+    },
+    "post_tool_command_suggester.py": {
+      "path": ".claude/hooks/post_tool_command_suggester.py",
+      "filename": "post_tool_command_suggester.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:56.941477",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": false,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": [
+          "Import error: Error: Invalid JSON input: Expecting value: line 1 column 1 (char 0)"
+        ]
+      },
+      "description": "Post-Tool Command Suggester Hook: Pattern-based command suggestions after tool use"
+    },
+    "confidence_gate.py": {
+      "path": ".claude/hooks/confidence_gate.py",
+      "filename": "confidence_gate.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:56.981366",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Confidence Gate Hook: Blocks Write/Edit to production files at <71% confidence"
+    },
+    "session_init.py": {
+      "path": ".claude/hooks/session_init.py",
+      "filename": "session_init.py",
+      "event_type": "SessionStart",
+      "last_scan": "2025-11-23T21:26:57.017502",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Session Initialization Hook: Initializes confidence/risk state at session start"
+    },
+    "token_tracker.py": {
+      "path": ".claude/hooks/token_tracker.py",
+      "filename": "token_tracker.py",
+      "event_type": null,
+      "last_scan": "2025-11-23T21:26:57.057140",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Token Tracker Hook: Updates token usage tracking at session stop"
+    },
+    "scratch_enforcer.py": {
+      "path": ".claude/hooks/scratch_enforcer.py",
+      "filename": "scratch_enforcer.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:57.094411",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Scratch Enforcer Hook (PostToolUse)"
+    },
+    "debt_tracker.py": {
+      "path": ".claude/hooks/debt_tracker.py",
+      "filename": "debt_tracker.py",
+      "event_type": null,
+      "last_scan": "2025-11-23T21:26:57.131489",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Debt Tracker Hook: Automatically detects technical debt in code modifications"
+    },
+    "detect_test_failure.py": {
+      "path": ".claude/hooks/detect_test_failure.py",
+      "filename": "detect_test_failure.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:57.165215",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Post-Bash Hook: Detects test failures and triggers auto-fix system"
+    },
+    "intent_classifier.py": {
+      "path": ".claude/hooks/intent_classifier.py",
+      "filename": "intent_classifier.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.208617",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Intent Classifier Hook: Injects relevant CLAUDE.md protocol sections based on user intent"
+    },
+    "pre_advice.py": {
+      "path": ".claude/hooks/pre_advice.py",
+      "filename": "pre_advice.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.239754",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "PRE-ADVICE HARD BLOCK HOOK"
+    },
+    "org_drift_gate.py": {
+      "path": ".claude/hooks/org_drift_gate.py",
+      "filename": "org_drift_gate.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:57.273465",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Organizational Drift Gate (PreToolUse Hook)"
+    },
+    "scratch_prompt_analyzer.py": {
+      "path": ".claude/hooks/scratch_prompt_analyzer.py",
+      "filename": "scratch_prompt_analyzer.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.314314",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Scratch Prompt Analyzer Hook (UserPromptSubmit)"
+    },
+    "scratch_enforcer_gate.py": {
+      "path": ".claude/hooks/scratch_enforcer_gate.py",
+      "filename": "scratch_enforcer_gate.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:57.350155",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Scratch Enforcer Gate Hook (PreToolUse)"
+    },
+    "detect_confidence_reward.py": {
+      "path": ".claude/hooks/detect_confidence_reward.py",
+      "filename": "detect_confidence_reward.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:57.387039",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Reward Detection Hook: DEPRECATED - evidence_tracker.py handles this now"
+    },
+    "check_knowledge.py": {
+      "path": ".claude/hooks/check_knowledge.py",
+      "filename": "check_knowledge.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.417282",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Knowledge Check Hook"
+    },
+    "prerequisite_checker.py": {
+      "path": ".claude/hooks/prerequisite_checker.py",
+      "filename": "prerequisite_checker.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.447021",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Prerequisite Checker Hook: Enforces prerequisite steps before major actions"
+    },
+    "batching_telemetry.py": {
+      "path": ".claude/hooks/batching_telemetry.py",
+      "filename": "batching_telemetry.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:57.481436",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Batching Telemetry Hook (PostToolUse)"
+    },
+    "tier_gate_v1_backup.py": {
+      "path": ".claude/hooks/tier_gate_v1_backup.py",
+      "filename": "tier_gate_v1_backup.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:57.516240",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Tier Gate Hook: Enforces confidence tier requirements before tool usage"
+    },
+    "detect_failure_auto_learn.py": {
+      "path": ".claude/hooks/detect_failure_auto_learn.py",
+      "filename": "detect_failure_auto_learn.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:57.552312",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Reflexion Memory: Auto-Learn from Failures (PostToolUse hook)"
+    },
+    "detect_low_confidence.py": {
+      "path": ".claude/hooks/detect_low_confidence.py",
+      "filename": "detect_low_confidence.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.589834",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Detect Low Confidence Hook: Warns when coding requests occur at insufficient confidence"
+    },
+    "detect_success_auto_learn.py": {
+      "path": ".claude/hooks/detect_success_auto_learn.py",
+      "filename": "detect_success_auto_learn.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:57.624283",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Reflexion Memory: Auto-Learn from Successes (PostToolUse hook)"
+    },
+    "constitutional_guard.py": {
+      "path": ".claude/hooks/constitutional_guard.py",
+      "filename": "constitutional_guard.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:57.662086",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "CONSTITUTIONAL GUARD HOOK"
+    },
+    "performance_gate.py": {
+      "path": ".claude/hooks/performance_gate.py",
+      "filename": "performance_gate.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:57.695440",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Performance Gate V2: WITH AUTO-TUNING"
+    },
+    "absurdity_detector.py": {
+      "path": ".claude/hooks/absurdity_detector.py",
+      "filename": "absurdity_detector.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.732494",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "ABSURDITY DETECTOR HOOK"
+    },
+    "session_digest.py": {
+      "path": ".claude/hooks/session_digest.py",
+      "filename": "session_digest.py",
+      "event_type": null,
+      "last_scan": "2025-11-23T21:26:57.765313",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Session Digest Hook: Automatically generates structured session summaries"
+    },
+    "auto_commit_on_complete.py": {
+      "path": ".claude/hooks/auto_commit_on_complete.py",
+      "filename": "auto_commit_on_complete.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.802934",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Auto-Commit on Completion Hook"
+    },
+    "auto_documentarian.py": {
+      "path": ".claude/hooks/auto_documentarian.py",
+      "filename": "auto_documentarian.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:57.841779",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "The Documentarian - Autonomous Documentation Sync (PostToolUse:Write/Edit)"
+    },
+    "synapse_fire.py": {
+      "path": ".claude/hooks/synapse_fire.py",
+      "filename": "synapse_fire.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.876279",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Synapse Fire Hook: Injects associative memory context based on user prompt"
+    },
+    "batching_analyzer.py": {
+      "path": ".claude/hooks/batching_analyzer.py",
+      "filename": "batching_analyzer.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:57.916205",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Batching Analyzer Hook (UserPromptSubmit)"
+    },
+    "block_main_write.py": {
+      "path": ".claude/hooks/block_main_write.py",
+      "filename": "block_main_write.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:57.948807",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Block Main Write Hook (PreToolUse)"
+    },
+    "risk_gate.py": {
+      "path": ".claude/hooks/risk_gate.py",
+      "filename": "risk_gate.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:57.980968",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Risk Gate Hook: Detects dangerous commands and increments risk"
+    },
+    "background_telemetry.py": {
+      "path": ".claude/hooks/background_telemetry.py",
+      "filename": "background_telemetry.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:58.017702",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Background Execution Telemetry (PostToolUse:Bash)"
+    },
+    "file_operation_gate.py": {
+      "path": ".claude/hooks/file_operation_gate.py",
+      "filename": "file_operation_gate.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.052777",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "File Operation Gate: PreToolUse Hook"
+    },
+    "scratch_flat_enforcer.py": {
+      "path": ".claude/hooks/scratch_flat_enforcer.py",
+      "filename": "scratch_flat_enforcer.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.090403",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Scratch Flat Structure Enforcer: PreToolUse Hook"
+    },
+    "scratch_context_hook.py": {
+      "path": ".claude/hooks/scratch_context_hook.py",
+      "filename": "scratch_context_hook.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:58.123769",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Scratch Context Injection Hook (UserPromptSubmit)"
+    },
+    "detect_background_opportunity.py": {
+      "path": ".claude/hooks/detect_background_opportunity.py",
+      "filename": "detect_background_opportunity.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.157295",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Background Execution Opportunity Detector (PreToolUse:Bash)"
+    },
+    "native_batching_enforcer_v1_backup.py": {
+      "path": ".claude/hooks/native_batching_enforcer_v1_backup.py",
+      "filename": "native_batching_enforcer_v1_backup.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.188649",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Native Tool Batching Enforcer (PreToolUse Hook)"
+    },
+    "hook_documentation_enforcer.py": {
+      "path": ".claude/hooks/hook_documentation_enforcer.py",
+      "filename": "hook_documentation_enforcer.py",
+      "event_type": "SessionStart",
+      "last_scan": "2025-11-23T21:26:58.223023",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Hook Documentation Enforcer: PreToolUse Hook"
+    },
+    "tier_gate.py": {
+      "path": ".claude/hooks/tier_gate.py",
+      "filename": "tier_gate.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.263063",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Tier Gate V2: WITH AUTO-TUNING"
+    },
+    "pre_delegation.py": {
+      "path": ".claude/hooks/pre_delegation.py",
+      "filename": "pre_delegation.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.300381",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "PRE-DELEGATION VALIDATION HOOK"
+    },
+    "auto_remember.py": {
+      "path": ".claude/hooks/auto_remember.py",
+      "filename": "auto_remember.py",
+      "event_type": null,
+      "last_scan": "2025-11-23T21:26:58.335135",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Auto Remember Hook: Automatically executes memory triggers from Stop messages"
+    },
+    "command_prerequisite_gate.py": {
+      "path": ".claude/hooks/command_prerequisite_gate.py",
+      "filename": "command_prerequisite_gate.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.368457",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Command Prerequisite Gate V2: WITH AUTO-TUNING"
+    },
+    "command_prerequisite_gate_v1_backup.py": {
+      "path": ".claude/hooks/command_prerequisite_gate_v1_backup.py",
+      "filename": "command_prerequisite_gate_v1_backup.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.405555",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Command Prerequisite Gate Hook: Enforces workflow command prerequisites"
+    },
+    "auto_guardian.py": {
+      "path": ".claude/hooks/auto_guardian.py",
+      "filename": "auto_guardian.py",
+      "event_type": "PostToolUse",
+      "last_scan": "2025-11-23T21:26:58.444294",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "The Guardian - Autonomous Test-Fix Loop (PostToolUse:Write/Edit)"
+    },
+    "detect_confidence_penalty.py": {
+      "path": ".claude/hooks/detect_confidence_penalty.py",
+      "filename": "detect_confidence_penalty.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:58.479393",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Penalty Detection Hook: Applies negative reinforcement for violations"
+    },
+    "detect_batch.py": {
+      "path": ".claude/hooks/detect_batch.py",
+      "filename": "detect_batch.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:58.516121",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Batch Operation Detection Hook"
+    },
+    "native_batching_enforcer.py": {
+      "path": ".claude/hooks/native_batching_enforcer.py",
+      "filename": "native_batching_enforcer.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.546555",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "Native Tool Batching Enforcer V2 (PreToolUse Hook)"
+    },
+    "auto_playwright_setup.py": {
+      "path": ".claude/hooks/auto_playwright_setup.py",
+      "filename": "auto_playwright_setup.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.583453",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": false,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": [
+          "Import error: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/home/jinx/workspace/claude-whitebox/.claude/hooks/auto_playwright_setup.py\", line 14, in <module>\n    data = json.load(sys.stdin)\n           ^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n           ^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+        ]
+      },
+      "description": "Auto Playwright Setup Hook: Triggers playwright.py when browser tasks detected"
+    },
+    "auto_commit_on_end.py": {
+      "path": ".claude/hooks/auto_commit_on_end.py",
+      "filename": "auto_commit_on_end.py",
+      "event_type": "SessionEnd",
+      "last_scan": "2025-11-23T21:26:58.663459",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Auto-Commit on Session End Hook"
+    },
+    "auto_commit_prompt_check.py": {
+      "path": ".claude/hooks/auto_commit_prompt_check.py",
+      "filename": "auto_commit_prompt_check.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:58.812189",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Auto-Commit Prompt Check Hook (UserPromptSubmit)"
+    },
+    "auto_janitor.py": {
+      "path": ".claude/hooks/auto_janitor.py",
+      "filename": "auto_janitor.py",
+      "event_type": "SessionEnd",
+      "last_scan": "2025-11-23T21:26:58.851952",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": true,
+        "has_proper_return": true,
+        "errors": []
+      },
+      "description": "The Janitor - Autonomous Workspace Cleanup (SessionEnd)"
+    },
+    "root_pollution_gate.py": {
+      "path": ".claude/hooks/root_pollution_gate.py",
+      "filename": "root_pollution_gate.py",
+      "event_type": "PreToolUse",
+      "last_scan": "2025-11-23T21:26:58.886421",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": true,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": []
+      },
+      "description": "Root Pollution Gate Hook: Prevents creating files/folders in repository root"
+    },
+    "meta_cognition_performance.py": {
+      "path": ".claude/hooks/meta_cognition_performance.py",
+      "filename": "meta_cognition_performance.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:58.920846",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": false,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": [
+          "Import error: Error: Invalid JSON input: Expecting value: line 1 column 1 (char 0)"
+        ]
+      },
+      "description": "Meta-Cognition Performance Reminder"
+    },
+    "sanity_check.py": {
+      "path": ".claude/hooks/sanity_check.py",
+      "filename": "sanity_check.py",
+      "event_type": "UserPromptSubmit",
+      "last_scan": "2025-11-23T21:26:58.951384",
+      "health": {
+        "syntax_valid": true,
+        "imports_valid": false,
+        "has_main": false,
+        "has_proper_return": false,
+        "errors": [
+          "Import error: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/home/jinx/workspace/claude-whitebox/.claude/hooks/sanity_check.py\", line 10, in <module>\n    data = json.load(sys.stdin)\n           ^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n           ^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+        ]
+      },
+      "description": "Sanity Check Hook: Detects when Claude is about to write code for complex libraries"
+    }
+  },
+  "by_event_type": {
+    "PreToolUse": [
+      "assumption_firewall.py",
+      "ban_stubs.py",
+      "block_mcp.py",
+      "pre_write_audit.py",
+      "detect_parallel_bash.py",
+      "detect_install.py",
+      "enforce_reasoning_rigor.py",
+      "performance_gate_v1_backup.py",
+      "trigger_skeptic.py",
+      "detect_sequential_agents.py",
+      "confidence_gate.py",
+      "org_drift_gate.py",
+      "scratch_enforcer_gate.py",
+      "tier_gate_v1_backup.py",
+      "constitutional_guard.py",
+      "performance_gate.py",
+      "block_main_write.py",
+      "risk_gate.py",
+      "file_operation_gate.py",
+      "scratch_flat_enforcer.py",
+      "detect_background_opportunity.py",
+      "native_batching_enforcer_v1_backup.py",
+      "tier_gate.py",
+      "pre_delegation.py",
+      "command_prerequisite_gate.py",
+      "command_prerequisite_gate_v1_backup.py",
+      "native_batching_enforcer.py",
+      "auto_playwright_setup.py",
+      "root_pollution_gate.py"
+    ],
+    "PostToolUse": [
+      "hook_performance_monitor.py",
+      "detect_tool_failure.py",
+      "performance_reward.py",
+      "auto_researcher.py",
+      "evidence_tracker.py",
+      "performance_telemetry_collector.py",
+      "auto_commit_telemetry.py",
+      "org_drift_telemetry.py",
+      "command_tracker.py",
+      "detect_logical_fallacy.py",
+      "post_tool_command_suggester.py",
+      "scratch_enforcer.py",
+      "detect_test_failure.py",
+      "detect_confidence_reward.py",
+      "batching_telemetry.py",
+      "detect_failure_auto_learn.py",
+      "detect_success_auto_learn.py",
+      "auto_documentarian.py",
+      "background_telemetry.py",
+      "auto_guardian.py"
+    ],
+    "SessionStart": [
+      "performance_analyzer.py",
+      "session_init.py",
+      "hook_documentation_enforcer.py"
+    ],
+    "UserPromptSubmit": [
+      "best_practice_enforcer.py",
+      "enforce_workflow.py",
+      "command_suggester.py",
+      "intervention.py",
+      "ecosystem_mapper.py",
+      "confidence_init.py",
+      "introspector.py",
+      "detect_gaslight.py",
+      "force_playwright.py",
+      "anti_sycophant.py",
+      "intent_classifier.py",
+      "pre_advice.py",
+      "scratch_prompt_analyzer.py",
+      "check_knowledge.py",
+      "prerequisite_checker.py",
+      "detect_low_confidence.py",
+      "absurdity_detector.py",
+      "auto_commit_on_complete.py",
+      "synapse_fire.py",
+      "batching_analyzer.py",
+      "scratch_context_hook.py",
+      "detect_confidence_penalty.py",
+      "detect_batch.py",
+      "auto_commit_prompt_check.py",
+      "meta_cognition_performance.py",
+      "sanity_check.py"
+    ],
+    "SessionEnd": [
+      "auto_commit_on_end.py",
+      "auto_janitor.py"
+    ]
+  }
+}

@@ -12,9 +12,15 @@
       "turn": 0,
       "confidence": 0,
       "reason": "session_start",
-      "timestamp": "2025-11-23T21:26:57.053156"
+      "timestamp": "2025-11-23T21:27:03.010478"
     }
   ],
   "read_files": {},
-  "initialized_at": "2025-11-23T21:26:57.053170"
+  "initialized_at": "2025-11-23T21:27:03.010493",
+  "bash_calls": [
+    {
+      "turn": 0,
+      "timestamp": 1763951224.7238805
+    }
+  ]
 }
