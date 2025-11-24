@@ -6,25 +6,11 @@
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-24T08:31:17.497683"
-    },
-    {
-      "turn": 0,
-      "tool": "PENALTY",
-      "target": "tier_violation",
-      "boost": -10,
-      "timestamp": "2025-11-24T08:31:17.498485"
-    },
-    {
-      "turn": 0,
-      "tool": "PENALTY",
-      "target": "tier_violation",
-      "boost": -10,
-      "timestamp": "2025-11-24T08:31:17.572745"
+      "timestamp": "2025-11-24T08:31:19.147122"
     }
   ],
-  "last_reset": "2025-11-24T08:31:17.325529",
+  "last_reset": "2025-11-24T08:31:18.897393",
   "total_gains": 0,
-  "total_losses": -30,
+  "total_losses": -10,
   "confidence": 0
 }
