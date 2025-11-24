@@ -6291,3 +6291,6 @@
 {"timestamp": 1763992200.5205853, "session_id": "17e47829-2786-4863-a396-3d70c8dd9ed2", "tool": "Bash", "event": "tool_use"}
 {"timestamp": 1763992205.761454, "session_id": "17e47829-2786-4863-a396-3d70c8dd9ed2", "tool": "Bash", "event": "tool_use"}
 {"timestamp": 1763992205.794845, "session_id": "17e47829-2786-4863-a396-3d70c8dd9ed2", "tool": "Bash", "event": "tool_use"}
+{"timestamp": 1764013326.820992, "session_id": "7979365e-68af-4eef-a52a-9f9d5f1e8f88", "tool": "Glob", "event": "tool_use"}
+{"timestamp": 1764013327.1816459, "session_id": "7979365e-68af-4eef-a52a-9f9d5f1e8f88", "tool": "Glob", "event": "tool_use"}
+{"timestamp": 1764013327.5654123, "session_id": "7979365e-68af-4eef-a52a-9f9d5f1e8f88", "tool": "Grep", "event": "tool_use"}
