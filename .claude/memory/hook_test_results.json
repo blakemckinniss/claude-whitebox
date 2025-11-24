@@ -775,406 +775,406 @@
   "execution_results": {
     "org_drift_telemetry.py": {
       "success": true,
-      "duration_ms": 57,
+      "duration_ms": 71,
       "error": null,
       "stdout": "Success\n",
       "stderr": ""
     },
     "batching_telemetry.py": {
       "success": true,
-      "duration_ms": 57,
+      "duration_ms": 67,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "native_batching_enforcer.py": {
       "success": true,
-      "duration_ms": 67,
+      "duration_ms": 73,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "scratch_enforcer.py": {
       "success": true,
-      "duration_ms": 64,
+      "duration_ms": 70,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "detect_background_opportunity.py": {
       "success": true,
-      "duration_ms": 43,
+      "duration_ms": 56,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "ecosystem_mapper.py": {
       "success": true,
-      "duration_ms": 45,
+      "duration_ms": 59,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "detect_install.py": {
       "success": true,
-      "duration_ms": 44,
+      "duration_ms": 51,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "auto_commit_telemetry.py": {
       "success": true,
-      "duration_ms": 75,
+      "duration_ms": 86,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "detect_test_failure.py": {
       "success": true,
-      "duration_ms": 82,
+      "duration_ms": 87,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "detect_failure_auto_learn.py": {
       "success": true,
-      "duration_ms": 64,
+      "duration_ms": 72,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\"}}",
       "stderr": ""
     },
     "post_tool_command_suggester.py": {
       "success": true,
-      "duration_ms": 80,
+      "duration_ms": 91,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "tier_gate_v1_backup.py": {
       "success": true,
-      "duration_ms": 78,
+      "duration_ms": 105,
       "error": null,
-      "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"\\ud83d\\udeab WRITE BLOCKED AT IGNORANCE TIER\\n\\nAction: Write test\\nYour Confidence: 0% (IGNORANCE TIER)\\nRequired: 31%+ (HYPOTHESIS tier)\\n\\nYou know nothing yet. Gather evidence first.\\nAllowed actions: Read, Research, Probe, Ask questions\\n\\nConfidence Penalty: -10%\\n\\nNew Confidence: 0% (IGNORANCE TIER)\\n\\nNext Steps:\\n  1. Gather evidence using allowed tools\\n  2. Build confidence to required tier\\n  3. Then retry this action\\n\"}}\n",
+      "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"\\ud83d\\udeab WRITE BLOCKED AT IGNORANCE TIER\\n\\nAction: Write test\\nYour Confidence: 10% (IGNORANCE TIER)\\nRequired: 31%+ (HYPOTHESIS tier)\\n\\nYou know nothing yet. Gather evidence first.\\nAllowed actions: Read, Research, Probe, Ask questions\\n\\nConfidence Penalty: -10%\\n\\nNew Confidence: 0% (IGNORANCE TIER)\\n\\nNext Steps:\\n  1. Gather evidence using allowed tools\\n  2. Build confidence to required tier\\n  3. Then retry this action\\n\"}}\n",
       "stderr": ""
     },
     "scratch_context_hook.py": {
       "success": true,
-      "duration_ms": 56,
+      "duration_ms": 68,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "hook_documentation_enforcer.py": {
       "success": true,
-      "duration_ms": 65,
+      "duration_ms": 84,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "absurdity_detector.py": {
       "success": true,
-      "duration_ms": 51,
+      "duration_ms": 71,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "risk_gate.py": {
       "success": true,
-      "duration_ms": 81,
+      "duration_ms": 109,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "confidence_init.py": {
       "success": true,
-      "duration_ms": 79,
+      "duration_ms": 113,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "report_hook_issues.py": {
       "success": true,
-      "duration_ms": 58,
+      "duration_ms": 83,
       "error": null,
-      "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\"}}\n",
+      "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"\\u2705 Hook health check: 89 hooks OK\"}}\n",
       "stderr": ""
     },
     "detect_sequential_agents.py": {
       "success": true,
-      "duration_ms": 55,
+      "duration_ms": 74,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "session_cleanup.py": {
       "success": true,
-      "duration_ms": 79,
+      "duration_ms": 116,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "force_playwright.py": {
       "success": true,
-      "duration_ms": 45,
+      "duration_ms": 58,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\"}}\n",
       "stderr": ""
     },
     "detect_batch.py": {
       "success": true,
-      "duration_ms": 49,
+      "duration_ms": 57,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "detect_confidence_reward.py": {
       "success": true,
-      "duration_ms": 48,
+      "duration_ms": 57,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "confidence_gate.py": {
       "success": true,
-      "duration_ms": 56,
+      "duration_ms": 74,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"\\n\\ud83d\\udea8 CONFIDENCE GATE: PRODUCTION WRITE BLOCKED\\n\\nCurrent Confidence: 0% (INSUFFICIENT)\\nTarget File: /test\\n\\n\\u26d4 PRODUCTION CODE MODIFICATION REQUIRES 71%+ CONFIDENCE\\n\\nYou are attempting to modify production code without runtime verification.\\n\\nCURRENT TIER: IGNORANCE (0-30%)\\n\\nREQUIRED EVIDENCE FOR 71%+:\\n  1. Read relevant code files (+10% each)\\n  2. Research documentation (/research, +20%)\\n  3. Inspect runtime APIs (/probe, +30%)\\n  4. Verify system state (/verify, +40%)\\n\\nALLOWED RIGHT NOW:\\n  \\u2705 Write to scratch/ (experimentation allowed)\\n  \\u2705 Gather evidence using investigation tools\\n  \\u2705 Test hypotheses in throwaway code\\n\\nFORBIDDEN:\\n  \\u274c Modify scripts/ at <71%\\n  \\u274c Edit production files at <71%\\n  \\u274c Commit unverified changes\\n\\nNEXT STEPS:\\n  1. python3 scripts/ops/confidence.py status (check current state)\\n  2. Gather evidence to reach 71%\\n  3. Retry this operation after threshold met\\n\\n**Earn the right to code. Evidence > Intuition.**\\n\"}}\n",
       "stderr": ""
     },
     "command_prerequisite_gate.py": {
       "success": true,
-      "duration_ms": 80,
+      "duration_ms": 104,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "command_tracker.py": {
       "success": true,
-      "duration_ms": 78,
+      "duration_ms": 108,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "anti_sycophant.py": {
       "success": true,
-      "duration_ms": 44,
+      "duration_ms": 58,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "enforce_workflow.py": {
       "success": true,
-      "duration_ms": 49,
+      "duration_ms": 56,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"(System Reminder: Prefer writing scratch scripts over manual actions. Check `scratch/` before starting.)\"}}\n",
       "stderr": ""
     },
     "pre_delegation.py": {
       "success": true,
-      "duration_ms": 61,
+      "duration_ms": 69,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "detect_low_confidence.py": {
       "success": true,
-      "duration_ms": 54,
+      "duration_ms": 70,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "command_suggester.py": {
       "success": true,
-      "duration_ms": 46,
+      "duration_ms": 63,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "test_hooks_background.py": {
       "success": true,
-      "duration_ms": 64,
+      "duration_ms": 80,
       "error": null,
-      "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"\\ud83e\\uddea Hook tests already running (started 16s ago)\"}}\n",
+      "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"\\ud83e\\uddea Hook tests already running (started 47s ago)\"}}\n",
       "stderr": ""
     },
     "auto_janitor.py": {
       "success": true,
-      "duration_ms": 104,
+      "duration_ms": 138,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "constitutional_guard.py": {
       "success": true,
-      "duration_ms": 59,
+      "duration_ms": 76,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "file_operation_gate.py": {
       "success": true,
-      "duration_ms": 78,
+      "duration_ms": 108,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"\\ud83d\\udeab WRITE BLOCKED: Path outside workspace\\n\\nPath: /test\\n\\nReason: Security violation - cannot write files outside repository.\\n\\n(Use SUDO keyword to bypass)\"}}\n",
       "stderr": ""
     },
     "detect_parallel_bash.py": {
       "success": true,
-      "duration_ms": 55,
+      "duration_ms": 78,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "auto_commit_prompt_check.py": {
       "success": true,
-      "duration_ms": 169,
+      "duration_ms": 187,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "auto_guardian.py": {
       "success": true,
-      "duration_ms": 76,
+      "duration_ms": 83,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "pattern_detector.py": {
       "success": true,
-      "duration_ms": 80,
+      "duration_ms": 106,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "best_practice_enforcer.py": {
       "success": true,
-      "duration_ms": 45,
+      "duration_ms": 56,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "auto_documentarian.py": {
       "success": true,
-      "duration_ms": 58,
+      "duration_ms": 70,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "detect_tool_failure.py": {
       "success": true,
-      "duration_ms": 97,
+      "duration_ms": 115,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "performance_telemetry_collector.py": {
       "success": true,
-      "duration_ms": 68,
+      "duration_ms": 83,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "detect_logical_fallacy.py": {
       "success": true,
-      "duration_ms": 58,
+      "duration_ms": 78,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "auto_playwright_setup.py": {
       "success": true,
-      "duration_ms": 55,
+      "duration_ms": 74,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\"}}\n",
       "stderr": ""
     },
     "native_batching_enforcer_v1_backup.py": {
       "success": true,
-      "duration_ms": 61,
+      "duration_ms": 73,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "pre_write_audit.py": {
       "success": true,
-      "duration_ms": 64,
+      "duration_ms": 59,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "auto_commit_on_complete.py": {
       "success": true,
-      "duration_ms": 214,
+      "duration_ms": 126,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "introspector.py": {
       "success": true,
-      "duration_ms": 92,
+      "duration_ms": 77,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "enforce_reasoning_rigor.py": {
       "success": true,
-      "duration_ms": 90,
+      "duration_ms": 70,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"action\": \"allow\"}}\n",
       "stderr": ""
     },
     "hook_performance_monitor.py": {
       "success": true,
-      "duration_ms": 117,
+      "duration_ms": 80,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "command_prerequisite_gate_v1_backup.py": {
       "success": true,
-      "duration_ms": 128,
+      "duration_ms": 94,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "session_digest.py": {
       "success": true,
-      "duration_ms": 108,
+      "duration_ms": 81,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "block_mcp.py": {
       "success": true,
-      "duration_ms": 79,
+      "duration_ms": 54,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"\\u26d4 SYSTEM POLICY: External MCP tool 'Unknown' is BANNED.\\\\nYou must not use black-box tools.\\\\nACTION REQUIRED: Write a script in `scratch/` (e.g., `scratch/tmp_tool.py`), inspect the code, and run it via `Bash`.\"}}\n",
       "stderr": ""
     },
     "session_init.py": {
       "success": true,
-      "duration_ms": 132,
+      "duration_ms": 100,
       "error": null,
       "stdout": "SYSTEM OVERRIDE: EPISTEMOLOGICAL PROTOCOL ACTIVE\n\n\ud83c\udfaf Dual-Metric System Initialized:\n   \u2022 Confidence: 0% (IGNORANCE TIER)\n   \u2022 Risk: 0%\n   \u2022 Session ID: test-ses...\n\n\ud83d\udcca Confidence Tiers:\n   \u2022 IGNORANCE (0-30%): Read/Research/Probe only, no coding\n   \u2022 HYPOTHESIS (31-70%): Can write to scratch/, no production code\n   \u2022 CERTAINTY (71-100%): Full capabilities\n\n\u2696\ufe0f Evidence Gathering Required:\n   \u2022 User Question: +25%\n   \u2022 Web Search: +20%\n   \u2022 Use Scripts: +20%\n   \u2022 Probe API: +15%\n   \u2022 Read File: +10% (first time), +2% (repeat)\n   \u2022 Verify: +15%\n\n\ud83d\udeab Pattern Detection Active:\n   \u2022 Hallucination: -20%\n   \u2022 Falsehood: -25%\n   \u2022 Insanity (repeated failures): -15%\n   \u2022 Tier Violation: -10%\n\nState File: .claude/memory/session_test-session_state.json\n\n",
       "stderr": ""
     },
     "auto_void.py": {
       "success": true,
-      "duration_ms": 150,
+      "duration_ms": 107,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "background_telemetry.py": {
       "success": true,
-      "duration_ms": 67,
+      "duration_ms": 73,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "trigger_skeptic.py": {
       "success": true,
-      "duration_ms": 61,
+      "duration_ms": 54,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
@@ -1188,21 +1188,21 @@
     },
     "detect_success_auto_learn.py": {
       "success": true,
-      "duration_ms": 83,
+      "duration_ms": 85,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\"}}\n",
       "stderr": ""
     },
     "detect_confidence_penalty.py": {
       "success": true,
-      "duration_ms": 81,
+      "duration_ms": 79,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "scratch_enforcer_gate.py": {
       "success": true,
-      "duration_ms": 75,
+      "duration_ms": 76,
       "error": null,
       "stdout": "",
       "stderr": ""
@@ -1216,84 +1216,84 @@
     },
     "debt_tracker.py": {
       "success": true,
-      "duration_ms": 68,
+      "duration_ms": 66,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "check_knowledge.py": {
       "success": true,
-      "duration_ms": 56,
+      "duration_ms": 49,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "meta_cognition_performance.py": {
       "success": true,
-      "duration_ms": 54,
+      "duration_ms": 52,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\\n\\u26a1 META-COGNITION PERFORMANCE CHECKLIST (Before responding):\\n\\n1. Multiple tool calls planned?\\n   \\u2192 Can they run in PARALLEL? (single message, multiple <invoke> blocks)\\n\\n2. Operation repeated >2 times?\\n   \\u2192 Should I write a SCRIPT to scratch/ instead?\\n\\n3. File iteration detected?\\n   \\u2192 Should I use parallel.py with max_workers=50?\\n\\n4. Multiple agents needed?\\n   \\u2192 Can I delegate in PARALLEL? (single message, multiple Task calls)\\n   \\u2192 \\ud83d\\ude80 AGENT CONTEXT IS FREE - each agent = separate context window!\\n\\n5. Large research/analysis across modules?\\n   \\u2192 Use PARALLEL AGENTS as free workers (no token cost to main thread)\\n   \\u2192 Example: \\\"Analyze auth, API, database modules\\\" \\u2192 3 agents in ONE message\\n\\n6. Bash loop planned?\\n   \\u2192 BLOCK YOURSELF - write script with parallel.py\\n\\n7. Major decision needed?\\n   \\u2192 Use ORACLE.PY IN PARALLEL (3s vs 90s for council.py)\\n   \\u2192 \\\"Run oracle judge, critic, skeptic in parallel\\\"\\n   \\u2192 30x faster, 95% context savings\\n\\n8. Need >10 perspectives? (exploration, audit, tests)\\n   \\u2192 Use SWARM.PY (10-1000 oracles in 3s!)\\n   \\u2192 swarm.py --generate 50 \\u2192 50 unique approaches in 3s\\n   \\u2192 swarm.py --review \\\"**/*.py\\\" \\u2192 audit 100+ files in 3s\\n   \\u2192 swarm.py --test-cases 100 \\u2192 100 tests in 3s\\n\\nRemember:\\n- You have UNLIMITED bandwidth\\n- Agent context is FREE (separate windows)\\n- Oracle.py is 30x faster than council.py (2-3s vs 90s)\\n- Swarm.py is 1000x faster than manual (1000 oracles in 3s!)\\n- Sequential = wasting resources = -20% confidence\\n- Parallel agents = free parallelism + free context = +20% confidence\\n- Parallel oracles = 3 expert perspectives in 3 seconds\\n- Swarm = 10-1000 perspectives in 3 seconds (nuclear option)\\n\"}}\n",
       "stderr": ""
     },
     "synapse_fire.py": {
       "success": true,
-      "duration_ms": 89,
+      "duration_ms": 78,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "intervention.py": {
       "success": true,
-      "duration_ms": 53,
+      "duration_ms": 54,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "tier_gate.py": {
       "success": true,
-      "duration_ms": 99,
+      "duration_ms": 93,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "intent_classifier.py": {
       "success": true,
-      "duration_ms": 57,
+      "duration_ms": 48,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "root_pollution_gate.py": {
       "success": true,
-      "duration_ms": 66,
+      "duration_ms": 67,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "performance_analyzer.py": {
       "success": true,
-      "duration_ms": 95,
+      "duration_ms": 90,
       "error": null,
-      "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"\\n\\u26a0\\ufe0f  PERFORMANCE ALERTS (Last 24h):\\n\\ud83d\\udfe1 Tool 'unknown' used 6177 times in 24h (possible loop)\\n\"}}\n",
+      "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"SessionStart\", \"additionalContext\": \"\\n\\u26a0\\ufe0f  PERFORMANCE ALERTS (Last 24h):\\n\\ud83d\\udfe1 Tool 'unknown' used 6178 times in 24h (possible loop)\\n\"}}\n",
       "stderr": ""
     },
     "performance_gate_v1_backup.py": {
       "success": true,
-      "duration_ms": 54,
+      "duration_ms": 59,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "scratch_prompt_analyzer.py": {
       "success": true,
-      "duration_ms": 83,
+      "duration_ms": 79,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "block_main_write.py": {
       "success": true,
-      "duration_ms": 56,
+      "duration_ms": 55,
       "error": null,
       "stdout": "",
       "stderr": ""
@@ -1307,42 +1307,42 @@
     },
     "pre_advice.py": {
       "success": true,
-      "duration_ms": 68,
+      "duration_ms": 73,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "ban_stubs.py": {
       "success": true,
-      "duration_ms": 56,
+      "duration_ms": 60,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
     },
     "auto_researcher.py": {
       "success": true,
-      "duration_ms": 57,
+      "duration_ms": 56,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "auto_remember.py": {
       "success": true,
-      "duration_ms": 69,
+      "duration_ms": 70,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "batching_analyzer.py": {
       "success": true,
-      "duration_ms": 55,
+      "duration_ms": 61,
       "error": null,
       "stdout": "",
       "stderr": ""
     },
     "evidence_tracker.py": {
       "success": true,
-      "duration_ms": 97,
+      "duration_ms": 105,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\\n\\ud83d\\udcc8 EVIDENCE GATHERED: Read (test)\\n   \\u2022 Confidence: 0% \\u2192 10% (+10%)\\n   \\u2022 Current Tier: IGNORANCE\\n\"}}\n",
       "stderr": ""
@@ -1356,35 +1356,35 @@
     },
     "performance_reward.py": {
       "success": true,
-      "duration_ms": 94,
+      "duration_ms": 97,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "sanity_check.py": {
       "success": true,
-      "duration_ms": 63,
+      "duration_ms": 57,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\"}}\n",
       "stderr": ""
     },
     "prerequisite_checker.py": {
       "success": true,
-      "duration_ms": 67,
+      "duration_ms": 64,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\", \"additionalContext\": \"\"}}\n",
       "stderr": ""
     },
     "org_drift_gate.py": {
       "success": true,
-      "duration_ms": 142,
+      "duration_ms": 143,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\", \"permissionDecisionReason\": \"Organizational drift checks passed\\n\\n\\u26a0\\ufe0f  WARNINGS:\\n  \\u2022 Hook explosion: 89 hooks (threshold: 30). Consider consolidating hooks.\"}}\n",
       "stderr": ""
     },
     "scratch_flat_enforcer.py": {
       "success": true,
-      "duration_ms": 67,
+      "duration_ms": 74,
       "error": null,
       "stdout": "{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"allow\"}}\n",
       "stderr": ""
