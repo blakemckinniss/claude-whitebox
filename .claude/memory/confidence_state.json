@@ -3,42 +3,21 @@
   "reinforcement_log": [
     {
       "turn": 0,
-      "tool": "Read",
-      "target": "/test",
-      "boost": 10,
-      "timestamp": "2025-11-23T23:33:18.507321"
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-23T23:33:19.174829"
     },
     {
       "turn": 0,
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T23:33:18.546243"
-    },
-    {
-      "turn": 0,
-      "tool": "PENALTY",
-      "target": "tier_violation",
-      "boost": -10,
-      "timestamp": "2025-11-23T23:33:18.634199"
-    },
-    {
-      "turn": 0,
-      "tool": "PENALTY",
-      "target": "tier_violation",
-      "boost": -10,
-      "timestamp": "2025-11-23T23:33:18.689539"
-    },
-    {
-      "turn": 0,
-      "tool": "PENALTY",
-      "target": "tier_violation",
-      "boost": -10,
-      "timestamp": "2025-11-23T23:33:18.744498"
+      "timestamp": "2025-11-23T23:33:19.233511"
     }
   ],
-  "last_reset": "2025-11-23T23:33:18.486670",
-  "total_gains": 10,
-  "total_losses": -40,
+  "last_reset": "2025-11-23T23:33:18.946362",
+  "total_gains": 0,
+  "total_losses": -20,
   "confidence": 0
 }
