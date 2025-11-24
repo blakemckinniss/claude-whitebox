@@ -40,8 +40,12 @@ def main(event):
             return {"hookSpecificOutput": {"hookEventName": "SessionStart"}}
 
         # Load results
-        with open(results_path, 'r') as f:
-            results = json.load(f)
+        try:
+            with open(results_path, 'r') as f:
+                results = json.load(f)
+        except (json.JSONDecodeError, IOError) as e:
+            # File is being written or corrupted, skip this round
+            return {"hookSpecificOutput": {"hookEventName": "SessionStart"}}
 
         health = results.get("health_summary", {})
         failing = health.get("failing", 0)

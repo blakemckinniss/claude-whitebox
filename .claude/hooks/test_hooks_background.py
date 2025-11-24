@@ -35,7 +35,7 @@ def main(event):
         # Launch in background (detached from parent process)
         # Use Popen instead of run() to avoid blocking
         subprocess.Popen(
-            ["python3", str(test_script), "--quiet"],
+            [sys.executable, str(test_script), "--quiet"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             start_new_session=True,  # Detach from parent

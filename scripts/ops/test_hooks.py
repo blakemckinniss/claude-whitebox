@@ -90,7 +90,7 @@ def test_hook_execution(hook_path: Path, event_type: str, timeout_ms: int = 500)
 
         # Run hook with mock event via stdin
         process = subprocess.run(
-            ["python3", str(hook_path)],
+            [sys.executable, str(hook_path)],
             input=json.dumps(event_data),
             capture_output=True,
             text=True,
