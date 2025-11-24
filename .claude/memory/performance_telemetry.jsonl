@@ -2825,3 +2825,5 @@
 {"timestamp": 1763955395.9753335, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
 {"timestamp": 1763955396.6823409, "session_id": "a3a050fd-441f-4d42-8cf1-ac1eeb36d526", "tool": "Bash", "event": "tool_use"}
 {"timestamp": 1763955397.1878927, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763955397.2731009, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763955397.2753642, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
