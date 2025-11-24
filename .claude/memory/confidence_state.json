@@ -1,5 +1,5 @@
 {
-  "current_confidence": 10,
+  "current_confidence": 14,
   "reinforcement_log": [
     {
       "turn": 0,
@@ -7,10 +7,24 @@
       "target": "/test",
       "boost": 10,
       "timestamp": "2025-11-23T23:37:32.935898"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "/test",
+      "boost": 2,
+      "timestamp": "2025-11-23T23:37:32.955368"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "/test",
+      "boost": 2,
+      "timestamp": "2025-11-23T23:37:32.960024"
     }
   ],
   "last_reset": "2025-11-23T23:37:32.755070",
-  "total_gains": 10,
+  "total_gains": 14,
   "total_losses": 0,
-  "confidence": 10
+  "confidence": 14
 }
