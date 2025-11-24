@@ -196,6 +196,66 @@ Stop manual iteration. Write a python script in `scratch/` to perform the task i
 
 ---
 
+## 🔍 Auto-Void Protocol (Automatic Completeness Enforcement)
+
+**MANDATE:** Automatically run completeness checks on production files at Stop lifecycle.
+
+**Philosophy:** If you find yourself manually requesting `void` checks after almost every task completion, it should be automated. This hook ensures stub detection happens automatically when confidence is in the "production work but need gates" range.
+
+**Trigger:** Stop lifecycle (session pause/end)
+
+**Detection:**
+*   Parses transcript for Write/Edit operations
+*   Extracts Python files in production zones only:
+    *   `scripts/ops/`
+    *   `scripts/lib/`
+    *   `.claude/hooks/`
+*   Deduplicates (same file modified multiple times = one check)
+*   Filters out scratch/ and project files
+
+**Confidence-Based Policy:**
+
+| Tier | Confidence | Policy |
+|------|-----------|--------|
+| IGNORANCE | 0-30% | No action (can't write anyway) |
+| HYPOTHESIS | 31-50% | No action (scratch only) |
+| WORKING | 51-70% | No action (scratch only) |
+| **CERTAINTY** | **71-85%** | **MANDATORY** check (always report) |
+| TRUSTED | 86-94% | OPTIONAL check (silent unless issues) |
+| EXPERT | 95-100% | No action (trusted) |
+
+**Check Behavior:**
+*   Runs `void.py --stub-only` (avoids Oracle API costs)
+*   Detects: TODO, FIXME, pass stubs, NotImplementedError, etc.
+*   Reports stub counts with line numbers
+*   Exit code always 0 (warnings only, no blocks)
+
+**Example Output (CERTAINTY tier):**
+```
+🔍 Auto-Void Check (CERTAINTY tier, 75% confidence):
+
+   ✅ scripts/ops/foo.py - Clean
+   ⚠️  scripts/lib/bar.py - 3 stub(s) detected
+       Line 42: TODO comment
+       Line 89: Function stub (pass)
+       Line 120: NotImplementedError
+
+💡 Tip: Run void.py with full Oracle analysis for deeper inspection
+```
+
+**Rationale:**
+*   At CERTAINTY (71-85%), you're doing production work but still building confidence
+*   Quality gates help catch incomplete implementations before they become technical debt
+*   At TRUSTED (86-94%), you've proven yourself but checks are still informational
+*   At EXPERT (95-100%), enforcement is minimal (trust established)
+
+**Implementation:**
+*   Hook: `.claude/hooks/auto_void.py`
+*   Registered in Stop lifecycle
+*   Test suite: `scratch/test_auto_void.py` (7/7 tests passing)
+
+---
+
 ## 🏗️ Organizational Drift Prevention Protocol
 
 **MANDATE:** Prevent catastrophic file structure anti-patterns in autonomous systems.
