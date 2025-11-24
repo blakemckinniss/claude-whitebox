@@ -192,7 +192,7 @@ def main():
     except:
         sys.exit(0)
 
-    tool_name = data.get("tool_name", "")
+    tool_name = data.get("toolName", "")
 
     # Only track batchable tools
     if tool_name not in BATCHABLE_TOOLS:
