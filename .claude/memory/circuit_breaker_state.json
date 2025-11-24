@@ -1,0 +1,1 @@
+{"circuits": {"circuit_a": {"state": "CLOSED", "trip_count": 0, "exponential_backoff_level": 0}, "circuit_b": {"state": "OPEN", "trip_count": 2, "exponential_backoff_level": 2, "cooldown_expires_at": 1763927532.5527236, "last_trip_time": 1763927502.5527244}, "circuit_c": {"state": "HALF_OPEN", "trip_count": 1, "exponential_backoff_level": 1}}}

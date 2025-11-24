@@ -1,0 +1,58 @@
+================================================================================
+HOOK OPTIMIZATION ANALYSIS
+================================================================================
+
+1. EVENT ASSIGNMENT OPTIMIZATION
+--------------------------------------------------------------------------------
+
+✅ MOVE TO PostToolUse (3 hooks):
+  • detect_batch
+    Reason: Reactive - doesn't need to run before tools
+  • sanity_check
+    Reason: Reactive - doesn't need to run before tools
+  • auto_commit_on_complete
+    Reason: Reactive - doesn't need to run before tools
+
+✅ MOVE TO PreToolUse (1 hooks):
+  • force_playwright
+    Matcher: Bash
+    Reason: Bash-specific - add matcher
+
+✓ KEEP IN UserPromptSubmit (17 hooks):
+  Critical hooks: 3
+
+
+2. CACHING OPPORTUNITIES
+--------------------------------------------------------------------------------
+
+📂 synapse_fire.py
+  Files read: .claude/memory/synapses.json, .claude/memory/lessons.md
+  Cache strategy: session_id
+  Expected benefit: 3-5× faster (reads 2 files every prompt)
+
+📂 scratch_context_hook.py
+  Files read: scratch/*.py
+  Cache strategy: file_mtime
+  Expected benefit: 2-3× faster (globs scratch/ every prompt)
+
+📂 detect_confidence_penalty.py
+  Files read: .claude/memory/anti_patterns.md
+  Cache strategy: session_id
+  Expected benefit: 2× faster
+
+📂 check_knowledge.py
+  Files read: .claude/memory/knowledge_checks.json
+  Cache strategy: session_id
+  Expected benefit: 2× faster
+
+
+================================================================================
+OPTIMIZATION SUMMARY
+================================================================================
+
+Current: 21 UserPromptSubmit hooks
+After optimization: 17 UserPromptSubmit hooks
+Reduction: 4 hooks moved to more appropriate events
+Cacheable hooks: 4
+
+Estimated speedup: 2-3× (1050ms → 350-500ms)

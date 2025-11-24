@@ -1,0 +1,55 @@
+### Define Next.js Page with getServerSideProps for Dynamic Data Fetching
+
+Source: https://github.com/vercel/next.js/blob/canary/docs/02-pages/03-building-your-application/02-rendering/01-server-side-rendering.mdx
+
+This Next.js example demonstrates how to implement Server-side Rendering (SSR) by defining an `async` function `getServerSideProps`. This function fetches data from an external API on every request and passes it as props to the `Page` component, enabling dynamic content rendering.
+
+```jsx
+export default function Page({ data }) {
+  // Render data...
+}
+
+// This gets called on every request
+export async function getServerSideProps() {
+  // Fetch data from external API
+  const res = await fetch(`https://.../data`)
+  const data = await res.json()
+
+  // Pass data to the page via props
+  return { props: { data } }
+}
+```
+
+--------------------------------
+
+### Dynamically Load Client-Side Only Component with `next/dynamic` and `ssr: false` in Next.js
+
+Source: https://github.com/vercel/next.js/blob/canary/docs/01-app/02-guides/lazy-loading.mdx
+
+Explains how to prevent server-side rendering (SSR) for a dynamically imported component by setting the `ssr` option to `false` in `next/dynamic`. This is essential for components that depend on browser-specific APIs (like `window`) and should only be executed on the client, or when specifically targeting a client-only bundle.
+
+```jsx
+'use client'
+
+import dynamic from 'next/dynamic'
+
+const DynamicHeader = dynamic(() => import('../components/header'), {
+  ssr: false,
+})
+```
+
+--------------------------------
+
+### Render Component Only in Browser with next/dynamic
+
+Source: https://github.com/vercel/next.js/blob/canary/docs/01-app/02-guides/single-page-applications.mdx
+
+This snippet shows how to use `next/dynamic` with the `ssr: false` option to ensure a React component is only rendered on the client-side. This is particularly useful for integrating third-party libraries or components that rely on browser-specific APIs (like `window` or `document`) and should not be server-side rendered.
+
+```javascript
+import dynamic from 'next/dynamic'
+
+const ClientOnlyComponent = dynamic(() => import('./component'), {
+  ssr: false,
+})
+```

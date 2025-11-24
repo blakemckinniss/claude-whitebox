@@ -1,0 +1,267 @@
+{
+  "analysis": {
+    "total_hooks": 21,
+    "state_writers": 0,
+    "state_readers": 0,
+    "pure_checks": 20,
+    "external_calls": 13
+  },
+  "batches": [
+    {
+      "batch_id": 2,
+      "parallel": true,
+      "hooks": [
+        {
+          "name": "confidence_init.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_init.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": false,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "synapse_fire.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/synapse_fire.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "scratch_context_hook.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_context_hook.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": false,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "pre_advice.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pre_advice.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "detect_low_confidence.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_low_confidence.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": [
+            "confidence_init.py"
+          ]
+        },
+        {
+          "name": "detect_confidence_penalty.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_confidence_penalty.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": [
+            "confidence_init.py"
+          ]
+        },
+        {
+          "name": "detect_gaslight.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_gaslight.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": false,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "intervention.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/intervention.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": false,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "anti_sycophant.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/anti_sycophant.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "enforce_workflow.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_workflow.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": false,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "check_knowledge.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/check_knowledge.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "detect_batch.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_batch.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "sanity_check.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/sanity_check.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "force_playwright.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/force_playwright.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "intent_classifier.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/intent_classifier.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "command_suggester.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_suggester.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "prerequisite_checker.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/prerequisite_checker.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": false,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "best_practice_enforcer.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/best_practice_enforcer.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "ecosystem_mapper.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/ecosystem_mapper.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": false,
+            "pure_check": true
+          },
+          "dependencies": []
+        },
+        {
+          "name": "auto_commit_on_complete.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_on_complete.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": true,
+            "pure_check": true
+          },
+          "dependencies": []
+        }
+      ],
+      "reason": "Pure checks (no dependencies)"
+    },
+    {
+      "batch_id": 5,
+      "parallel": true,
+      "hooks": [
+        {
+          "name": "meta_cognition_performance.py",
+          "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/meta_cognition_performance.py",
+          "analysis": {
+            "reads_state": false,
+            "writes_state": false,
+            "calls_external": false,
+            "pure_check": false
+          },
+          "dependencies": []
+        }
+      ],
+      "reason": "Misc hooks (parallel)"
+    }
+  ],
+  "performance": {
+    "original_latency_ms": 1050,
+    "optimized_latency_ms": 100,
+    "speedup": 10.5,
+    "parallel_count": 21,
+    "sequential_count": 0
+  }
+}

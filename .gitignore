@@ -1,39 +1,56 @@
-# Ignore scratch directory contents but keep the folder
-scratch/*
-!scratch/.gitkeep
-
-# User projects (each project manages its own git)
-projects/*
-!projects/.template
-!projects/README.md
-
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Environment
-.env
-.venv
-env/
+# Virtual environments
 venv/
+ENV/
+env/
 
-# Claude Memory: Runtime State (Session-specific, per-user)
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backups
+*.backup
+*.bak
+*.old
+*.tmp
+
+# Logs
+*.log
+
+# Node
+node_modules/
+
+# Project-specific
+scratch/archive/
+projects/
 .claude/memory/session_*_state.json
-.claude/memory/active_context.md
-.claude/memory/upkeep_log.md
-.claude/memory/performance_dashboard.md
-.claude/memory/*_telemetry.jsonl
-.claude/memory/debt_ledger.jsonl
-.claude/memory/context_audit/
-.claude/memory/deliberations/
-.claude/memory/session_digests/
-.claude/memory/*_enforcement_state.json
-.claude/memory/tier_gate_state.json
-.claude/memory/confidence_state.json
-.claude/memory/auto_commit_state.json
-.claude/memory/circuit_breaker_state.json
-.claude/memory/circuit_breaker_incidents.jsonl
-.claude/memory/hook_test_results.json
+.claude/memory/epistemology_state.json

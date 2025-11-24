@@ -1,0 +1,53 @@
+
+═══════════════════════════════════════════════════════════════════════════
+HOOK OPTIMIZATION - APPLIED
+═══════════════════════════════════════════════════════════════════════════
+
+Timestamp: 2025-11-23 11:49:45
+
+CHANGES APPLIED:
+
+1. Event Reassignments
+   - detect_batch.py: UserPromptSubmit → PostToolUse
+   - sanity_check.py: UserPromptSubmit → PostToolUse
+   - auto_commit_on_complete.py: UserPromptSubmit → PostToolUse
+   - force_playwright.py: UserPromptSubmit → PreToolUse:Bash
+
+2. Caching Added
+   - synapse_fire.py: Session-level cache
+   - scratch_context_hook.py: Session-level cache
+   - detect_confidence_penalty.py: Session-level cache
+   - check_knowledge.py: Session-level cache
+
+3. Subprocess Timeouts
+   - Added timeout=10 to 32 subprocess calls
+   - Context-aware timeouts (git push=30s, tests=60s, etc.)
+
+EXPECTED IMPACT:
+
+Before:
+  - UserPromptSubmit: 21 hooks (1050ms latency)
+  - Subprocess hangs: 32 risk points
+  - File re-reading: 4 hooks × multiple times per prompt
+
+After:
+  - UserPromptSubmit: 17 hooks (650-750ms latency)
+  - Subprocess hangs: 0 risk points (all protected)
+  - File re-reading: Cached (2-5× faster per hook)
+
+Total Speedup: 2-3× (1050ms → 350-500ms)
+
+ROLLBACK:
+
+If issues occur:
+  cp scratch/settings_backup_*.json .claude/settings.json
+  cp scratch/*.py.backup .claude/hooks/
+
+VALIDATION:
+
+Run a Claude Code session and observe:
+  1. Hook latency (should be <500ms)
+  2. No subprocess hangs
+  3. Session-level caching working
+
+═══════════════════════════════════════════════════════════════════════════

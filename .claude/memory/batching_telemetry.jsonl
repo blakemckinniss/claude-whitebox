@@ -1,0 +1,1 @@
+{"timestamp": 1763918598.4884493, "session_id": "test", "turn": 1, "tools_in_turn": 2, "unique_tools": 1, "batchable_tools": 2, "is_batched": true, "efficiency_score": 1.0, "estimated_time_saved_ms": 2000}
