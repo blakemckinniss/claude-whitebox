@@ -11,11 +11,11 @@
         ]
       },
       {
-        "matcher": "(Read|Write|Edit)",
+        "matcher": "(Read|Write|Edit|Bash)",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/file_operation_gate.py"
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/unified_path_gate.py"
           }
         ]
       },
@@ -25,40 +25,6 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/hook_documentation_enforcer.py"
-          }
-        ]
-      },
-      {
-        "matcher": "(Write|Edit)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/assumption_firewall.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/org_drift_gate.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/constitutional_guard.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/root_pollution_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_flat_enforcer.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/block_main_write.py"
           },
           {
             "type": "command",
@@ -79,20 +45,21 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_reasoning_rigor.py"
-          },
+          }
+        ]
+      },
+      {
+        "matcher": "(Write|Edit)",
+        "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/assumption_firewall.py"
           }
         ]
       },
       {
         "matcher": "Edit",
         "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/constitutional_guard.py"
-          },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
@@ -104,24 +71,12 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_reasoning_rigor.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
           }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/root_pollution_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_flat_enforcer.py"
-          },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_install.py"
@@ -227,7 +182,7 @@
           },
           {
             "type": "command",
-            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n\ud83e\udde0 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
+            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n🧠 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
           },
           {
             "type": "command",
