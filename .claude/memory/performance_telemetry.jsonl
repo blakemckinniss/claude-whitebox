@@ -6302,3 +6302,5 @@
 {"timestamp": 1764012251.2695305, "session_id": "dc6c98a9-5a3e-4850-86b6-065587f9f0a7", "tool": "Grep", "event": "tool_use"}
 {"timestamp": 1764012257.1432743, "session_id": "dc6c98a9-5a3e-4850-86b6-065587f9f0a7", "tool": "Read", "event": "tool_use"}
 {"timestamp": 1764012262.725535, "session_id": "dc6c98a9-5a3e-4850-86b6-065587f9f0a7", "tool": "Edit", "event": "tool_use"}
+{"timestamp": 1764012272.6095355, "session_id": "dc6c98a9-5a3e-4850-86b6-065587f9f0a7", "tool": "Bash", "event": "tool_use"}
+{"timestamp": 1764012293.4056206, "session_id": "dc6c98a9-5a3e-4850-86b6-065587f9f0a7", "tool": "Bash", "event": "tool_use"}
