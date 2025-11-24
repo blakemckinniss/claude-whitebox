@@ -67,3 +67,7 @@ projects/
 .claude/memory/scratch_enforcement_state.json
 .claude/memory/org_drift_state.json
 .claude/memory/command_tracker_state.json
+.claude/memory/batching_enforcement_state.json
+.claude/memory/scratch_telemetry.jsonl
+.claude/memory/*_telemetry.jsonl
+.claude/memory/*_state.json
