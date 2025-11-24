@@ -58,5 +58,28 @@ node_modules/
 scratch/archive/
 projects/
 
-# Claude ephemeral files - entire memory directory is session state
-.claude/memory/
+# Claude ephemeral files - session state and telemetry (not persistent knowledge)
+.claude/memory/session_*_state.json
+.claude/memory/*_telemetry.jsonl
+.claude/memory/*_enforcement_state.json
+.claude/memory/confidence_state.json
+.claude/memory/tier_gate_state.json
+.claude/memory/hook_test_results.json
+.claude/memory/test_hooks.lock
+.claude/memory/test_hooks_last_run.txt
+.claude/memory/session_digests/
+.claude/memory/context_audit/
+.claude/memory/deliberations/
+.claude/memory/upkeep_log.md
+.claude/memory/performance_dashboard.md
+.claude/memory/hook_registry.json
+.claude/memory/metacognition_patterns.json
+.claude/memory/performance_gate_state.json
+.claude/memory/scratch_enforcement_state.json
+.claude/memory/scratch_index.json
+.claude/memory/settings_baseline.json
+.claude/memory/auto_commit_state.json
+.claude/memory/automation_config.json
+.claude/memory/circuit_breaker_*.json
+.claude/memory/debt_ledger.jsonl
+.claude/memory/fallacy_telemetry.jsonl
