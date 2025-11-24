@@ -89,10 +89,21 @@ class HookRegistry:
                     # Search all event types for this hook
                     for event_type, hook_list in hooks_config.items():
                         if isinstance(hook_list, list):
-                            for hook_entry in hook_list:
-                                # Handle both string paths and dict configs
-                                hook_file = hook_entry if isinstance(hook_entry, str) else hook_entry.get("file", "")
-                                if hook_path.name in hook_file:
+                            for matcher_group in hook_list:
+                                # Handle nested hook arrays (matcher groups)
+                                if isinstance(matcher_group, dict) and 'hooks' in matcher_group:
+                                    for hook_entry in matcher_group['hooks']:
+                                        if isinstance(hook_entry, dict):
+                                            command = hook_entry.get('command', '')
+                                            if hook_path.name in command:
+                                                return event_type
+                                # Handle direct hook entries (legacy)
+                                elif isinstance(matcher_group, dict):
+                                    hook_file = matcher_group.get("file", "")
+                                    if hook_path.name in hook_file:
+                                        return event_type
+                                # Handle string paths
+                                elif isinstance(matcher_group, str) and hook_path.name in matcher_group:
                                     return event_type
             except Exception:
                 pass
