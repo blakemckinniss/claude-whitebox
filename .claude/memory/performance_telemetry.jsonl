@@ -2995,3 +2995,5 @@
 {"timestamp": 1763955485.846929, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
 {"timestamp": 1763955486.7287962, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
 {"timestamp": 1763955487.3313289, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763955487.4918573, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763955487.8558223, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
