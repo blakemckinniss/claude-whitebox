@@ -1,16 +1,16 @@
 {
-  "current_confidence": 10,
+  "current_confidence": 0,
   "reinforcement_log": [
     {
       "turn": 0,
-      "tool": "Read",
-      "target": "/test",
-      "boost": 10,
-      "timestamp": "2025-11-24T08:25:46.595695"
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-24T08:25:47.270596"
     }
   ],
-  "last_reset": "2025-11-24T08:25:46.308656",
-  "total_gains": 10,
-  "total_losses": 0,
-  "confidence": 10
+  "last_reset": "2025-11-24T08:25:47.022319",
+  "total_gains": 0,
+  "total_losses": -10,
+  "confidence": 0
 }
