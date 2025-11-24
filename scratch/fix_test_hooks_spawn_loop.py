@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 """
+Fix for test_hooks_background.py spawn loop
+
+Problem: start_new_session=True may trigger recursive SessionStart events
+Solution: Add spawn guard with file-based locking and cooldown
+
+Strategy:
+1. Check if test already running (lock file)
+2. Check cooldown (60s minimum between spawns)
+3. Remove start_new_session=True (keep parent attached)
+4. Add cleanup on completion
+"""
+
+fix_code = '''#!/usr/bin/env python3
+"""
 SessionStart hook: Run hook test suite in background (non-blocking).
 
 Launches test_hooks.py in background process and returns immediately.
@@ -127,8 +141,30 @@ def main(event):
             }
         }
 
-
 if __name__ == "__main__":
-    event = json.load(sys.stdin)
-    result = main(event)
-    print(json.dumps(result))
+    try:
+        event_data = json.load(sys.stdin)
+        result = main(event_data)
+        print(json.dumps(result))
+    except Exception as e:
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "SessionStart",
+                "additionalContext": f"Hook execution error: {e}"
+            }
+        }))
+'''
+
+print("Fixed test_hooks_background.py code:")
+print("=" * 70)
+print(fix_code)
+print("=" * 70)
+
+print("\nChanges:")
+print("1. Added file-based lock (.claude/memory/test_hooks.lock)")
+print("2. Added 60s cooldown (.claude/memory/test_hooks_last_run.txt)")
+print("3. Removed start_new_session=True (prevent recursive sessions)")
+print("4. Added cleanup thread to remove lock after completion")
+print("5. Added PID tracking in lock file")
+
+print("\nApply fix? (Write to .claude/hooks/test_hooks_background.py)")
