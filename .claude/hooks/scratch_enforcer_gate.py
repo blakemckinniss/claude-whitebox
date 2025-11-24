@@ -71,8 +71,8 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": False,
-                    "blockMessage": message
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": message
                 }
             }
             print(json.dumps(output))
@@ -89,7 +89,7 @@ def main():
     output = {
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "allowExecution": True
+            "permissionDecision": "allow"
         }
     }
     print(json.dumps(output))

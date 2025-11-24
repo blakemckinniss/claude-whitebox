@@ -50,7 +50,7 @@ def main():
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "allowExecution": True,
+                "permissionDecision": "allow",
             }
         }
         print(json.dumps(output))
@@ -85,7 +85,7 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": f"🎓 Exception: {rule['reason']}",
                 }
             }
@@ -118,7 +118,7 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": transition_msg,
                 }
             }
@@ -134,7 +134,7 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": report,
                 }
             }
@@ -146,8 +146,8 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": False,
-                    "blockMessage": message,
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": message,
                 }
             }
             print(json.dumps(output))
@@ -157,7 +157,7 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": message,
                 }
             }
@@ -168,7 +168,7 @@ def main():
     output = {
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "allowExecution": True,
+            "permissionDecision": "allow",
         }
     }
     print(json.dumps(output))

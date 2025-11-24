@@ -75,7 +75,7 @@ def main():
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "allowExecution": True,
+                "permissionDecision": "allow",
             }
         }
         print(json.dumps(output))
@@ -107,7 +107,7 @@ def main():
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "allowExecution": True,
+                "permissionDecision": "allow",
                 "additionalContext": """
 ✅ CONSTITUTIONAL OVERRIDE GRANTED
 
@@ -196,8 +196,8 @@ If you are the user and want to authorize this change, re-run with:
     output = {
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "allowExecution": False,
-            "blockMessage": block_message,
+            "permissionDecision": "deny",
+            "permissionDecisionReason": block_message,
         }
     }
     print(json.dumps(output))

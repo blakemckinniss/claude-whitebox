@@ -107,7 +107,7 @@ def main():
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "allowExecution": True,
+                "permissionDecision": "allow",
             }
         }
         print(json.dumps(output))
@@ -134,7 +134,7 @@ def main():
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "allowExecution": True,
+                "permissionDecision": "allow",
                 "additionalContext": f"""✨ EXPERT TIER ({current_confidence}%) - Prerequisite checks bypassed
 
 Maximum autonomy earned through consistent evidence gathering.""",
@@ -153,7 +153,7 @@ Maximum autonomy earned through consistent evidence gathering.""",
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "allowExecution": True,
+                "permissionDecision": "allow",
                 "additionalContext": f"""🎓 Exception rule applied: {rule['reason']}""",
             }
         }
@@ -193,7 +193,7 @@ Maximum autonomy earned through consistent evidence gathering.""",
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": transition_msg,
                 }
             }
@@ -209,7 +209,7 @@ Maximum autonomy earned through consistent evidence gathering.""",
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": report,
                 }
             }
@@ -223,7 +223,7 @@ Maximum autonomy earned through consistent evidence gathering.""",
                 output = {
                     "hookSpecificOutput": {
                         "hookEventName": "PreToolUse",
-                        "allowExecution": True,
+                        "permissionDecision": "allow",
                         "additionalContext": message.replace("BLOCKED", "⚠️ RECOMMENDED"),
                     }
                 }
@@ -231,8 +231,8 @@ Maximum autonomy earned through consistent evidence gathering.""",
                 output = {
                     "hookSpecificOutput": {
                         "hookEventName": "PreToolUse",
-                        "allowExecution": False,
-                        "blockMessage": message,
+                        "permissionDecision": "deny",
+                        "permissionDecisionReason": message,
                     }
                 }
             print(json.dumps(output))
@@ -242,7 +242,7 @@ Maximum autonomy earned through consistent evidence gathering.""",
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": message,
                 }
             }
@@ -253,7 +253,7 @@ Maximum autonomy earned through consistent evidence gathering.""",
     output = {
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "allowExecution": True,
+            "permissionDecision": "allow",
         }
     }
     print(json.dumps(output))

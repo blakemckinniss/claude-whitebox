@@ -131,7 +131,7 @@ def main():
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "allowExecution": True,
+                "permissionDecision": "allow",
             }
         }
         print(json.dumps(output))
@@ -147,7 +147,7 @@ def main():
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "allowExecution": True,
+                "permissionDecision": "allow",
             }
         }
         print(json.dumps(output))
@@ -200,7 +200,7 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": f"⚠️ File operation validation bypassed with SUDO\n\n{error_msg}",
                 }
             }
@@ -208,15 +208,15 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": False,
-                    "blockMessage": error_msg + "\n\n(Use SUDO keyword to bypass)",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": error_msg + "\n\n(Use SUDO keyword to bypass)",
                 }
             }
     else:
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "allowExecution": True,
+                "permissionDecision": "allow",
             }
         }
 

@@ -182,7 +182,7 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,  # Don't block on transitions
+                    "permissionDecision": "allow",  # Don't block on transitions
                     "additionalContext": transition_msg,
                 }
             }
@@ -201,7 +201,7 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": report,
                 }
             }
@@ -213,8 +213,8 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": False,
-                    "blockMessage": message,
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": message,
                 }
             }
             print(json.dumps(output))
@@ -224,7 +224,7 @@ def main():
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "allowExecution": True,
+                    "permissionDecision": "allow",
                     "additionalContext": message,
                 }
             }
@@ -236,7 +236,7 @@ def main():
     save_session_state(session_id, session_state)
 
     output = {
-        "hookSpecificOutput": {"hookEventName": "PreToolUse", "allowExecution": True}
+        "hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}
     }
     print(json.dumps(output))
     sys.exit(0)
