@@ -3062,3 +3062,7 @@
 {"timestamp": 1763955519.119862, "session_id": "a3a050fd-441f-4d42-8cf1-ac1eeb36d526", "tool": "Bash", "event": "tool_use"}
 {"timestamp": 1763955519.7470932, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
 {"timestamp": 1763955519.800107, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763955521.277771, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763955521.31396, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763955521.403387, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763955521.415191, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
