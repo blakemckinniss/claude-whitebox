@@ -6,18 +6,25 @@
       "tool": "Read",
       "target": "/test",
       "boost": 10,
-      "timestamp": "2025-11-23T22:34:19.383126"
+      "timestamp": "2025-11-23T22:34:19.934061"
     },
     {
       "turn": 0,
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T22:34:19.521676"
+      "timestamp": "2025-11-23T22:34:19.973800"
+    },
+    {
+      "turn": 0,
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-23T22:34:20.008672"
     }
   ],
-  "last_reset": "2025-11-23T22:34:19.378236",
+  "last_reset": "2025-11-23T22:34:19.757574",
   "total_gains": 10,
-  "total_losses": -10,
+  "total_losses": -20,
   "confidence": 0
 }
