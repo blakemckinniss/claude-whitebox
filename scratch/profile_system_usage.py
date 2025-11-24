@@ -38,8 +38,13 @@ def get_zombie_processes():
 
     zombies = []
     for line in result.stdout.split('\n')[1:]:  # Skip header
-        if '<defunct>' in line or 'Z' in line.split()[7]:  # State column
-            zombies.append(line)
+        if not line.strip():
+            continue
+        parts = line.split()
+        if len(parts) >= 8:
+            # Check for <defunct> or Z state
+            if '<defunct>' in line or (len(parts[7]) > 0 and 'Z' in parts[7]):
+                zombies.append(line)
 
     return zombies
 
