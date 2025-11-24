@@ -1,51 +1,51 @@
 {
-  "current_confidence": 2,
+  "current_confidence": 4,
   "reinforcement_log": [
     {
       "turn": 0,
       "tool": "Read",
       "target": "/test",
       "boost": 10,
-      "timestamp": "2025-11-23T23:32:37.588978"
+      "timestamp": "2025-11-23T23:32:39.049800"
     },
     {
       "turn": 0,
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T23:32:37.677644"
-    },
-    {
-      "turn": 0,
-      "tool": "PENALTY",
-      "target": "tier_violation",
-      "boost": -10,
-      "timestamp": "2025-11-23T23:32:37.742793"
+      "timestamp": "2025-11-23T23:32:39.062319"
     },
     {
       "turn": 0,
       "tool": "Read",
       "target": "/test",
       "boost": 2,
-      "timestamp": "2025-11-23T23:32:38.252351"
+      "timestamp": "2025-11-23T23:32:39.102707"
     },
     {
       "turn": 0,
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T23:32:38.292707"
+      "timestamp": "2025-11-23T23:32:39.106622"
     },
     {
       "turn": 0,
       "tool": "Read",
       "target": "/test",
       "boost": 2,
-      "timestamp": "2025-11-23T23:32:38.310906"
+      "timestamp": "2025-11-23T23:32:39.176745"
+    },
+    {
+      "turn": 0,
+      "tool": "Read",
+      "target": "/test",
+      "boost": 2,
+      "timestamp": "2025-11-23T23:32:39.344316"
     }
   ],
-  "last_reset": "2025-11-23T23:32:37.458406",
-  "total_gains": 14,
-  "total_losses": -30,
-  "confidence": 2
+  "last_reset": "2025-11-23T23:32:38.829353",
+  "total_gains": 16,
+  "total_losses": -20,
+  "confidence": 4
 }
