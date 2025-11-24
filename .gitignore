@@ -49,6 +49,11 @@ desktop.ini
 # Node
 node_modules/
 
+# Secrets
+.env
+.env.*
+*.secret
+
 # Project-specific
 scratch/archive/
 projects/
