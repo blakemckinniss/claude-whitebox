@@ -6,17 +6,17 @@
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T23:31:14.076611"
+      "timestamp": "2025-11-23T23:31:14.578018"
     },
     {
       "turn": 0,
       "tool": "PENALTY",
       "target": "tier_violation",
       "boost": -10,
-      "timestamp": "2025-11-23T23:31:14.217643"
+      "timestamp": "2025-11-23T23:31:14.583549"
     }
   ],
-  "last_reset": "2025-11-23T23:31:13.946405",
+  "last_reset": "2025-11-23T23:31:14.321402",
   "total_gains": 0,
   "total_losses": -20,
   "confidence": 0
