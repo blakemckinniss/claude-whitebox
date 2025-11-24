@@ -16,5 +16,17 @@
     }
   ],
   "read_files": {},
-  "initialized_at": "2025-11-23T21:29:49.996696"
+  "initialized_at": "2025-11-23T21:29:49.996696",
+  "bash_calls": [
+    {
+      "turn": 0,
+      "timestamp": 1763951392.2517405
+    }
+  ],
+  "agent_calls": [
+    {
+      "turn": 0,
+      "timestamp": 1763951392.4031134
+    }
+  ]
 }

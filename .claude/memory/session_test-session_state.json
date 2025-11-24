@@ -1,0 +1,35 @@
+{
+  "session_id": "test-session",
+  "confidence": 0,
+  "risk": 0,
+  "turn_count": 0,
+  "tokens_estimated": 0,
+  "context_window_percent": 0,
+  "evidence_ledger": [
+    {
+      "turn": 0,
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-23T21:29:52.694074"
+    }
+  ],
+  "risk_events": [],
+  "confidence_history": [
+    {
+      "turn": 0,
+      "confidence": 0,
+      "reason": "session_start",
+      "timestamp": "2025-11-23T21:29:52.451931"
+    },
+    {
+      "turn": 0,
+      "confidence": 0,
+      "reason": "tier_violation: Attempted Write - tier_violation",
+      "timestamp": "2025-11-23T21:29:52.694084"
+    }
+  ],
+  "read_files": {},
+  "initialized_at": "2025-11-23T21:29:52.451943",
+  "files_read": []
+}

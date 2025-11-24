@@ -1,79 +1,16 @@
 {
-  "current_confidence": 100,
+  "current_confidence": 0,
   "reinforcement_log": [
     {
       "turn": 0,
-      "tool": "Bash",
-      "target": "git commit -m 'test'",
-      "boost": 10,
-      "timestamp": "2025-11-22T01:39:11.934101"
-    },
-    {
-      "turn": 0,
-      "tool": "Bash",
-      "target": "git diff HEAD",
-      "boost": 10,
-      "timestamp": "2025-11-22T01:39:11.934723"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "CLAUDE.md",
-      "boost": 20,
-      "timestamp": "2025-11-22T01:39:11.935042"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "CLAUDE.md",
-      "boost": 5,
-      "timestamp": "2025-11-22T01:39:11.935367"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "README.md",
-      "boost": 15,
-      "timestamp": "2025-11-22T01:39:11.935669"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "docs/api.md",
-      "boost": 15,
-      "timestamp": "2025-11-22T01:39:11.935951"
-    },
-    {
-      "turn": 0,
-      "tool": "Write",
-      "target": "test_new.py",
-      "boost": 15,
-      "timestamp": "2025-11-22T01:39:11.936228"
-    },
-    {
-      "turn": 0,
-      "tool": "Edit",
-      "target": "test_existing.py",
-      "boost": 20,
-      "timestamp": "2025-11-22T01:39:11.936573"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "src/main.py",
-      "boost": 10,
-      "timestamp": "2025-11-22T01:39:11.936932"
-    },
-    {
-      "turn": 0,
-      "tool": "Read",
-      "target": "src/main.py",
-      "boost": 2,
-      "timestamp": "2025-11-22T01:39:11.937317"
+      "tool": "PENALTY",
+      "target": "tier_violation",
+      "boost": -10,
+      "timestamp": "2025-11-23T21:29:52.694074"
     }
   ],
-  "last_reset": "2025-11-22T01:39:11.933482",
-  "total_gains": 127,
-  "total_losses": 0,
-  "confidence": 100
+  "last_reset": "2025-11-23T21:29:52.451943",
+  "total_gains": 0,
+  "total_losses": -10,
+  "confidence": 0
 }
