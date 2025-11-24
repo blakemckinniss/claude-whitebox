@@ -5900,3 +5900,8 @@
 {"timestamp": 1763990952.4101553, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
 {"timestamp": 1763990952.410182, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
 {"timestamp": 1763990952.449422, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763990952.8914578, "session_id": "2d68786d-d34c-4e39-8ce2-9735da95ad04", "tool": "Bash", "event": "tool_use"}
+{"timestamp": 1763990953.1079452, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763990953.1383424, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763990953.1517196, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
+{"timestamp": 1763990953.1963103, "session_id": "unknown", "tool": "unknown", "event": "tool_use"}
