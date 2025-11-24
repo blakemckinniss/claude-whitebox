@@ -136,7 +136,7 @@ class HookRegistry:
         # 1. Syntax check
         try:
             result = subprocess.run(
-                ["python3", "-m", "py_compile", str(hook_path)],
+                [sys.executable, "-m", "py_compile", str(hook_path)],
                 capture_output=True,
                 text=True,
                 timeout=5
