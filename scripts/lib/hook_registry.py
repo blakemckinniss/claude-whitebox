@@ -153,14 +153,12 @@ class HookRegistry:
             return health  # Skip further checks if syntax invalid
 
         # 2. Import check (try importing the module)
+        import sys
+        sys.path.insert(0, str(self.hooks_dir))
         try:
-            # Add hooks dir to path temporarily
-            import sys
-            sys.path.insert(0, str(self.hooks_dir))
-
             module_name = hook_path.stem
             result = subprocess.run(
-                ["python3", "-c", f"import sys; sys.path.insert(0, '{self.hooks_dir}'); import {module_name}"],
+                [sys.executable, "-c", f"import sys; sys.path.insert(0, '{self.hooks_dir}'); import {module_name}"],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -170,11 +168,16 @@ class HookRegistry:
             if result.returncode != 0:
                 health["errors"].append(f"Import error: {result.stderr.strip()}")
 
-            sys.path.remove(str(self.hooks_dir))
         except subprocess.TimeoutExpired:
             health["errors"].append("Import check timeout")
         except Exception as e:
             health["errors"].append(f"Import check failed: {e}")
+        finally:
+            # Always clean up sys.path, even if exception occurred
+            try:
+                sys.path.remove(str(self.hooks_dir))
+            except ValueError:
+                pass  # Already removed
 
         # 3. Structure check (has main function)
         try:
