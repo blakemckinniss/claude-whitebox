@@ -28,7 +28,8 @@ except ImportError:
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except (json.JSONDecodeError, ValueError):
+    # Malformed JSON - silent failure
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "UserPromptSubmit",
@@ -68,8 +69,11 @@ Total auto-commits this session: {stats['total_auto_commits']}"""
 
     elif file_count >= (stats['thresholds']['file_count_min'] * 0.7) or loc_changed >= (stats['thresholds']['loc_threshold'] * 0.7):
         # APPROACHING THRESHOLD (70%)
-        file_percent = int((file_count / stats['thresholds']['file_count_min']) * 100)
-        loc_percent = int((loc_changed / stats['thresholds']['loc_threshold']) * 100)
+        # ZeroDivisionError protection
+        file_min = stats['thresholds']['file_count_min']
+        loc_thresh = stats['thresholds']['loc_threshold']
+        file_percent = int((file_count / file_min) * 100) if file_min > 0 else 0
+        loc_percent = int((loc_changed / loc_thresh) * 100) if loc_thresh > 0 else 0
 
         message = f"""📊 COMMIT DENSITY TRACKER
 

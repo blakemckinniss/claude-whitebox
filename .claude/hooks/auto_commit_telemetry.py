@@ -15,12 +15,13 @@ try:
     scratch_dir = Path(__file__).resolve().parent.parent.parent / "scratch"
     sys.path.insert(0, str(scratch_dir))
     import auto_commit_enforcement
-except ImportError:
-    # Library not available yet
+except ImportError as e:
+    # Library not available - expected during initial setup
+    import sys
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PostToolUse",
-            "additionalContext": ""
+            "additionalContext": ""  # Silent - expected during setup
         }
     }))
     sys.exit(0)
@@ -28,13 +29,14 @@ except ImportError:
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except (json.JSONDecodeError, ValueError) as e:
+    # Malformed JSON input
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PostToolUse",
-            "additionalContext": ""
+            "additionalContext": f"⚠️ Hook input parse error: {type(e).__name__}"
         }
-    }))
+    }), file=sys.stderr)
     sys.exit(0)
 
 tool_name = input_data.get("toolName", "")
