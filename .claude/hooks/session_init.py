@@ -16,11 +16,17 @@ from lib.epistemology import initialize_session_state
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception as e:
     # SessionStart hooks may not have standard input
     input_data = {}
 
+# Get session ID - use stdin data or fallback to unknown
 session_id = input_data.get("sessionId", "unknown")
+
+# If still unknown, check environment (Claude Code sets this)
+if session_id == "unknown":
+    import os
+    session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
 
 # Initialize session state
 state = initialize_session_state(session_id)
