@@ -245,10 +245,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_prompt_check.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_init.py"
           },
           {
@@ -339,10 +335,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_telemetry.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_logical_fallacy.py"
           },
           {
@@ -399,10 +391,6 @@
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_on_complete.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_telemetry_collector.py"
           },
           {
@@ -435,6 +423,10 @@
     "Stop": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_threshold.py"
+          },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pattern_detector.py"
@@ -471,7 +463,7 @@
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_on_end.py"
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_threshold.py"
           },
           {
             "type": "command",
