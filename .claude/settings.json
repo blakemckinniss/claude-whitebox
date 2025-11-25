@@ -20,15 +20,6 @@
         ]
       },
       {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/hook_documentation_enforcer.py"
-          }
-        ]
-      },
-      {
         "matcher": "(Write|Edit)",
         "hooks": [
           {
@@ -38,6 +29,26 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/org_drift_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/constitutional_guard.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_reasoning_rigor.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
           }
         ]
       },
@@ -46,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/constitutional_guard.py"
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/hook_documentation_enforcer.py"
           },
           {
             "type": "command",
@@ -62,52 +73,11 @@
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pre_write_audit.py"
           },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/ban_stubs.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_reasoning_rigor.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/constitutional_guard.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_reasoning_rigor.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
           }
         ]
       },
@@ -227,7 +197,7 @@
           },
           {
             "type": "command",
-            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n\ud83e\udde0 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
+            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n🧠 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
           },
           {
             "type": "command",

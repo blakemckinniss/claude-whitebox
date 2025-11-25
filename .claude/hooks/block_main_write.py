@@ -16,23 +16,6 @@ import sys
 import json
 import os
 
-def validate_file_path(file_path: str) -> bool:
-    """
-    Validate file path to prevent path traversal attacks.
-    Per official docs: "Block path traversal - Check for .. in file paths"
-    """
-    if not file_path:
-        return True
-
-    # Normalize path to resolve any . or .. components
-    normalized = str(Path(file_path).resolve())
-
-    # Check for path traversal attempts
-    if '..' in file_path:
-        return False
-
-    return True
-
 
 def main():
     # Read hook input from stdin
@@ -64,7 +47,7 @@ def main():
         sys.exit(0)
 
     if is_production:
-        message = f"""🛡️ PRODUCTION CODE WRITE BLOCKED
+        reason = f"""🛡️ PRODUCTION CODE WRITE BLOCKED
 
 Target: {file_path}
 
@@ -90,10 +73,13 @@ See CLAUDE.md § Agent Delegation (script-smith)
 """
 
         print(json.dumps({
-            "allow": False,
-            "message": message
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason": reason
+            }
         }))
-        sys.exit(1)  # Block the operation
+        sys.exit(0)
 
     # Allow non-production writes
     sys.exit(0)

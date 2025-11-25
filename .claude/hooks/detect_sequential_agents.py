@@ -90,29 +90,34 @@ def main():
 
     if previous_calls and len(current_turn_calls) == 1:
         # Sequential pattern detected: agent in turn N-1, another in turn N
-        print()
-        print("🚫 SEQUENTIAL AGENT PATTERN DETECTED")
-        print()
-        print("VIOLATION: You are calling agents one-by-one across multiple turns.")
-        print()
-        print("RULE: When delegating to 2+ agents, use PARALLEL invocation.")
-        print()
-        print("❌ FORBIDDEN (Sequential):")
-        print("   Turn N:   <invoke Task>agent1</invoke>")
-        print("   Turn N+1: <invoke Task>agent2</invoke>")
-        print()
-        print("✅ REQUIRED (Parallel):")
-        print("   Turn N:   <invoke Task>agent1</invoke>")
-        print("             <invoke Task>agent2</invoke>")
-        print("             <invoke Task>agent3</invoke>")
-        print()
-        print("WHY: Each agent = FREE separate context. Sequential = WASTE.")
-        print()
-        print("ACTION: Revise your response to invoke all agents in ONE message.")
-        print()
+        reason = """🚫 SEQUENTIAL AGENT PATTERN DETECTED
 
-        # HARD BLOCK
-        sys.exit(1)
+VIOLATION: You are calling agents one-by-one across multiple turns.
+
+RULE: When delegating to 2+ agents, use PARALLEL invocation.
+
+❌ FORBIDDEN (Sequential):
+   Turn N:   <invoke Task>agent1</invoke>
+   Turn N+1: <invoke Task>agent2</invoke>
+
+✅ REQUIRED (Parallel):
+   Turn N:   <invoke Task>agent1</invoke>
+             <invoke Task>agent2</invoke>
+             <invoke Task>agent3</invoke>
+
+WHY: Each agent = FREE separate context. Sequential = WASTE.
+
+ACTION: Revise your response to invoke all agents in ONE message.
+"""
+
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason": reason
+            }
+        }))
+        sys.exit(0)
 
     # No violation detected
     sys.exit(0)
