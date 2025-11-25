@@ -81,7 +81,7 @@ def main():
     """Main detection logic"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         sys.exit(0)
 
     # Get command from tool parameters

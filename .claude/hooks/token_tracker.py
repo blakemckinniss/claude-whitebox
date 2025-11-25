@@ -22,7 +22,7 @@ from lib.epistemology import (
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     sys.exit(0)
 
 session_id = input_data.get("sessionId", "unknown")

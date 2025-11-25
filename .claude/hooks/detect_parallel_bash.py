@@ -33,7 +33,7 @@ def load_state():
     try:
         with open(STATE_FILE) as f:
             return json.load(f)
-    except:
+    except Exception:
         return {}
 
 
@@ -44,7 +44,7 @@ def save_state(state):
     try:
         with open(STATE_FILE, 'w') as f:
             json.dump(state, f, indent=2)
-    except:
+    except Exception:
         pass
 
 
@@ -52,7 +52,7 @@ def main():
     """Main detection logic"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         sys.exit(0)
 
     # Load state

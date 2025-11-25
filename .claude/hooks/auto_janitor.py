@@ -55,7 +55,7 @@ def archive_old_files(threshold_days=7):
             try:
                 shutil.move(str(file_path), str(archive_path))
                 archived.append(file_path.name)
-            except:
+            except Exception:
                 pass
 
     return archived

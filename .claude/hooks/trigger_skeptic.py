@@ -26,7 +26,7 @@ def validate_file_path(file_path: str) -> bool:
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     # If can't parse input, allow the operation
     print(
         json.dumps(

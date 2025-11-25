@@ -64,7 +64,7 @@ def main():
     """Main enforcement logic"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",

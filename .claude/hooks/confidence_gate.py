@@ -54,7 +54,7 @@ def load_confidence():
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     print(
         json.dumps(
             {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}}

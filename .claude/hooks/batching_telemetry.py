@@ -54,7 +54,7 @@ def load_state():
     try:
         with open(STATE_FILE) as f:
             return json.load(f)
-    except:
+    except Exception:
         return {}
 
 
@@ -135,7 +135,7 @@ def record_telemetry(analysis):
     try:
         with open(TELEMETRY_FILE, 'a') as f:
             f.write(json.dumps(entry) + "\n")
-    except:
+    except Exception:
         pass
 
 
@@ -158,9 +158,9 @@ def generate_summary_report(lookback_hours=24):
                     entry = json.loads(line)
                     if entry.get("timestamp", 0) > cutoff:
                         entries.append(entry)
-                except:
+                except Exception:
                     continue
-    except:
+    except Exception:
         return None
 
     if not entries:
@@ -189,7 +189,7 @@ def main():
     """Main telemetry logic"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         sys.exit(0)
 
     tool_name = data.get("toolName", "")

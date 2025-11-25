@@ -20,14 +20,14 @@ def load_confidence():
         with open(STATE_FILE) as f:
             data = json.load(f)
             return data.get("current_confidence", 0)
-    except:
+    except Exception:
         return 0
 
 
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     print(
         json.dumps(
             {

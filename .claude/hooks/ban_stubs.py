@@ -10,7 +10,7 @@ import re
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     # If parsing fails, allow the operation
     print(json.dumps({
         "hookSpecificOutput": {

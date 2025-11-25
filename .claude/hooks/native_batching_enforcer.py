@@ -70,7 +70,7 @@ def load_session_state(session_id: str):
     try:
         with open(session_file) as f:
             return json.load(f)
-    except:
+    except Exception:
         return {"tool_calls": []}
 
 
@@ -82,7 +82,7 @@ def save_session_state(session_id: str, state: dict):
     try:
         with open(session_file, "w") as f:
             json.dump(state, f, indent=2)
-    except:
+    except Exception:
         pass
 
 
@@ -140,7 +140,7 @@ def main():
     """Main enforcement logic"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         sys.exit(0)
 
     tool_name = data.get("toolName", "")

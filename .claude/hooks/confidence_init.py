@@ -22,7 +22,7 @@ from lib.epistemology import (
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     print(
         json.dumps(
             {

@@ -31,7 +31,7 @@ def get_cached_result(cache_key: str):
             try:
                 with open(cache_file) as f:
                     return json.load(f)
-            except:
+            except Exception:
                 pass
     return None
 
@@ -41,7 +41,7 @@ def set_cached_result(cache_key: str, result):
     try:
         with open(cache_file, 'w') as f:
             json.dump(result, f)
-    except:
+    except Exception:
         pass
 
 def output_empty_context():
@@ -57,7 +57,7 @@ def output_empty_context():
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     output_empty_context()
 
 # Get user prompt and session

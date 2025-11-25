@@ -13,7 +13,7 @@ from pathlib import Path
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     sys.exit(0)
 
 # Extract data (Claude hooks use camelCase keys)
@@ -45,13 +45,13 @@ try:
     import random
     import os
     if random.randint(1, 100) == 1:
-        line_count = int(subprocess.check_output(['wc', '-l', str(LOG_FILE)]).split()[0])
+        line_count = int(subprocess.check_output(['wc', '-l', str(LOG_FILE)]).split()[0], timeout=30)
 
         if line_count > 10000:
             # Use tail to keep last 5000 lines (memory efficient)
-            subprocess.run(['tail', '-n', '5000', str(LOG_FILE)], stdout=open(str(LOG_FILE) + '.tmp', 'w'))
+            subprocess.run(['tail', '-n', '5000', str(LOG_FILE)], stdout=open(str(LOG_FILE) + '.tmp', 'w'), timeout=30)
             os.replace(str(LOG_FILE) + '.tmp', str(LOG_FILE))
-except:
+except Exception:
     pass
 
 # Output required hook structure

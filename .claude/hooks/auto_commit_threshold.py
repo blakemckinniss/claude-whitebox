@@ -169,7 +169,7 @@ def execute_commit():
                 capture_output=True,
                 timeout=30
             )
-        except:
+        except Exception:
             pass  # Upkeep is optional
 
         # Stage all changes
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     # This hook runs on Stop/SessionEnd - no stdin expected
     try:
         input_data = json.load(sys.stdin)
-    except:
+    except Exception:
         pass  # Stop/SessionEnd don't always provide stdin
 
     result = execute_commit()

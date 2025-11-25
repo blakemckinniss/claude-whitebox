@@ -84,7 +84,7 @@ def record_telemetry(command, is_background):
     try:
         with open(TELEMETRY_FILE, 'a') as f:
             f.write(json.dumps(entry) + "\n")
-    except:
+    except Exception:
         pass
 
 
@@ -103,9 +103,9 @@ def analyze_recent_usage(lookback_turns=20):
                     entry = json.loads(line)
                     if entry.get("session_id") == SESSION_ID and entry.get("turn", 0) >= min_turn:
                         entries.append(entry)
-                except:
+                except Exception:
                     continue
-    except:
+    except Exception:
         return None
 
     if not entries:
@@ -193,7 +193,7 @@ def main():
     """Main telemetry logic"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         sys.exit(0)
 
     # Get command and background status

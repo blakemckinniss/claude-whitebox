@@ -78,7 +78,7 @@ def main():
     # Read user prompt from stdin
     try:
         user_input = sys.stdin.read().strip()
-    except:
+    except Exception:
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "UserPromptSubmit",

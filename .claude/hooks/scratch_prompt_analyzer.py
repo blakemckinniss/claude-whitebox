@@ -30,7 +30,7 @@ def main():
     """Main hook logic"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         sys.exit(0)
 
     prompt = data.get("prompt", "")

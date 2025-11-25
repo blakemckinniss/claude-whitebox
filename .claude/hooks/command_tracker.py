@@ -18,7 +18,7 @@ from lib.epistemology import record_command_run, load_session_state
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     print(
         json.dumps(
             {

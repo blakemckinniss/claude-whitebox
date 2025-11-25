@@ -22,7 +22,7 @@ from lib.pattern_detection import analyze_patterns
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     # If parsing fails, exit silently (Stop hooks don't block)
     sys.exit(0)
 
@@ -36,7 +36,7 @@ if not transcript_path or not Path(transcript_path).exists():
 try:
     with open(transcript_path) as f:
         transcript = [json.loads(line) for line in f if line.strip()]
-except:
+except Exception:
     sys.exit(0)
 
 # Skip if conversation too short (need at least 3 messages for pattern detection)
@@ -106,7 +106,7 @@ New Confidence: {new_confidence}% ({tier_name} TIER)
 """
         warnings.append(warning)
 
-    except:
+    except Exception:
         pass  # Silent failure for penalty application
 
 # Output warnings and block if violations detected

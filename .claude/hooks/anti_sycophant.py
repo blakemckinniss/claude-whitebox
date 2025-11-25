@@ -9,7 +9,7 @@ import json
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     # If parsing fails, exit silently
     print(
         json.dumps(

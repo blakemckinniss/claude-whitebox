@@ -50,7 +50,7 @@ def main(event):
                 else:
                     # Stale lock (>60s), remove it
                     lock_file.unlink()
-            except:
+            except Exception:
                 pass
 
         # SPAWN GUARD 2: Cooldown check
@@ -66,7 +66,7 @@ def main(event):
                             "additionalContext": f"🧪 Hook tests on cooldown ({60-elapsed:.0f}s remaining)"
                         }
                     }
-            except:
+            except Exception:
                 pass
 
         # Create lock file
@@ -95,10 +95,10 @@ def main(event):
                     try:
                         os.kill(process.pid, 0)  # Signal 0 = check if alive
                         # Still running, don't remove lock
-                    except:
+                    except Exception:
                         # Process finished, remove lock
                         lock_file.unlink()
-            except:
+            except Exception:
                 pass
 
         # Start cleanup thread (non-blocking)
@@ -117,7 +117,7 @@ def main(event):
         try:
             if lock_file.exists():
                 lock_file.unlink()
-        except:
+        except Exception:
             pass
 
         return {

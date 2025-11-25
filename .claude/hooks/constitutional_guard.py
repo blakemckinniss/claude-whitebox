@@ -70,7 +70,7 @@ def main():
     """Block unauthorized CLAUDE.md modifications"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         # Can't read input, allow (fail open)
         output = {
             "hookSpecificOutput": {

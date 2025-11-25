@@ -55,7 +55,7 @@ def main():
     try:
         # Load input
         input_data = json.load(sys.stdin)
-    except:
+    except Exception:
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "PostToolUse",

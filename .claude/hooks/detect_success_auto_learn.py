@@ -44,7 +44,7 @@ def auto_learn_success(tool_name, context, lesson_text):
             timeout=5,
         )
         return True
-    except:
+    except Exception:
         return False
 
 
@@ -54,7 +54,7 @@ def get_session_state():
         if SESSION_FILE.exists():
             with open(SESSION_FILE, 'r') as f:
                 return json.load(f)
-    except:
+    except Exception:
         pass
     return {}
 
@@ -64,14 +64,14 @@ def update_session_state(state):
     try:
         with open(SESSION_FILE, 'w') as f:
             json.dump(state, f, indent=2)
-    except:
+    except Exception:
         pass
 
 
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse"}}))
     sys.exit(0)
 

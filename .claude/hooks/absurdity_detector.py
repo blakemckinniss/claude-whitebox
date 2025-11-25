@@ -125,7 +125,7 @@ def main():
     # Read user prompt from stdin
     try:
         user_input = sys.stdin.read().strip()
-    except:
+    except Exception:
         sys.exit(0)  # Can't read input, allow
 
     if not user_input:

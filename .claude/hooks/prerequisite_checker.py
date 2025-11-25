@@ -10,7 +10,7 @@ from pathlib import Path
 
 try:
     data = json.load(sys.stdin)
-except:
+except Exception:
     sys.exit(0)
 
 prompt = data.get("prompt", "").lower()
@@ -31,7 +31,7 @@ try:
         confidence = 0
         evidence_ledger = []
         read_files = {}
-except:
+except Exception:
     confidence = 0
     evidence_ledger = []
     read_files = {}

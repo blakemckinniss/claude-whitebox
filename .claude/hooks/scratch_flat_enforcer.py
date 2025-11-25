@@ -48,7 +48,7 @@ ALLOWED_SCRATCH_SUBDIRS = {
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     # Fail open on parse error
     print(
         json.dumps(

@@ -195,8 +195,9 @@ class HookAuditor:
 
         issues = []
 
-        # Check for subprocess without timeout
-        if 'subprocess' in content:
+        # Check for subprocess without timeout - only blocking calls need timeout
+        # Popen is intentionally async/background, so timeout doesn't apply
+        if re.search(r'subprocess\.(run|check_output|call)\(', content):
             if 'timeout=' not in content:
                 issues.append("Uses subprocess without timeout parameter")
 
@@ -206,14 +207,11 @@ class HookAuditor:
             if f'import {imp}' in content or f'from {imp}' in content:
                 issues.append(f"Imports heavy library: {imp}")
 
-        # Check for network calls without timeout
-        if 'requests' in content and 'timeout=' not in content:
-            issues.append("Uses requests without timeout")
-
-        # Check for reading large files
-        if '.read()' in content and 'limit' not in content.lower():
-            if 'CLAUDE_TRANSCRIPT' not in content:  # Transcript reading is expected
-                pass  # Many hooks legitimately read files
+        # Check for actual requests HTTP calls (not just string references in docs)
+        # Must be at start of line or after = (assignment), not in quotes
+        if re.search(r'^[^"\'#]*requests\.(get|post|put|delete|patch|head)\(', content, re.MULTILINE):
+            if 'timeout=' not in content:
+                issues.append("Uses requests without timeout")
 
         for issue in issues:
             self.add_issue("WARNING", "PERFORMANCE", issue, hook_file)

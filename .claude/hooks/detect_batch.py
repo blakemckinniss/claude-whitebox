@@ -9,7 +9,7 @@ import json
 
 try:
     data = json.load(sys.stdin)
-except:
+except Exception:
     sys.exit(0)
 
 # Get user prompt

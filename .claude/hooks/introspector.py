@@ -311,7 +311,7 @@ def main():
     # Load input
     try:
         input_data = json.load(sys.stdin)
-    except:
+    except Exception:
         output_context("")
 
     prompt = input_data.get("prompt", "")

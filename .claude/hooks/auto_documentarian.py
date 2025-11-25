@@ -67,7 +67,7 @@ def extract_tool_info(file_path):
 
         return {"description": ""}
 
-    except:
+    except Exception:
         return {"description": ""}
 
 
@@ -113,7 +113,7 @@ def main():
     # Load input
     try:
         input_data = json.load(sys.stdin)
-    except:
+    except Exception:
         sys.exit(0)
 
     # Check if enabled

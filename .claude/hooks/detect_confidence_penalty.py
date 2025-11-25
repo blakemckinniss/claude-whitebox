@@ -22,14 +22,14 @@ def apply_penalty(action_key, reason):
             capture_output=True,
             timeout=5,
         )
-    except:
+    except Exception:
         pass  # Silent failure
 
 
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     print(
         json.dumps(
             {

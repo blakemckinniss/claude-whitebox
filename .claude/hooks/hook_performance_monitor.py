@@ -39,9 +39,9 @@ def load_performance_data(days=7):
                     entry = json.loads(line)
                     if entry.get("timestamp", 0) > cutoff:
                         data.append(entry)
-                except:
+                except Exception:
                     continue
-    except:
+    except Exception:
         return []
 
     return data
@@ -146,7 +146,7 @@ def main():
     if REPORT_FILE.exists():
         try:
             last_report_time = REPORT_FILE.stat().st_mtime
-        except:
+        except Exception:
             pass
 
     # Generate report if last one is >24h old

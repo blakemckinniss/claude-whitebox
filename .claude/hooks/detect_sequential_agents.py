@@ -30,7 +30,7 @@ def load_state():
     try:
         with open(STATE_FILE) as f:
             return json.load(f)
-    except:
+    except Exception:
         return {}
 
 

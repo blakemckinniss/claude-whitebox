@@ -129,7 +129,7 @@ def main():
     # Load input
     try:
         input_data = json.load(sys.stdin)
-    except:
+    except Exception:
         sys.exit(0)
 
     # Check if Guardian enabled

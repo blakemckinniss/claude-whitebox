@@ -32,9 +32,9 @@ def load_recent_telemetry(hours=24):
                     entry = json.loads(line)
                     if entry.get("timestamp", 0) > cutoff:
                         data.append(entry)
-                except:
+                except Exception:
                     continue
-    except:
+    except Exception:
         return []
 
     return data
@@ -98,7 +98,7 @@ def generate_context_injection(alerts):
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except:
+except Exception:
     sys.exit(0)
 
 # Analyze telemetry

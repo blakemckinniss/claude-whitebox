@@ -17,7 +17,7 @@ def load_scratch_index():
     try:
         with open(index_path) as f:
             return json.load(f)
-    except:
+    except Exception:
         return {}
 
 def find_associations(query, index, top_n=3):
@@ -69,7 +69,7 @@ def find_associations(query, index, top_n=3):
 def main():
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         sys.exit(0)
     
     prompt = data.get("prompt", "").lower()

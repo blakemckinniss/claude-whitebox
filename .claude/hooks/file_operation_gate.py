@@ -127,7 +127,7 @@ def main():
     """Main gate logic"""
     try:
         data = json.load(sys.stdin)
-    except:
+    except Exception:
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
