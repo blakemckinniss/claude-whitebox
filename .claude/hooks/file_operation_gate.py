@@ -29,6 +29,32 @@ sys.path.insert(0, str(PROJECT_DIR / "scripts" / "lib"))
 
 from epistemology import load_session_state, save_session_state, initialize_session_state
 
+# Dedicated file for tracking reads (more reliable than session state)
+MEMORY_DIR = PROJECT_DIR / ".claude" / "memory"
+FILES_READ_TRACKER = MEMORY_DIR / "files_read_tracker.json"
+
+def load_files_read() -> set:
+    """Load files read from dedicated tracker file."""
+    try:
+        if FILES_READ_TRACKER.exists():
+            import json
+            with open(FILES_READ_TRACKER, 'r') as f:
+                data = json.load(f)
+                return set(data.get("files", []))
+    except Exception:
+        pass
+    return set()
+
+def save_files_read(files: set) -> None:
+    """Save files read to dedicated tracker file."""
+    try:
+        MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+        import json
+        with open(FILES_READ_TRACKER, 'w') as f:
+            json.dump({"files": list(files)}, f)
+    except Exception:
+        pass
+
 def validate_file_path(file_path: str) -> bool:
     """
     Validate file path to prevent path traversal attacks.
@@ -140,7 +166,6 @@ def main():
     session_id = data.get("session_id", "unknown")
     tool_name = data.get("tool_name", "")
     tool_params = data.get("tool_input", {})
-    prompt = data.get("prompt", "")
 
     # Only validate file operations
     if tool_name not in ["Read", "Write", "Edit"]:
@@ -158,11 +183,39 @@ def main():
     if not state:
         state = initialize_session_state(session_id)
 
-    # Get files_read tracking
+    # Get files_read tracking from BOTH session state AND dedicated tracker
+    # This ensures persistence even if session state gets reset
     files_read = set(state.get("files_read", []))
+    files_read.update(load_files_read())  # Merge with dedicated tracker
 
     # Workspace root
     workspace_root = PROJECT_DIR
+
+    # Check for SUDO bypass via transcript (more reliable than session state)
+    transcript_path = data.get("transcript_path", "")
+    sudo_found = False
+    if transcript_path:
+        try:
+            import os
+            if os.path.exists(transcript_path):
+                with open(transcript_path, 'r') as tf:
+                    transcript = tf.read()
+                    last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                    sudo_found = "SUDO" in last_chunk
+        except Exception:
+            pass
+    
+    if sudo_found:
+        # SUDO bypass - skip validation entirely
+        output = {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+                "additionalContext": "⚠️ SUDO BYPASS: File operation validation skipped",
+            }
+        }
+        print(json.dumps(output))
+        sys.exit(0)
 
     # Validate based on tool
     is_valid = True
@@ -189,13 +242,16 @@ def main():
         if file_path:
             is_valid, error_msg = validate_edit(file_path, workspace_root, files_read)
 
-    # Save updated state
+    # Save updated state to BOTH session state AND dedicated tracker
     state["files_read"] = list(files_read)
     save_session_state(session_id, state)
+    save_files_read(files_read)  # Also save to dedicated tracker
 
     # Return result
     if not is_valid:
-        # Check for SUDO bypass
+        # Check for SUDO bypass - get prompt from session state
+        # (PreToolUse hooks don't receive 'prompt' directly, it's stored by confidence_init.py)
+        prompt = state.get("current_prompt", "")
         if "SUDO" in prompt:
             output = {
                 "hookSpecificOutput": {

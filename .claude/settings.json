@@ -2,6 +2,15 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/synapse_fire.py"
+          }
+        ]
+      },
+      {
         "matcher": "mcp__.*",
         "hooks": [
           {
@@ -11,7 +20,7 @@
         ]
       },
       {
-        "matcher": "(Read|Write|Edit)",
+        "matcher": "(Read|Write|Edit|MultiEdit)",
         "hooks": [
           {
             "type": "command",
@@ -20,7 +29,7 @@
         ]
       },
       {
-        "matcher": "(Write|Edit|Bash|Task)",
+        "matcher": "(Write|Edit|MultiEdit|Bash|Task)",
         "hooks": [
           {
             "type": "command",
@@ -33,7 +42,7 @@
         ]
       },
       {
-        "matcher": "(Write|Edit|Bash)",
+        "matcher": "(Write|Edit|MultiEdit|Bash)",
         "hooks": [
           {
             "type": "command",
@@ -46,15 +55,11 @@
         ]
       },
       {
-        "matcher": "(Write|Edit)",
+        "matcher": "(Write|Edit|MultiEdit)",
         "hooks": [
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/assumption_firewall.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/org_drift_gate.py"
           },
           {
             "type": "command",
@@ -84,20 +89,12 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pre_write_audit.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/ban_stubs.py"
           }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_install.py"
-          },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_gate.py"
@@ -113,10 +110,6 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/force_playwright.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_background_opportunity.py"
           },
           {
             "type": "command",
@@ -138,29 +131,11 @@
         ]
       },
       {
-        "matcher": "(Bash|Write|Edit)",
+        "matcher": "(Bash|Write|Edit|MultiEdit)",
         "hooks": [
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/trigger_skeptic.py"
-          }
-        ]
-      },
-      {
-        "matcher": "(Read|Grep|Glob|WebFetch|WebSearch)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/native_batching_enforcer.py"
-          }
-        ]
-      },
-      {
-        "matcher": "(Read|Grep|Glob|Edit)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_enforcer_gate.py"
           }
         ]
       }
@@ -183,7 +158,7 @@
           },
           {
             "type": "command",
-            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n🧠 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
+            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n\ud83e\udde0 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
           },
           {
             "type": "command",
@@ -282,11 +257,28 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_prompt_analyzer.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/sanity_check.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/protocol_enforcer.py"
           }
         ]
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/synapse_fire.py"
+          }
+        ]
+      },
       {
         "hooks": [
           {
@@ -323,6 +315,10 @@
           },
           {
             "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_detour.py"
+          },
+          {
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_reward.py"
           },
           {
@@ -343,10 +339,6 @@
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/sanity_check.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_telemetry_collector.py"
           },
           {
@@ -363,10 +355,6 @@
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/org_drift_telemetry.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_guardian.py"
           },
           {
@@ -379,10 +367,6 @@
     "Stop": [
       {
         "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_threshold.py"
-          },
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pattern_detector.py"
@@ -416,10 +400,6 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/scripts/ops/upkeep.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_commit_threshold.py"
           },
           {
             "type": "command",

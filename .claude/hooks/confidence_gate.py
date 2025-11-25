@@ -2,10 +2,12 @@
 """
 Confidence Gate Hook: Blocks Write/Edit to production files at <71% confidence
 Allows scratch/ writes at any level (experimentation)
+Supports SUDO bypass via transcript check
 """
 import sys
 import json
 from pathlib import Path
+
 
 def validate_file_path(file_path: str) -> bool:
     """
@@ -87,6 +89,35 @@ if not file_path:
 # Delete operations ALWAYS require CERTAINTY tier (no scratch exception)
 if tool_name == "Delete":
     confidence = load_confidence()
+    
+    # Check for SUDO bypass via transcript
+    transcript_path = input_data.get("transcript_path", "")
+    sudo_found = False
+    if transcript_path:
+        try:
+            import os
+            if os.path.exists(transcript_path):
+                with open(transcript_path, 'r') as tf:
+                    transcript = tf.read()
+                    last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                    sudo_found = "SUDO" in last_chunk
+        except Exception:
+            pass
+    
+    if sudo_found:
+        print(
+            json.dumps(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "PreToolUse",
+                        "permissionDecision": "allow",
+                        "additionalContext": f"⚠️ SUDO BYPASS: Delete operation allowed ({confidence}% confidence)\nTarget: {file_path}",
+                    }
+                }
+            )
+        )
+        sys.exit(0)
+    
     if confidence < 71:
         additional_context = f"""🚨 DELETE OPERATION BLOCKED
 
@@ -134,6 +165,38 @@ if "/scratch/" in file_path or file_path.startswith("scratch/"):
 
 # Check confidence for production files
 confidence = load_confidence()
+
+# Check for SUDO bypass via transcript (more reliable than session state)
+# The transcript contains the conversation including user's current message
+transcript_path = input_data.get("transcript_path", "")
+prompt = ""
+if transcript_path:
+    try:
+        import os
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                # Look for SUDO in the last portion of transcript (most recent messages)
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                if "SUDO" in last_chunk:
+                    prompt = "SUDO"  # Flag that SUDO was found
+    except Exception:
+        pass
+
+if "SUDO" in prompt:
+    # SUDO bypass - allow with warning
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
+                    "additionalContext": f"⚠️ SUDO BYPASS: Confidence gate bypassed ({confidence}% < 71%)\nTarget: {file_path}",
+                }
+            }
+        )
+    )
+    sys.exit(0)
 
 if confidence < 71:
     additional_context = f"""
@@ -187,7 +250,7 @@ NEXT STEPS:
 # Confidence sufficient, allow operation
 print(
     json.dumps(
-        {"hookSpecificOutput": {"hookEventName": "PreToolUse", "action": "allow"}}
+        {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}}
     )
 )
 sys.exit(0)

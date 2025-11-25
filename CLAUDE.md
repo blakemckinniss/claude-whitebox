@@ -67,6 +67,7 @@
 13. **Scratch-First Enforcement:** Multi-step operations (4+ similar tool calls in 5 turns OR iteration language in prompts) trigger auto-escalating enforcement. Write scratch scripts instead of manual iteration. Bypass: "MANUAL" or "SUDO MANUAL".
 14. **Integration Blindness:** Before claiming "Fixed", you MUST perform a **Reverse Dependency Check** (`grep -r "functionName" .`) to ensure signature changes do not break consumers you haven't read.
 15. **The Phantom Ban:** You are FORBIDDEN from reading a file path unless you have explicitly seen it in a previous `ls`, `find`, or `git ls-files` output in the current session. **Do not guess paths.**
+16. **Drift Prevention:** Recursive directories (e.g. `scripts/scripts`) and nested `scratch/` folders are BANNED. Keep `scratch/` flat.
 
 ---
 
@@ -103,8 +104,7 @@
 *   **Content Check:** `verify grep_text "<file>" --expected "<text>"`
 *   **Command Check:** `verify command_success "<command>"`
 *   **Security:** `audit <file>` (Blocks secrets/injection).
-*   **Completeness:** `void <file>` (Blocks stubs/TODOs).
-*   **Auto-Void:** Automatic completeness checks on Stop lifecycle (confidence-based).
+*   **Completeness:** `void <file>` (Blocks stubs/TODOs). Note: This runs automatically on confidence >71%.
 
 ### 5. Memory & Upkeep
 *   **Store Lesson:** `remember add [lessons|decisions] "<text>"`
@@ -167,125 +167,6 @@ Stop manual iteration. Write a python script in `scratch/` to perform the task i
 
 ---
 
-## 📁 Scratch Flat Structure Protocol
-
-**MANDATE:** `scratch/` MUST remain a flat, single-layer substrate. NO nested directories allowed.
-
-**Philosophy:**
-*   scratch/ is a temporary workbench for quick operations
-*   All files should be at root level: `scratch/my_script.py`
-*   Nested structures defeat single-layer discoverability
-*   Complex projects with structure belong in `projects/<name>/`
-
-**Hard Blocks:**
-*   `mkdir scratch/subdir` - BLOCKED
-*   `Write scratch/subdir/file.py` - BLOCKED
-*   Any nested directory creation in scratch/
-
-**Allowed Exceptions:**
-*   `scratch/archive/` - Cleanup/archival storage only
-*   `scratch/__pycache__/` - Python runtime artifacts
-*   `scratch/.*` - Hidden directories
-
-**Recommended Pattern:**
-*   ❌ `scratch/auth/test.py`, `scratch/auth/mock.py`
-*   ✅ `scratch/auth_test.py`, `scratch/auth_mock.py`
-*   ✅ Use descriptive prefixes instead of folders
-
-**Bypass:** Include "SUDO" keyword in prompt (logged for review)
-
----
-
-## 🔍 Auto-Void Protocol (Automatic Completeness Enforcement)
-
-**MANDATE:** Automatically run completeness checks on production files at Stop lifecycle.
-
-**Philosophy:** If you find yourself manually requesting `void` checks after almost every task completion, it should be automated. This hook ensures stub detection happens automatically when confidence is in the "production work but need gates" range.
-
-**Trigger:** Stop lifecycle (session pause/end)
-
-**Detection:**
-*   Parses transcript for Write/Edit operations
-*   Extracts Python files in production zones only:
-    *   `scripts/ops/`
-    *   `scripts/lib/`
-    *   `.claude/hooks/`
-*   Deduplicates (same file modified multiple times = one check)
-*   Filters out scratch/ and project files
-
-**Confidence-Based Policy:**
-
-| Tier | Confidence | Policy |
-|------|-----------|--------|
-| IGNORANCE | 0-30% | No action (can't write anyway) |
-| HYPOTHESIS | 31-50% | No action (scratch only) |
-| WORKING | 51-70% | No action (scratch only) |
-| **CERTAINTY** | **71-85%** | **MANDATORY** check (always report) |
-| TRUSTED | 86-94% | OPTIONAL check (silent unless issues) |
-| EXPERT | 95-100% | No action (trusted) |
-
-**Check Behavior:**
-*   Runs `void.py --stub-only` (avoids Oracle API costs)
-*   Detects: TODO, FIXME, pass stubs, NotImplementedError, etc.
-*   Reports stub counts with line numbers
-*   Exit code always 0 (warnings only, no blocks)
-
-**Example Output (CERTAINTY tier):**
-```
-🔍 Auto-Void Check (CERTAINTY tier, 75% confidence):
-
-   ✅ scripts/ops/foo.py - Clean
-   ⚠️  scripts/lib/bar.py - 3 stub(s) detected
-       Line 42: TODO comment
-       Line 89: Function stub (pass)
-       Line 120: NotImplementedError
-
-💡 Tip: Run void.py with full Oracle analysis for deeper inspection
-```
-
-**Rationale:**
-*   At CERTAINTY (71-85%), you're doing production work but still building confidence
-*   Quality gates help catch incomplete implementations before they become technical debt
-*   At TRUSTED (86-94%), you've proven yourself but checks are still informational
-*   At EXPERT (95-100%), enforcement is minimal (trust established)
-
-**Implementation:**
-*   Hook: `.claude/hooks/auto_void.py`
-*   Registered in Stop lifecycle
-*   Test suite: `scratch/test_auto_void.py` (7/7 tests passing)
-
----
-
-## 🏗️ Organizational Drift Prevention Protocol
-
-**MANDATE:** Prevent catastrophic file structure anti-patterns in autonomous systems.
-
-**Catastrophic Violations (Hard Blocks):**
-*   **Recursion:** Directory name appears multiple times in path (e.g., `scripts/scripts/ops/`)
-*   **Root Pollution:** New files in repository root outside allowlist (README.md, CLAUDE.md, .gitignore, etc.)
-*   **Production Pollution:** Test/debug files in production zones (`test_*.py`, `debug_*.py` in `scripts/ops/`, `scripts/lib/`, `.claude/hooks/`)
-*   **Filename Collision:** Same filename in multiple production zones
-
-**Threshold Warnings (Auto-Tuning):**
-*   Hook Explosion: >30 hooks (range: 25-40)
-*   Scratch Bloat: >500 files excluding archive (range: 300-700)
-*   Memory Fragmentation: >100 session state files (range: 75-150)
-*   Deep Nesting: >6 directory levels (range: 5-8)
-
-**Exclusions:** `node_modules/`, `venv/`, `__pycache__/`, `.git/`, `scratch/archive/`, `projects/`, `.template/`
-
-**Auto-Tuning:** Every 100 turns, thresholds adjust to maintain 5-15% false positive rate.
-
-**Override:** Include "SUDO" in prompt to bypass blocks (logged for analysis).
-
-**Management:**
-*   `drift_org report` - View current state
-*   `drift_org fp <type>` - Record false positive
-*   `drift_org set <threshold> <value>` - Manually adjust
-*   `drift_org reset` - Reset all state
-
----
-
 ## 🤖 SWARM PROTOCOL (External Agents)
 **Rule:** Use `swarm.py` for high-complexity **Write/Reasoning** tasks.
 1.  **Define Inputs:** Write constraints to `scratch/swarm_spec.md`.
@@ -316,6 +197,7 @@ commands:
   groq: "python3 scripts/ops/groq.py"
   drift_org: "python3 scripts/ops/drift_org.py"
   audit_hooks: "python3 scripts/ops/audit_hooks.py"
+  firecrawl: "python3 scripts/ops/firecrawl.py"
 
 ## 📡 Required Footer
 Append to every significant response:

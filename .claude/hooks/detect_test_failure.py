@@ -77,7 +77,7 @@ def main():
 
     # Extract command info
     tool_input = input_data.get("tool_input", {})
-    tool_result = input_data.get('toolResult', {})
+    tool_result = input_data.get('tool_response', input_data.get('toolResult', {}))
     turn = input_data.get('turn', 0)
 
     command = tool_input.get('command', '')

@@ -1,0 +1,143 @@
+{
+  "total_evaluations": 126,
+  "rules_triggered": {
+    "verify_fixed_claims": 8,
+    "tier_production_write": 15,
+    "audit_production_write": 15,
+    "anti_sycophant_opinion": 9,
+    "council_complex_decision": 8,
+    "detour_blocking_error": 6,
+    "upkeep_before_commit": 8,
+    "think_repeated_failures": 3,
+    "background_slow_command": 3,
+    "macgyver_install_blocked": 1,
+    "scratch_manual_iteration": 4,
+    "stub_code_detected": 1
+  },
+  "rules_bypassed": {
+    "upkeep_before_commit": 1,
+    "scratch_manual_iteration": 1
+  },
+  "initialized_at": "2025-11-24T21:38:58.723924",
+  "decision_log": [
+    {
+      "timestamp": "2025-11-24T22:36:15.426926",
+      "turn": 0,
+      "event": "UserPromptSubmit",
+      "tool": null,
+      "matches": [
+        {
+          "rule": "upkeep_before_commit",
+          "category": "workflow",
+          "enforcement": "block"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-24T22:38:48.968361",
+      "turn": 0,
+      "event": "UserPromptSubmit",
+      "tool": null,
+      "matches": [
+        {
+          "rule": "upkeep_before_commit",
+          "category": "workflow",
+          "enforcement": "block"
+        },
+        {
+          "rule": "scratch_manual_iteration",
+          "category": "workflow",
+          "enforcement": "warn"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-24T22:39:02.832441",
+      "turn": 0,
+      "event": "UserPromptSubmit",
+      "tool": null,
+      "matches": [
+        {
+          "rule": "scratch_manual_iteration",
+          "category": "workflow",
+          "enforcement": "warn"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-24T22:48:43.801431",
+      "turn": 5,
+      "event": "PreToolUse",
+      "tool": "Write",
+      "matches": [
+        {
+          "rule": "tier_production_write",
+          "category": "safety",
+          "enforcement": "block"
+        },
+        {
+          "rule": "audit_production_write",
+          "category": "quality",
+          "enforcement": "warn"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-24T22:51:03.031964",
+      "turn": 5,
+      "event": "PreToolUse",
+      "tool": "Write",
+      "matches": [
+        {
+          "rule": "tier_production_write",
+          "category": "safety",
+          "enforcement": "block"
+        },
+        {
+          "rule": "audit_production_write",
+          "category": "quality",
+          "enforcement": "warn"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-25T00:28:19.546412",
+      "turn": 0,
+      "event": "UserPromptSubmit",
+      "tool": null,
+      "matches": [
+        {
+          "rule": "scratch_manual_iteration",
+          "category": "workflow",
+          "enforcement": "warn"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-25T00:35:26.522837",
+      "turn": 0,
+      "event": "UserPromptSubmit",
+      "tool": null,
+      "matches": [
+        {
+          "rule": "upkeep_before_commit",
+          "category": "workflow",
+          "enforcement": "block"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-25T00:43:42.622958",
+      "turn": 0,
+      "event": "UserPromptSubmit",
+      "tool": null,
+      "matches": [
+        {
+          "rule": "upkeep_before_commit",
+          "category": "workflow",
+          "enforcement": "block"
+        }
+      ]
+    }
+  ]
+}

@@ -60,7 +60,7 @@ if not state:
 turn = state.get("turn_count", 0)
 
 # Update confidence based on tool usage
-old_confidence = state["confidence"]
+old_confidence = state.get("confidence", 0)
 new_confidence, boost = update_confidence(
     session_id=session_id,
     tool_name=tool_name,

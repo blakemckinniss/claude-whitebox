@@ -8,10 +8,26 @@ lazy text-based approaches (requests + BeautifulSoup).
 """
 import sys
 import json
+import os
 
 # Load input
-data = json.load(sys.stdin)
-prompt = data.get("prompt", "").lower()
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}}))
+    sys.exit(0)
+
+# Get user context from transcript (PreToolUse doesn't receive 'prompt')
+prompt = ""
+transcript_path = data.get("transcript_path", "")
+if transcript_path and os.path.exists(transcript_path):
+    try:
+        with open(transcript_path, 'r') as tf:
+            transcript = tf.read()
+            # Use last 5000 chars for context
+            prompt = transcript[-5000:].lower() if len(transcript) > 5000 else transcript.lower()
+    except Exception:
+        pass
 
 # Words implying UI interaction
 ui_triggers = [
@@ -44,7 +60,8 @@ if wants_ui and wants_lazy:
         json.dumps(
             {
                 "hookSpecificOutput": {
-                    "hookEventName": "UserPromptSubmit",
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
                     "additionalContext": (
                         "⚠️ PROTOCOL VIOLATION: Do not use requests/BS4 for UI tasks.\n"
                         "Dynamic sites require browser automation.\n\n"
@@ -54,10 +71,10 @@ if wants_ui and wants_lazy:
                         "2. Use the Whitebox Browser SDK:\n"
                         "   from browser import get_browser_session, smart_dump\n"
                         "   with get_browser_session() as (p, browser, page):\n"
-                        "       page.goto('https://example.com')\n"
+                        "       page.goto(\'https://example.com\')\n"
                         "       content = smart_dump(page)\n\n"
                         "3. Or scaffold a Playwright script:\n"
-                        "   python3 scripts/scaffold.py scratch/browser_task.py 'Task' --template playwright\n\n"
+                        "   python3 scripts/scaffold.py scratch/browser_task.py \'Task\' --template playwright\n\n"
                         "Why Playwright > requests:\n"
                         "- CSRF tokens require browser sessions\n"
                         "- JavaScript rendering needs real browser\n"
@@ -72,5 +89,5 @@ if wants_ui and wants_lazy:
     sys.exit(0)
 
 # No warning needed
-print(json.dumps({"hookSpecificOutput": {"hookEventName": "UserPromptSubmit"}}))
+print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}}))
 sys.exit(0)

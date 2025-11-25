@@ -16,22 +16,27 @@ except Exception:
 prompt = data.get("prompt", "").lower()
 
 # Triggers indicating batch operations
+# FIXED: Removed overly broad patterns like "all " and "every"
+# Now requires more specific context
 batch_triggers = [
-    "batch",
-    "bulk",
-    "mass",
+    "batch process",
+    "bulk operation",
+    "mass update",
     "all files",
-    "all ",
-    "every",
-    "scan",
+    "all the files",
+    "every file",
+    "scan all",
+    "scan the",
     "scrape",
     "crawl",
-    "iterate",
+    "iterate over",
+    "iterate through",
     "loop through",
     "process multiple",
     "process all",
     "foreach",
-    "for each",
+    "for each file",
+    "for each item",
     "convert all",
     "download all",
     "upload all",
@@ -82,7 +87,7 @@ if batch_detected:
         json.dumps(
             {
                 "hookSpecificOutput": {
-                    "hookEventName": "UserPromptSubmit",
+                    "hookEventName": "PostToolUse",
                     "additionalContext": (
                         "⚠️ BATCH OPERATION DETECTED\n"
                         "PERFORMANCE PROTOCOL: Use `scripts.lib.parallel` to multi-thread this operation.\n"

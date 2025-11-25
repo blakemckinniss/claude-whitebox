@@ -25,7 +25,31 @@ import json
 import re
 import ast
 from pathlib import Path
+
+# Add scripts/lib to path for epistemology
+_hook_dir = Path(__file__).resolve().parent
+_project_root = _hook_dir.parent.parent
+import sys as _sys
+_sys.path.insert(0, str(_project_root / "scripts" / "lib"))
+from epistemology import load_session_state
 from typing import List, Tuple, Optional
+
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        import os
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                # Check last 5000 chars for SUDO (recent messages)
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
 
 # Add scripts/lib to path
 PROJECT_DIR = Path.cwd()
@@ -344,7 +368,9 @@ def main():
 
     tool_name = input_data.get("tool_name", "")
     tool_input = input_data.get("tool_input", {})
-    prompt = input_data.get("prompt", "")
+    # PreToolUse hooks don't receive 'prompt' - check SUDO bypass
+    session_id = input_data.get("session_id", "unknown")
+    sudo_bypass = check_sudo_in_transcript(input_data)
 
     # Only enforce on Write/Edit to .claude/hooks/*.py
     if tool_name not in ["Write", "Edit"]:
@@ -429,7 +455,7 @@ def main():
     is_valid = validator.validate_all()
 
     # Check for SUDO bypass
-    if "SUDO" in prompt:
+    if sudo_bypass:
         # Allow with warning
         output = {
             "hookSpecificOutput": {

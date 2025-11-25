@@ -19,9 +19,39 @@ from lib.epistemology import (
 )
 from lib.pattern_detection import analyze_patterns
 
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        import os
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                # Check last 5000 chars for SUDO (recent messages)
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
+
+
+
 # Load input
 try:
     input_data = json.load(sys.stdin)
+
+    # SUDO escape hatch
+    if check_sudo_in_transcript(input_data):
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "Stop",
+                "permissionDecision": "allow",
+                "additionalContext": "⚠️ SUDO bypass - hook check skipped"
+            }
+        }))
+        sys.exit(0)
 except Exception:
     # If parsing fails, exit silently (Stop hooks don't block)
     sys.exit(0)

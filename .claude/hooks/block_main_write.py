@@ -17,11 +17,38 @@ import json
 import os
 
 
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
+
+
 def main():
     # Read hook input from stdin
     try:
         hook_input = json.loads(sys.stdin.read())
     except (json.JSONDecodeError, ValueError):
+        sys.exit(0)
+
+    # SUDO escape hatch
+    if check_sudo_in_transcript(hook_input):
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+                "additionalContext": "⚠️ SUDO bypass - block_main_write check skipped"
+            }
+        }))
         sys.exit(0)
 
     tool_name = hook_input.get("tool_name", "")

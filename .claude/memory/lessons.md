@@ -147,3 +147,21 @@ ASSUMPTION FIREWALL PROTOCOL - User input = ground truth. If user provides worki
 
 ### 2025-11-23 21:55
 Root cause analysis pattern: When void.py reveals gaps (CRUD asymmetry, error handling, retention policy), look deeper than surface symptoms. Example: Memory directory unbounded growth was SYMPTOM (fixed with gitignore), but ROOT CAUSE was missing cleanup/pruning in epistemology.py. Solution: Created retention policy scripts (scratch/fix_epistemology_gaps.py) and documented migration path (scratch/epistemology_patches.py). Fix the library, not just the symptoms.
+
+### 2025-11-24 20:58
+[AUTO-LEARNED-SUCCESS] Novel solution: Created detour_lib_fixed.py (similar scripts: 2)
+
+### 2025-11-24 21:02
+[AUTO-LEARNED-SUCCESS] Novel solution: Created detour_cli_draft.py (similar scripts: 3)
+
+### 2025-11-24 21:41
+[AUTO-LEARNED-SUCCESS] Novel solution: Created protocol_enforcer_draft.py (similar scripts: 2)
+
+### 2025-11-24 22:00
+[AUTO-LEARNED-SUCCESS] Novel solution: Created test_protocol_predicates.py (similar scripts: 2)
+
+### 2025-11-24 22:08
+[AUTO-LEARNED-SUCCESS] Novel solution: Created verify_predicate_enhancements.py (similar scripts: 2)
+
+### 2025-11-25 00:43
+[AUTO-LEARNED-SUCCESS] Novel solution: Created apply_coderabbit_fixes_part2.py (similar scripts: 2)

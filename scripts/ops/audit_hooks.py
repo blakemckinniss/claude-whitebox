@@ -7,11 +7,15 @@ Validates configuration, input/output formats, event types, and best practices.
 
 Usage:
     python3 scripts/ops/audit_hooks.py [--fix] [--json] [--strict]
+    python3 scripts/ops/audit_hooks.py --fix --dry-run  # Preview fixes
+    python3 scripts/ops/audit_hooks.py --prune          # Remove orphaned hooks
 
 Options:
-    --fix     Auto-fix common issues (bare except, missing timeouts)
-    --json    Output results as JSON
-    --strict  Treat warnings as errors (exit 1 if any warnings)
+    --fix      Auto-fix common issues (bare except, missing timeouts)
+    --dry-run  Preview fix changes without applying (requires --fix)
+    --json     Output results as JSON
+    --strict   Treat warnings as errors (exit 1 if any warnings)
+    --prune    Archive orphaned hooks to .claude/hooks/archive/
 
 Official Spec Reference:
     https://docs.anthropic.com/en/hooks-reference
@@ -22,6 +26,7 @@ import sys
 import json
 import ast
 import re
+import shutil
 import argparse
 from pathlib import Path
 from collections import defaultdict, Counter
@@ -193,12 +198,16 @@ EXIT_CODES = {
 class HookAuditor:
     """Comprehensive hook system auditor with official spec validation."""
 
-    def __init__(self, fix_mode: bool = False, strict_mode: bool = False):
+    def __init__(self, fix_mode: bool = False, strict_mode: bool = False,
+                 dry_run: bool = False, prune_mode: bool = False):
         self.fix_mode = fix_mode
         self.strict_mode = strict_mode
+        self.dry_run = dry_run
+        self.prune_mode = prune_mode
         self.issues = []
         self.warnings = []
         self.fixes_applied = []
+        self.pruned_hooks = []
         self.registered_hooks = set()
         self.all_hooks = set()
         self.settings = {}
@@ -409,6 +418,432 @@ class HookAuditor:
 
         return issues
 
+    def _get_hook_event_type(self, hook_file: str) -> Optional[str]:
+        """Get the event type a hook is registered for from settings.json."""
+        hooks = self.settings.get("hooks", {})
+        for event_type, event_hooks in hooks.items():
+            for hook_config in event_hooks:
+                for hook in hook_config.get("hooks", []):
+                    cmd = hook.get("command", "")
+                    if hook_file in cmd:
+                        return event_type
+        return None
+
+    def check_pretool_prompt_access(self, hook_file: str) -> list:
+        """Check if PreToolUse hooks incorrectly try to access 'prompt' field.
+        
+        PreToolUse hooks do NOT receive 'prompt' in their input data.
+        The prompt field is only available in UserPromptSubmit hooks.
+        
+        Hooks that need SUDO bypass should read from session state instead.
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        with open(filepath) as f:
+            content = f.read()
+
+        issues = []
+
+        # Check if this is a PreToolUse hook
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type != "PreToolUse":
+            return []
+
+        # Check for incorrect prompt access patterns
+        bad_patterns = [
+            (r'data\.get\(["\'"]prompt["\'"]', "data.get('prompt')"),
+            (r'input_data\.get\(["\'"]prompt["\'"]', "input_data.get('prompt')"),
+        ]
+
+        for pattern, desc in bad_patterns:
+            if re.search(pattern, content):
+                issues.append(f"Incorrect prompt access: {desc}")
+                self.add_issue(
+                    "ERROR", "PRETOOL_PROMPT_ACCESS",
+                    f"PreToolUse hook tries to access 'prompt' from input - NOT available in PreToolUse events. Use session state instead.",
+                    hook_file,
+                    spec_ref="PreToolUse input: session_id, tool_name, tool_input (no prompt)"
+                )
+                break
+
+        return issues
+
+
+    def check_posttooluse_output(self, hook_file: str) -> list:
+        """Check PostToolUse output format per official spec.
+        
+        PostToolUse hooks can provide feedback to Claude:
+        - decision: "block" | undefined
+        - reason: string (explanation for decision)
+        - hookSpecificOutput.additionalContext: string (context for Claude)
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type != "PostToolUse":
+            return []
+
+        with open(filepath) as f:
+            content = f.read()
+
+        issues = []
+
+        # Check for decision: "block" without reason
+        if '"decision": "block"' in content:
+            if '"reason"' not in content:
+                issues.append("PostToolUse block without reason")
+                self.add_issue(
+                    "WARNING", "SPEC_OUTPUT",
+                    "PostToolUse uses decision:'block' but missing 'reason' field",
+                    hook_file,
+                    spec_ref="PostToolUse: reason explains decision to Claude"
+                )
+
+        return issues
+
+    def check_stop_output(self, hook_file: str) -> list:
+        """Check Stop/SubagentStop output format per official spec.
+        
+        Stop hooks control whether Claude must continue:
+        - decision: "block" | undefined
+        - reason: REQUIRED when decision is "block"
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type not in ["Stop", "SubagentStop"]:
+            return []
+
+        with open(filepath) as f:
+            content = f.read()
+
+        issues = []
+
+        # Check for decision: "block" without reason
+        if '"decision": "block"' in content:
+            if '"reason"' not in content:
+                issues.append("Stop block without reason")
+                self.add_issue(
+                    "ERROR", "SPEC_OUTPUT",
+                    "Stop hook uses decision:'block' but MISSING required 'reason' field",
+                    hook_file,
+                    spec_ref="Stop: reason MUST be provided when blocking"
+                )
+
+        return issues
+
+    def check_userpromptsubmit_output(self, hook_file: str) -> list:
+        """Check UserPromptSubmit output format per official spec.
+        
+        UserPromptSubmit can:
+        - Block prompts: decision: "block", reason: string
+        - Add context: hookSpecificOutput.additionalContext or plain stdout
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type != "UserPromptSubmit":
+            return []
+
+        with open(filepath) as f:
+            content = f.read()
+
+        issues = []
+
+        # Check for decision: "block" without reason
+        if '"decision": "block"' in content:
+            if '"reason"' not in content:
+                issues.append("UserPromptSubmit block without reason")
+                self.add_issue(
+                    "WARNING", "SPEC_OUTPUT",
+                    "UserPromptSubmit uses decision:'block' but missing 'reason'",
+                    hook_file,
+                    spec_ref="UserPromptSubmit: reason shown to user when blocking"
+                )
+
+        return issues
+
+    def check_permissionrequest_output(self, hook_file: str) -> list:
+        """Check PermissionRequest output format per official spec.
+        
+        PermissionRequest hooks use different structure:
+        - hookSpecificOutput.decision.behavior: "allow" | "deny"
+        - hookSpecificOutput.decision.updatedInput: optional modified input
+        - hookSpecificOutput.decision.message: string when denying
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type != "PermissionRequest":
+            return []
+
+        with open(filepath) as f:
+            content = f.read()
+
+        issues = []
+
+        # Check for wrong output structure (using permissionDecision instead of decision.behavior)
+        if '"permissionDecision"' in content:
+            issues.append("Wrong output structure for PermissionRequest")
+            self.add_issue(
+                "ERROR", "SPEC_OUTPUT",
+                "PermissionRequest uses 'permissionDecision' but should use 'decision.behavior'",
+                hook_file,
+                spec_ref="PermissionRequest: hookSpecificOutput.decision.behavior: allow|deny"
+            )
+
+        return issues
+
+    def check_sessionstart_output(self, hook_file: str) -> list:
+        """Check SessionStart output format per official spec.
+        
+        SessionStart hooks can:
+        - Add context: hookSpecificOutput.additionalContext
+        - Stdout is also added as context
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type != "SessionStart":
+            return []
+
+        # SessionStart is quite flexible - just info check
+        return []
+
+    def check_common_json_fields(self, hook_file: str) -> list:
+        """Check for proper usage of common JSON output fields.
+        
+        All hook types can include:
+        - continue: bool (default true)
+        - stopReason: string (when continue is false)
+        - suppressOutput: bool (hide from transcript)
+        - systemMessage: string (warning shown to user)
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        with open(filepath) as f:
+            content = f.read()
+
+        issues = []
+
+        # Check for continue: false without stopReason
+        if '"continue": false' in content.lower() or '"continue":false' in content.lower():
+            if '"stopReason"' not in content and '"stopreason"' not in content.lower():
+                issues.append("continue:false without stopReason")
+                self.add_issue(
+                    "WARNING", "SPEC_OUTPUT",
+                    "Uses continue:false but missing 'stopReason' (message shown to user)",
+                    hook_file,
+                    spec_ref="Common JSON: stopReason accompanies continue with reason"
+                )
+
+        return issues
+
+    def check_prompt_type_hooks(self, settings: dict) -> list:
+        """Check for prompt-based hooks (type: 'prompt') configuration.
+        
+        Prompt-based hooks use LLM evaluation instead of bash commands.
+        Only supported for Stop and SubagentStop events.
+        """
+        hooks = settings.get("hooks", {})
+        issues = []
+
+        for event_type, event_hooks in hooks.items():
+            for hook_config in event_hooks:
+                for hook in hook_config.get("hooks", []):
+                    if hook.get("type") == "prompt":
+                        # Prompt hooks only work for Stop/SubagentStop per docs
+                        if event_type not in ["Stop", "SubagentStop"]:
+                            issues.append((event_type, "prompt_type_wrong_event"))
+                            self.add_issue(
+                                "WARNING", "SPEC_VIOLATION",
+                                f"Prompt-based hook in {event_type} - only fully supported for Stop/SubagentStop",
+                                spec_ref="Prompt hooks most useful for Stop, SubagentStop"
+                            )
+
+        return issues
+
+
+    def check_unsafe_dict_access(self, hook_file: str) -> list:
+        """Check for unsafe dictionary key access patterns.
+        
+        Common bug: Accessing state["key"] without checking if key exists.
+        This causes KeyError when loading state from files that don't have the key.
+        
+        Patterns detected:
+        - state["key"].append() without prior key check
+        - state["key"] = value after load without .get() fallback
+        - Direct bracket access on loaded dicts
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        with open(filepath) as f:
+            content = f.read()
+
+        issues = []
+
+        # Pattern 1: state["key"].append() - risky if key doesn't exist
+        # Look for .append() on bracket-accessed dict values
+        import re
+        append_pattern = r'(state|data|config)\["[\w_]+"\]\.append\('
+        matches = re.findall(append_pattern, content)
+        if matches:
+            # Check if there's a corresponding initialization or .get() check
+            # Simple heuristic: look for "if X not in state" or state.setdefault or state.get
+            has_guard = (
+                'not in state' in content or 
+                'setdefault' in content or
+                '.get(' in content and 'append' in content
+            )
+            if not has_guard:
+                issues.append("Unsafe dict append")
+                self.add_issue(
+                    "WARNING", "UNSAFE_DICT_ACCESS",
+                    "Uses state['key'].append() without checking if key exists - may cause KeyError",
+                    hook_file,
+                    spec_ref="Use 'if key not in state: state[key] = []' before append"
+                )
+
+        # Pattern 2: Accessing nested keys without guards
+        # e.g., state["a"]["b"] without checking state["a"] exists
+        nested_pattern = r'(state|data)\["[\w_]+"\]\["[\w_]+"\]'
+        nested_matches = re.findall(nested_pattern, content)
+        if nested_matches:
+            has_nested_guard = '.get(' in content and ', {}' in content
+            if not has_nested_guard:
+                issues.append("Unsafe nested dict access")
+                self.add_issue(
+                    "WARNING", "UNSAFE_DICT_ACCESS",
+                    "Uses nested dict access state['a']['b'] without guards - may cause KeyError",
+                    hook_file,
+                    spec_ref="Use state.get('a', {}).get('b', default) for safe nested access"
+                )
+
+        # Pattern 3: Reading dict values that may not exist (not simple assignment)
+        # Simple assignment state["key"] = value is SAFE (creates key if missing)
+        # Dangerous: state["key"] used in expressions, method calls, or as operand
+        if 'load_session_state' in content or 'load_state' in content:
+            # Look for state["key"] in non-assignment contexts (reading the value)
+            # Examples: state["key"] + 1, func(state["key"]), if state["key"]
+            read_pattern = r'(?<!= )state\["([\w_]+)"\](?!\s*=)'
+            reads = re.findall(read_pattern, content)
+
+            # Filter to unique keys and check for guards
+            risky_keys = []
+            seen = set()
+            for key in reads:
+                if key in seen:
+                    continue
+                seen.add(key)
+                # Check if this key is guarded with .get() or existence check
+                guard_patterns = [
+                    f'"{key}" not in state',
+                    f"'{key}' not in state",
+                    f'"{key}" in state',
+                    f"'{key}' in state",
+                    f'state.get("{key}"',
+                    f"state.get('{key}'",
+                ]
+                has_guard = any(p in content for p in guard_patterns)
+                # Whitelist common keys that are always initialized by the system
+                safe_keys = ['confidence', 'turn_count', 'current_prompt', 'files_read',
+                             'session_id', 'evidence_ledger', 'read_files']
+                if not has_guard and key not in safe_keys:
+                    risky_keys.append(key)
+
+            if risky_keys and len(risky_keys) <= 3:  # Only report if a few risky keys
+                for key in risky_keys[:2]:  # Limit to 2 reports per file
+                    issues.append(f"Potentially unsafe key read: {key}")
+                    self.add_issue(
+                        "WARNING", "UNSAFE_DICT_ACCESS",
+                        f"Reads state['{key}'] without checking existence - may cause KeyError",
+                        hook_file,
+                        spec_ref="Use state.get('key', default) or check 'key' in state first"
+                    )
+
+        return issues
+
+    def check_transcript_usage(self, hook_file: str) -> list:
+        """Check if PreToolUse hooks use transcript for user context instead of session state.
+
+        PreToolUse hooks do NOT receive 'prompt' in their input data.
+        Hooks that need to check user messages (e.g., SUDO bypass) should read
+        from transcript_path instead of session state, which is more reliable.
+
+        Patterns detected:
+        - state.get("current_prompt") in PreToolUse hooks
+        - data.get("prompt") in PreToolUse hooks (won't work)
+        - load_session_state for prompt access in PreToolUse
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        # Only check PreToolUse hooks
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type != "PreToolUse":
+            return []
+
+        with open(filepath) as f:
+            content = f.read()
+
+        issues = []
+
+        # Pattern 1: Using data.get("prompt") - won't work in PreToolUse
+        if 'data.get("prompt"' in content or "data.get('prompt'" in content:
+            # Check if it's NOT checking transcript
+            if 'transcript_path' not in content:
+                issues.append("Uses data.get('prompt') which is not available in PreToolUse")
+                self.add_issue(
+                    "WARNING", "USE_TRANSCRIPT",
+                    "PreToolUse hook uses data.get('prompt') - prompt is NOT available in PreToolUse input",
+                    hook_file,
+                    spec_ref="Use transcript_path to read user messages instead"
+                )
+
+        # Pattern 2: Using session state for current_prompt
+        if 'current_prompt' in content and 'transcript_path' not in content:
+            issues.append("Uses session state for prompt instead of transcript")
+            self.add_issue(
+                "WARNING", "USE_TRANSCRIPT",
+                "PreToolUse hook reads 'current_prompt' from session state - transcript is more reliable",
+                hook_file,
+                spec_ref="Use data.get('transcript_path') and read last ~5000 chars for user context"
+            )
+
+        # Pattern 3: Has SUDO bypass but doesn't use transcript
+        if 'SUDO' in content and 'transcript_path' not in content:
+            issues.append("SUDO bypass without transcript")
+            self.add_issue(
+                "WARNING", "USE_TRANSCRIPT",
+                "Hook has SUDO bypass but doesn't use transcript - may not detect SUDO reliably",
+                hook_file,
+                spec_ref="Read transcript_path for SUDO detection: last_chunk = transcript[-5000:]"
+            )
+
+        # Positive check: hook uses transcript correctly
+        if 'transcript_path' in content and ('SUDO' in content or 'prompt' in content.lower()):
+            # This is good - no issue to report
+            pass
+
+        return issues
+
     def check_exit_code_usage(self, hook_file: str) -> list:
         """Check exit code usage per spec."""
         filepath = HOOKS_DIR / hook_file
@@ -461,6 +896,17 @@ class HookAuditor:
                 self.add_issue(
                     "ERROR", "SYNTAX",
                     f"Syntax error at line {e.lineno}: {e.msg}",
+                    hook_file.name
+                )
+            except (OSError, UnicodeDecodeError) as e:
+                errors.append({
+                    "file": hook_file.name,
+                    "line": 0,
+                    "error": str(e)
+                })
+                self.add_issue(
+                    "ERROR", "FILE_READ",
+                    f"Cannot read file: {e}",
                     hook_file.name
                 )
         return errors
@@ -581,48 +1027,353 @@ class HookAuditor:
     # ========================================================================
 
     def fix_bare_except(self, hook_file: str) -> bool:
-        """Fix bare except: clauses."""
+        """Fix bare except: clauses with backup and validation."""
         filepath = HOOKS_DIR / hook_file
         if not filepath.exists():
             return False
 
-        content = filepath.read_text()
+        try:
+            content = filepath.read_text()
+        except (OSError, UnicodeDecodeError) as e:
+            self.add_issue("WARNING", "FIX_ERROR", f"Cannot read file: {e}", hook_file)
+            return False
+
         original = content
 
         # Replace bare except: with except Exception:
         content = re.sub(r'\bexcept\s*:', 'except Exception:', content)
 
         if content != original:
-            filepath.write_text(content)
-            self.fixes_applied.append((hook_file, "Fixed bare except: clauses"))
-            return True
+            # Validate syntax after replacement
+            try:
+                ast.parse(content)
+            except SyntaxError as e:
+                self.add_issue("WARNING", "FIX_ERROR",
+                              f"Fix would create syntax error at line {e.lineno}, skipping", hook_file)
+                return False
+
+            if self.dry_run:
+                self.fixes_applied.append((hook_file, "[DRY-RUN] Would fix bare except: clauses"))
+                return True
+
+            # Create backup before writing
+            backup_path = filepath.with_suffix('.py.bak')
+            try:
+                shutil.copy2(filepath, backup_path)
+                filepath.write_text(content)
+                self.fixes_applied.append((hook_file, "Fixed bare except: clauses (backup: .bak)"))
+                return True
+            except OSError as e:
+                self.add_issue("WARNING", "FIX_ERROR", f"Cannot write file: {e}", hook_file)
+                return False
         return False
 
-    def fix_snake_case_inputs(self, hook_file: str) -> bool:
-        """Fix snake_case input field access."""
+    def fix_camelcase_to_snake_case(self, hook_file: str) -> bool:
+        """Fix camelCase input fields to snake_case per official spec.
+
+        Official Claude Code docs use snake_case for input fields:
+        - tool_name, tool_input, session_id, tool_response, etc.
+        """
         filepath = HOOKS_DIR / hook_file
         if not filepath.exists():
             return False
 
-        content = filepath.read_text()
+        try:
+            content = filepath.read_text()
+        except (OSError, UnicodeDecodeError) as e:
+            self.add_issue("WARNING", "FIX_ERROR", f"Cannot read file: {e}", hook_file)
+            return False
+
         original = content
 
+        # Convert camelCase TO snake_case (official spec uses snake_case)
         replacements = [
-            (r'\.get\(["\']tool_name["\']', '.get("toolName"'),
-            (r'\.get\(["\']tool_input["\']', '.get("toolInput"'),
-            (r'\.get\(["\']tool_params["\']', '.get("toolParams"'),
-            (r'\.get\(["\']session_id["\']', '.get("sessionId"'),
-            (r'\.get\(["\']tool_response["\']', '.get("toolResponse"'),
+            (r'\.get\(["\']toolName["\']', '.get("tool_name"'),
+            (r'\.get\(["\']toolInput["\']', '.get("tool_input"'),
+            (r'\.get\(["\']toolParams["\']', '.get("tool_input"'),  # toolParams -> tool_input
+            (r'\.get\(["\']sessionId["\']', '.get("session_id"'),
+            (r'\.get\(["\']toolResponse["\']', '.get("tool_response"'),
+            (r'\.get\(["\']toolUseId["\']', '.get("tool_use_id"'),
+            (r'\.get\(["\']hookEventName["\']', '.get("hook_event_name"'),
         ]
 
         for pattern, replacement in replacements:
             content = re.sub(pattern, replacement, content)
 
         if content != original:
-            filepath.write_text(content)
-            self.fixes_applied.append((hook_file, "Fixed snake_case input fields"))
-            return True
+            # Validate syntax after replacement
+            try:
+                ast.parse(content)
+            except SyntaxError as e:
+                self.add_issue("WARNING", "FIX_ERROR",
+                              f"Fix would create syntax error at line {e.lineno}, skipping", hook_file)
+                return False
+
+            if self.dry_run:
+                self.fixes_applied.append((hook_file, "[DRY-RUN] Would fix camelCase to snake_case"))
+                return True
+
+            # Create backup before writing
+            backup_path = filepath.with_suffix('.py.bak')
+            try:
+                shutil.copy2(filepath, backup_path)
+                filepath.write_text(content)
+                self.fixes_applied.append((hook_file, "Fixed camelCase to snake_case (backup: .bak)"))
+                return True
+            except OSError as e:
+                self.add_issue("WARNING", "FIX_ERROR", f"Cannot write file: {e}", hook_file)
+                return False
         return False
+
+    # ========================================================================
+    # NEW v2.0.10+ SPEC CHECKS
+    # ========================================================================
+
+    def check_updated_input_usage(self, hook_file: str) -> list:
+        """Check for proper updatedInput usage in PreToolUse hooks.
+
+        Since v2.0.10, PreToolUse hooks can modify tool inputs via updatedInput.
+        This must be inside hookSpecificOutput with permissionDecision: "allow".
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type != "PreToolUse":
+            return []
+
+        try:
+            with open(filepath) as f:
+                content = f.read()
+        except (OSError, UnicodeDecodeError):
+            return []
+
+        issues = []
+
+        if 'updatedInput' in content:
+            # Must be with permissionDecision: "allow"
+            if '"permissionDecision": "deny"' in content or '"permissionDecision": "ask"' in content:
+                issues.append("updatedInput with non-allow decision")
+                self.add_issue(
+                    "WARNING", "SPEC_OUTPUT",
+                    "Uses updatedInput but permissionDecision may be deny/ask - input modifications ignored",
+                    hook_file,
+                    spec_ref="updatedInput only applies when permissionDecision is 'allow'"
+                )
+
+            if 'hookSpecificOutput' not in content:
+                issues.append("updatedInput outside hookSpecificOutput")
+                self.add_issue(
+                    "ERROR", "SPEC_OUTPUT",
+                    "Uses updatedInput but not inside hookSpecificOutput wrapper",
+                    hook_file,
+                    spec_ref="updatedInput must be in hookSpecificOutput"
+                )
+
+        return issues
+
+    def check_interrupt_field(self, hook_file: str) -> list:
+        """Check for interrupt field usage in deny decisions.
+
+        When denying, hooks can set interrupt: true to stop Claude entirely.
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        try:
+            with open(filepath) as f:
+                content = f.read()
+        except (OSError, UnicodeDecodeError):
+            return []
+
+        issues = []
+
+        if '"interrupt"' in content and 'true' in content.lower():
+            if '"permissionDecision": "deny"' not in content and '"behavior": "deny"' not in content:
+                issues.append("interrupt without deny")
+                self.add_issue(
+                    "WARNING", "SPEC_OUTPUT",
+                    "Uses 'interrupt' field but no deny decision found - interrupt only works with deny",
+                    hook_file,
+                    spec_ref="interrupt: true only applies when denying"
+                )
+
+        return issues
+
+    def check_posttooluse_input_key(self, hook_file: str) -> list:
+        """Check if PostToolUse hooks use correct input key name.
+
+        Official spec uses 'tool_response' for PostToolUse input.
+        Many hooks incorrectly use 'toolResult' which may not receive data.
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type != "PostToolUse":
+            return []
+
+        try:
+            with open(filepath) as f:
+                content = f.read()
+        except (OSError, UnicodeDecodeError):
+            return []
+
+        issues = []
+
+        # Check for toolResult without tool_response fallback
+        if 'toolResult' in content and 'tool_response' not in content:
+            issues.append("Uses toolResult instead of tool_response")
+            self.add_issue(
+                "ERROR", "POSTTOOL_INPUT_KEY",
+                "PostToolUse hook uses 'toolResult' but official spec uses 'tool_response'. "
+                "Fix: tool_result = input_data.get('tool_response') or input_data.get('toolResult', {})",
+                hook_file,
+                spec_ref="PostToolUse input: tool_response (not toolResult)"
+            )
+
+        return issues
+
+    def check_exit_code_access(self, hook_file: str) -> list:
+        """Check for exit_code access timing.
+
+        tool_response.exit_code is only available in PostToolUse hooks.
+        PreToolUse hooks cannot access it (tool hasn't run yet).
+        """
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        event_type = self._get_hook_event_type(hook_file)
+
+        try:
+            with open(filepath) as f:
+                content = f.read()
+        except (OSError, UnicodeDecodeError):
+            return []
+
+        issues = []
+
+        # Only flag actual access patterns, not mentions in comments/strings
+        access_patterns = [
+            '.get("exit_code"',
+            "['exit_code']",
+            '["exit_code"]',
+            '.exit_code',
+            'tool_response.get("exit_code"',
+        ]
+        has_exit_code_access = any(p in content for p in access_patterns)
+
+        if has_exit_code_access and event_type == "PreToolUse":
+            issues.append("exit_code in PreToolUse")
+            self.add_issue(
+                "ERROR", "SPEC_INPUT",
+                "Accesses exit_code in PreToolUse - only available in PostToolUse",
+                hook_file,
+                spec_ref="tool_response.exit_code only in PostToolUse"
+            )
+
+        return issues
+
+    def check_multiedit_matcher(self, settings: dict) -> list:
+        """Check that Edit-related matchers include MultiEdit.
+
+        MultiEdit is a newer tool that should be included alongside Edit.
+        """
+        hooks = settings.get("hooks", {})
+        issues = []
+
+        for event_type, event_hooks in hooks.items():
+            if event_type not in ["PreToolUse", "PostToolUse"]:
+                continue
+
+            for hook_config in event_hooks:
+                matcher = hook_config.get("matcher", "")
+
+                if "Edit" in matcher and "MultiEdit" not in matcher and "|" in matcher:
+                    if matcher not in ["*", "Edit"]:
+                        issues.append((matcher, "missing_multiedit"))
+                        self.add_issue(
+                            "WARNING", "MATCHER_COVERAGE",
+                            f"Matcher '{matcher}' includes Edit but not MultiEdit",
+                            spec_ref="Consider 'Edit|MultiEdit|Write' for complete coverage"
+                        )
+
+        return issues
+
+    def check_deprecated_root_fields(self, hook_file: str) -> list:
+        """Check for deprecated root-level decision/reason fields in PreToolUse."""
+        filepath = HOOKS_DIR / hook_file
+        if not filepath.exists():
+            return []
+
+        event_type = self._get_hook_event_type(hook_file)
+        if event_type != "PreToolUse":
+            return []
+
+        try:
+            with open(filepath) as f:
+                content = f.read()
+        except (OSError, UnicodeDecodeError):
+            return []
+
+        issues = []
+
+        deprecated_patterns = [
+            '"decision": "approve"',
+            '"decision": "block"',
+        ]
+
+        for pattern in deprecated_patterns:
+            if pattern in content and 'hookSpecificOutput' not in content:
+                issues.append("deprecated root-level decision")
+                self.add_issue(
+                    "WARNING", "DEPRECATED",
+                    "Uses deprecated root-level decision - use hookSpecificOutput.permissionDecision",
+                    hook_file,
+                    spec_ref="decision/reason fields deprecated for PreToolUse"
+                )
+                break
+
+        return issues
+
+    # ========================================================================
+    # PRUNE FUNCTIONALITY
+    # ========================================================================
+
+    def prune_orphaned_hooks(self) -> list:
+        """Archive orphaned hooks to .claude/hooks/archive/."""
+        archive_dir = HOOKS_DIR / "archive"
+        pruned = []
+
+        ignored_patterns = ['_backup', '_v1_backup', 'test_hooks']
+
+        for hook in self.all_hooks:
+            if hook in self.registered_hooks:
+                continue
+            if any(p in hook for p in ignored_patterns):
+                continue
+
+            src = HOOKS_DIR / hook
+            dst = archive_dir / hook
+
+            if self.dry_run:
+                self.pruned_hooks.append((hook, "[DRY-RUN] Would archive"))
+                pruned.append(hook)
+                continue
+
+            try:
+                archive_dir.mkdir(exist_ok=True)
+                shutil.move(str(src), str(dst))
+                self.pruned_hooks.append((hook, f"Archived to {archive_dir.name}/"))
+                pruned.append(hook)
+            except OSError as e:
+                self.add_issue("WARNING", "PRUNE_ERROR", f"Cannot archive: {e}", hook)
+
+        return pruned
 
     # ========================================================================
     # MAIN AUDIT
@@ -664,6 +1415,8 @@ class HookAuditor:
         # Spec compliance checks
         self.check_event_types(self.settings)
         self.check_matcher_usage(self.settings)
+        self.check_prompt_type_hooks(self.settings)
+        self.check_multiedit_matcher(self.settings)
 
         # Syntax check
         self.check_syntax_errors()
@@ -679,19 +1432,40 @@ class HookAuditor:
 
             self.check_hook_input_format(hook)
             self.check_hook_output_format(hook)
+            self.check_pretool_prompt_access(hook)
+            self.check_posttooluse_output(hook)
+            self.check_stop_output(hook)
+            self.check_userpromptsubmit_output(hook)
+            self.check_permissionrequest_output(hook)
+            self.check_sessionstart_output(hook)
+            self.check_common_json_fields(hook)
+            self.check_unsafe_dict_access(hook)
+            self.check_transcript_usage(hook)
             self.check_exit_code_usage(hook)
             self.check_error_handling(hook)
             self.check_performance(hook)
             self.check_security(hook)
 
+            # New v2.0.10+ spec checks
+            self.check_updated_input_usage(hook)
+            self.check_interrupt_field(hook)
+            self.check_exit_code_access(hook)
+            self.check_deprecated_root_fields(hook)
+            self.check_posttooluse_input_key(hook)
+
             # Auto-fix if enabled
             if self.fix_mode:
                 self.fix_bare_except(hook)
-                self.fix_snake_case_inputs(hook)
+                self.fix_camelcase_to_snake_case(hook)
+
+        # Prune orphaned hooks if enabled
+        if self.prune_mode:
+            self.prune_orphaned_hooks()
 
         results["errors"] = self.issues
         results["warnings"] = self.warnings
         results["fixes"] = self.fixes_applied
+        results["pruned"] = self.pruned_hooks
 
         return results
 
@@ -750,6 +1524,13 @@ class HookAuditor:
             for hook, fix in fixes:
                 print(f"   ✅ {hook}: {fix}")
 
+        # Pruned hooks
+        pruned = results.get("pruned", [])
+        if pruned:
+            print(f"\n🗑️  PRUNED HOOKS ({len(pruned)}):")
+            for hook, action in pruned:
+                print(f"   📦 {hook}: {action}")
+
         # Summary
         print("\n" + "=" * 70)
         print("📋 SUMMARY")
@@ -758,6 +1539,8 @@ class HookAuditor:
         print(f"   Warnings: {len(warnings)}")
         if fixes:
             print(f"   Fixes Applied: {len(fixes)}")
+        if pruned:
+            print(f"   Hooks Pruned: {len(pruned)}")
 
 
         # Spec reference
@@ -781,12 +1564,15 @@ Official Spec: https://docs.anthropic.com/en/hooks-reference
         """
     )
     parser.add_argument("--fix", action="store_true", help="Auto-fix common issues")
+    parser.add_argument("--dry-run", action="store_true", help="Preview fix changes without applying (requires --fix)")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as errors")
+    parser.add_argument("--prune", action="store_true", help="Archive orphaned hooks to .claude/hooks/archive/")
 
     args = parser.parse_args()
 
-    auditor = HookAuditor(fix_mode=args.fix, strict_mode=args.strict)
+    auditor = HookAuditor(fix_mode=args.fix, strict_mode=args.strict,
+                         dry_run=args.dry_run, prune_mode=args.prune)
     results = auditor.run_audit()
 
     if args.json:

@@ -33,6 +33,7 @@ except Exception:
             {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
                     "additionalContext": "",
                 }
             }
@@ -100,6 +101,7 @@ if tool_name in risky_tools and is_risky:
             {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
                     "additionalContext": (
                         "\n⚠️  RISK DETECTED: You are about to perform a potentially destructive or complex operation.\n\n"
                         "🧠 CARTESIAN PROTOCOL - META-COGNITION CHECK:\n"
@@ -122,7 +124,7 @@ if tool_name in risky_tools and is_risky:
 # No warning needed
 print(
     json.dumps(
-        {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": ""}}
+        {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow", "additionalContext": ""}}
     )
 )
 sys.exit(0)

@@ -17,7 +17,7 @@ tool_params = data.get("tool_input", {})
 
 # Only trigger on Bash tool with browser-related commands
 if tool_name != "Bash":
-    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
+    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"}}))
     sys.exit(0)
 
 command = tool_params.get("command", "")

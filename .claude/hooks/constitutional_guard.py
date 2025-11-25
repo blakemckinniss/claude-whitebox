@@ -36,6 +36,23 @@ import sys
 import json
 from pathlib import Path
 
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        import os
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                # Check last 5000 chars for SUDO (recent messages)
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
+
 def validate_file_path(file_path: str) -> bool:
     """
     Validate file path to prevent path traversal attacks.
@@ -83,7 +100,9 @@ def main():
 
     tool_name = data.get("tool_name", "")
     tool_params = data.get("tool_input", {})
-    prompt = data.get("prompt", "")
+
+    # Check for SUDO bypass in transcript
+    sudo_authorized = check_sudo_in_transcript(data)
 
     # Only intercept Write and Edit tools
     if tool_name not in ["Write", "Edit"]:
@@ -101,8 +120,8 @@ def main():
     if target != claude_md.resolve():
         sys.exit(0)
 
-    # Check for bypass keyword
-    if "SUDO CONSTITUTIONAL" in prompt:
+    # Check for bypass keyword (SUDO in recent transcript)
+    if sudo_authorized:
         # Allow with warning
         output = {
             "hookSpecificOutput": {

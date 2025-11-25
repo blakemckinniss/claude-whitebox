@@ -5,7 +5,24 @@ Triggers on: PreToolUse (Bash commands)
 """
 import sys
 import json
+import os
 from pathlib import Path
+
+
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
 
 # Add scripts/lib to path
 SCRIPT_DIR = Path(__file__).resolve().parent.parent.parent / "scripts"
@@ -32,6 +49,17 @@ except Exception as e:
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
             "permissionDecision": "allow"
+        }
+    }))
+    sys.exit(0)
+
+# SUDO escape hatch
+if check_sudo_in_transcript(input_data):
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "allow",
+            "additionalContext": "⚠️ SUDO bypass - risk gate check skipped"
         }
     }))
     sys.exit(0)

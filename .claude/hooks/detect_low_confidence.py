@@ -56,26 +56,27 @@ if not prompt:
 
 prompt_lower = prompt.lower()
 
-# Detect coding/action requests
-coding_triggers = [
-    "write",
-    "implement",
-    "create",
-    "build",
-    "make",
-    "refactor",
-    "fix",
-    "modify",
-    "edit",
-    "update",
-    "add a",
-    "add the",
-    "generate",
-    "scaffold",
+# Detect coding/action requests - FIXED: Use regex word boundaries
+import re
+
+coding_patterns = [
+    r"\bwrite\b",      # Won't match "rewrite" prefix
+    r"\bimplement\b",
+    r"\bcreate\b",
+    r"\bbuild\b",
+    r"\bmake\s+(?:a|the|this|me)\b",  # "make a/the" not "Makefile"
+    r"\brefactor\b",
+    r"\bfix\b",        # Won't match "prefix", "suffix"
+    r"\bmodify\b",
+    r"\bedit\b",       # Won't match "credit"
+    r"\bupdate\b",
+    r"\badd\s+(?:a|the|an)\b",  # "add a/the" specifically
+    r"\bgenerate\b",
+    r"\bscaffold\b",
 ]
 
-# Detect if this is a coding request
-is_coding_request = any(trigger in prompt_lower for trigger in coding_triggers)
+# Detect if this is a coding request - using regex for precision
+is_coding_request = any(re.search(pattern, prompt_lower) for pattern in coding_patterns)
 
 if is_coding_request:
     confidence = load_confidence()

@@ -76,7 +76,7 @@ except Exception:
     sys.exit(0)
 
 tool_name = input_data.get("tool_name", "")
-tool_result = input_data.get("toolResult", {})
+tool_result = input_data.get("tool_response") or input_data.get("toolResult", {})
 session_state = get_session_state()
 
 lessons_learned = []

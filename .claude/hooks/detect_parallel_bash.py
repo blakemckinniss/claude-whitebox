@@ -124,6 +124,7 @@ Note: Only use if operations are INDEPENDENT.
             output = {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
                     "additionalContext": message
                 }
             }

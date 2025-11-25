@@ -20,7 +20,24 @@ Philosophy: "Garbage in, garbage out" - If you don't understand the problem,
 import json
 import sys
 import re
+import os
 from pathlib import Path
+
+
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
 
 
 def find_project_root():
@@ -108,6 +125,17 @@ def main():
     # Load input
     try:
         input_data = json.load(sys.stdin)
+
+        # SUDO escape hatch
+        if check_sudo_in_transcript(input_data):
+            print(json.dumps({
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
+                    "additionalContext": "⚠️ SUDO bypass - pre-delegation check skipped"
+                }
+            }))
+            sys.exit(0)
     except json.JSONDecodeError as e:
         # SECURITY: Fail CLOSED on malformed input
         error_msg = f"Pre-delegation: Malformed JSON - {str(e)[:100]}"

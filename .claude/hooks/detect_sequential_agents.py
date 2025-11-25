@@ -13,6 +13,22 @@ import os
 import json
 from pathlib import Path
 
+
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
+
 # Environment
 PROJECT_DIR = os.getenv("CLAUDE_PROJECT_DIR", os.getcwd())
 SESSION_ID = os.getenv("CLAUDE_SESSION_ID", "unknown")
@@ -47,6 +63,22 @@ def save_state(state):
 
 def main():
     """Detect sequential agent pattern"""
+    # Read stdin for SUDO check
+    try:
+        hook_input = json.load(sys.stdin)
+        # SUDO escape hatch
+        if check_sudo_in_transcript(hook_input):
+            print(json.dumps({
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
+                    "additionalContext": "⚠️ SUDO bypass - sequential agent detection skipped"
+                }
+            }))
+            sys.exit(0)
+    except Exception:
+        pass
+
     # Load state
     state = load_state()
 

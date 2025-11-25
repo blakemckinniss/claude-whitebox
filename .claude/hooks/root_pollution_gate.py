@@ -9,6 +9,25 @@ import json
 import re
 from pathlib import Path
 
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        import os
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                # Check last 5000 chars for SUDO (recent messages)
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
+
+
+
 def validate_file_path(file_path: str) -> bool:
     """
     Validate file path to prevent path traversal attacks.
@@ -30,6 +49,17 @@ def validate_file_path(file_path: str) -> bool:
 # Load input
 try:
     input_data = json.load(sys.stdin)
+
+    # SUDO escape hatch
+    if check_sudo_in_transcript(input_data):
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+                "additionalContext": "⚠️ SUDO bypass - hook check skipped"
+            }
+        }))
+        sys.exit(0)
 except Exception:
     # Fail open on parse error
     print(
@@ -105,30 +135,23 @@ if tool_name == "Write":
                     if "/" not in after_root:
                         # Check whitelist
                         if filename not in ALLOWED_ROOT_FILES:
-                            block_message = f"""🚫 ROOT POLLUTION BLOCKED
+                            # Auto-redirect to scratch/
+                            redirected_path = path_str.replace(f"/claude-whitebox/{filename}", f"/claude-whitebox/scratch/{filename}")
 
-You attempted to write: {filename}
-Location: Repository root
+                            auto_fix_message = f"""🔧 AUTO-REDIRECTED: root file moved to scratch/
+
+Original: {filename} (repository root)
+Fixed:    scratch/{filename}
 
 RULE: NEVER create new files in repository root
 
-Allowed zones:
-  • projects/<name>/  - User projects
-  • scratch/         - Prototypes, temp files
-  • scripts/ops/     - Operational tools (production)
+The file was automatically redirected to scratch/.
+If this should be a permanent file, move it to:
+  • projects/<name>/ for user projects
+  • scripts/ops/ for operational tools
 
-Whitelist (already exists):
+Whitelist (allowed in root):
   • {', '.join(sorted(ALLOWED_ROOT_FILES))}
-
-Why:
-  - Root pollution creates clutter
-  - Template must stay clean
-  - Architecture zones enforce separation
-
-Required action:
-  • Move to projects/<name>/ for user projects
-  • Move to scratch/ for temporary work
-  • Move to scripts/ for operational tools
 
 See CLAUDE.md § Hard Block #1 (Root Pollution Ban)"""
 
@@ -137,8 +160,12 @@ See CLAUDE.md § Hard Block #1 (Root Pollution Ban)"""
                                     {
                                         "hookSpecificOutput": {
                                             "hookEventName": "PreToolUse",
-                                            "permissionDecision": "deny",
-                                            "permissionDecisionReason": block_message,
+                                            "permissionDecision": "allow",
+                                            "permissionDecisionReason": auto_fix_message,
+                                            "updatedInput": {
+                                                "file_path": redirected_path,
+                                                "content": tool_params.get("content", "")
+                                            }
                                         }
                                     }
                                 )
@@ -155,11 +182,12 @@ if tool_name == "Bash":
     command = tool_params.get("command", "")
 
     # Detect mkdir/touch/echo > at root level
+    # Note: Exclude & from capture to avoid matching shell redirects like 2>&1
     patterns = [
         r"mkdir\s+([^\s/]+)$",  # mkdir dirname (no path)
         r"touch\s+([^\s/]+)$",  # touch filename (no path)
-        r"echo.*>\s*([^\s/]+)$",  # echo > filename (no path)
-        r"cat.*>\s*([^\s/]+)$",  # cat > filename (no path)
+        r"echo\s+[^|]*>\s*([^\s/&]+)$",  # echo > filename (exclude & for 2>&1)
+        r"cat\s+[^|]*>\s*([^\s/&]+)$",  # cat > filename (exclude & for 2>&1)
     ]
 
     for pattern in patterns:

@@ -1,115 +1,1095 @@
 {
   "patterns": {
-    "(scrape|crawl|browser|selenium|e2e|headless|playwright)": [
+    "___BROWSER_AUTOMATION___": "=== Web Scraping & Browser ===",
+    "(scrape|crawl|browser|selenium|e2e|headless|playwright|puppeteer|screenshot|render)": [
       "Protocol: The Headless Protocol (Playwright browser automation)",
-      "Tool: scripts/lib/browser.py",
+      "Tool: scripts/lib/browser.py - get_browser_session() context manager",
+      "Tool: scripts/ops/firecrawl.py - API-based scraping (simpler than Playwright)",
       "Lesson: Do NOT use requests/BeautifulSoup for JavaScript sites",
-      "Action: Use get_browser_session() context manager"
+      "Lesson: Playwright auto-setup via auto_playwright_setup.py hook",
+      "Action: Use 'async with get_browser_session() as page:'"
     ],
-    "(sql|query|database|migration|schema|postgres|mysql)": [
-      "Protocol: The Oracle Protocol (consult before major changes)",
+    "(firecrawl|web.?to.?markdown|html.?to.?markdown|extract.?content|site.?content|page.?content|get.?webpage)": [
+      "Tool: scripts/ops/firecrawl.py - Firecrawl API for web scraping",
+      "Usage: firecrawl scrape <url> - Single page to markdown",
+      "Usage: firecrawl crawl <url> --limit N - Crawl entire site",
+      "Usage: firecrawl status <job_id> - Check async crawl progress",
+      "Lesson: Firecrawl handles JS rendering, no browser setup needed",
+      "Alternative: Playwright for complex interactions (forms, auth)"
+    ],
+    "(click|button|form|submit|input|select|dropdown|checkbox|login|captcha)": [
+      "Protocol: The Headless Protocol (form automation)",
+      "Tool: page.fill(), page.click(), page.select_option()",
+      "Caution: Wait for elements with page.wait_for_selector()",
+      "Lesson: Use page.screenshot() for debugging failed interactions"
+    ],
+    "(download|pdf|image|file|attachment|blob)": [
+      "Tool: Playwright download handling with page.expect_download()",
+      "Lesson: Use response.body() for binary content",
+      "Caution: Check Content-Type header before parsing"
+    ],
+
+    "___DATABASE___": "=== Database & SQL ===",
+    "(sql|query|database|migration|schema|postgres|mysql|sqlite|orm)": [
+      "Protocol: The Oracle Protocol (consult before major DB changes)",
       "Protocol: The Cartesian Protocol (think.py for decomposition)",
       "Memory: Check active_context.md for current DB state",
-      "Caution: Run skeptic.py before migrations"
+      "Caution: Run skeptic.py before migrations - data loss risk",
+      "Lesson: Always backup before ALTER TABLE"
     ],
-    "(api|fetch|request|http|rest|endpoint)": [
+    "(transaction|commit|rollback|lock|deadlock|isolation)": [
+      "Caution: Use context managers for transaction safety",
+      "Lesson: Avoid long-running transactions - they block",
+      "Pattern: with connection.begin() as txn: ... txn.commit()"
+    ],
+    "(index|performance|slow query|explain|optimize query)": [
+      "Tool: EXPLAIN ANALYZE for query profiling",
+      "Lesson: Missing indexes are #1 cause of slow queries",
+      "Caution: Adding indexes locks table during creation"
+    ],
+
+    "___API_NETWORKING___": "=== API & HTTP ===",
+    "(api|fetch|request|http|rest|endpoint|webhook|callback)": [
       "Protocol: The Research Protocol (search for current API docs)",
       "Protocol: The Probe Protocol (verify methods with probe.py)",
-      "Tool: Use urllib for simple requests (stdlib)",
-      "Lesson: Never guess API methods - probe or research first"
+      "Tool: Use urllib.request for simple requests (stdlib)",
+      "Lesson: Never guess API methods - probe or research first",
+      "Caution: Check rate limits before bulk operations"
     ],
-    "(refactor|rewrite|optimize|restructure)": [
+    "(auth|oauth|jwt|bearer|token|session|cookie|cors)": [
+      "Protocol: The Sentinel Protocol (audit secrets)",
+      "Caution: NEVER log tokens or credentials",
+      "Lesson: Use httponly cookies for session tokens",
+      "Caution: CORS errors = server config issue, not client"
+    ],
+    "(websocket|socket|realtime|streaming|sse|long-poll)": [
+      "Lesson: WebSockets need heartbeat/ping for connection health",
+      "Caution: Handle reconnection logic explicitly",
+      "Tool: asyncio for WebSocket handling"
+    ],
+    "(graphql|mutation|subscription|resolver)": [
+      "Lesson: GraphQL errors return 200 OK - check response.errors",
+      "Caution: N+1 query problem is common in GraphQL",
+      "Tool: Use DataLoader pattern for batching"
+    ],
+
+    "___CODE_QUALITY___": "=== Refactoring & Quality ===",
+    "(refactor|rewrite|optimize|restructure|cleanup|technical debt)": [
       "Protocol: The Cartesian Protocol (think.py + skeptic.py MANDATORY)",
       "Tool: scripts/ops/xray.py for structural analysis",
       "Caution: Beware sunk cost fallacy - sometimes rewrite > patch",
-      "Action: Run audit.py after refactoring"
+      "Action: Run audit.py after refactoring",
+      "Lesson: Refactor in separate commit before adding features"
     ],
-    "(bug|error|fail|exception|crash|broken)": [
+    "(quality|lint|check|validate|audit|review)": [
+      "Protocol: The Sentinel Protocol (automated quality gates)",
+      "Tool: scripts/ops/audit.py - security & complexity check",
+      "Tool: scripts/ops/void.py - completeness check",
+      "Hook: pre_write_audit.py blocks deadly sins",
+      "Action: Run in strict mode for CI/CD"
+    ],
+    "(complexity|cyclomatic|cognitive|maintainability|readability)": [
+      "Tool: scripts/ops/audit.py --complexity",
+      "Lesson: Functions >20 lines = refactor candidate",
+      "Lesson: Cyclomatic complexity >10 = split function",
+      "Philosophy: Flat is better than nested"
+    ],
+    "(dead code|unused|orphan|deprecate|remove)": [
+      "Tool: scripts/ops/xray.py to find references",
+      "Philosophy: Delete with prejudice - dead code is liability",
+      "Action: grep -r 'function_name' . to check usage",
+      "Lesson: Commented-out code = delete it"
+    ],
+
+    "___DEBUGGING___": "=== Errors & Debugging ===",
+    "(bug|error|fail|exception|crash|broken|issue|problem)": [
       "Protocol: The MacGyver Protocol (improvise if tools missing)",
       "Memory: Search lessons.md for similar errors",
       "Tool: scripts/ops/inventory.py to check available tools",
-      "Action: Write to lessons.md after fixing"
+      "Action: Write to lessons.md after fixing",
+      "Hook: detect_failure_auto_learn.py captures failures"
     ],
-    "(search|find|grep|locate|where)": [
+    "(stack trace|traceback|debug|breakpoint|pdb|logging)": [
+      "Tool: python -m pdb script.py for debugging",
+      "Lesson: Add logging BEFORE the error, not after",
+      "Pattern: logger.debug(f'State: {vars()}') for context",
+      "Caution: Remove debug prints before commit"
+    ],
+    "(timeout|hang|freeze|stuck|infinite loop|memory leak)": [
+      "Tool: timeout command for runaway processes",
+      "Lesson: Always set timeouts on network operations",
+      "Pattern: signal.alarm() for Python timeouts",
+      "Caution: Memory leaks often = circular references"
+    ],
+    "(race condition|concurrent|thread|async|deadlock|mutex)": [
+      "Caution: Shared mutable state is the root of all evil",
+      "Lesson: Use asyncio.Lock() for async code",
+      "Pattern: threading.Lock() for threads",
+      "Tool: ThreadPoolExecutor for CPU-bound parallelism"
+    ],
+    "(flaky|intermittent|sometimes|random fail|heisenbug)": [
+      "Lesson: Flaky = usually timing/race condition",
+      "Action: Add strategic sleeps/waits to debug",
+      "Caution: Order-dependent tests are a smell",
+      "Tool: pytest --count=10 to reproduce flaky tests"
+    ],
+
+    "___ERROR_TYPES___": "=== Specific Error Types & Stack Traces ===",
+    "(TypeError|ValueError|KeyError|IndexError|AttributeError)": [
+      "Lesson: TypeError = wrong type passed to function",
+      "Lesson: KeyError = dict key doesn't exist, use .get()",
+      "Lesson: IndexError = list index out of range",
+      "Pattern: Use isinstance() checks for type safety"
+    ],
+    "(ImportError|ModuleNotFoundError|NameError)": [
+      "Lesson: ModuleNotFoundError = package not installed or wrong venv",
+      "Action: Check sys.path and PYTHONPATH",
+      "Tool: pip show package_name for install location"
+    ],
+    "(FileNotFoundError|PermissionError|IOError|OSError)": [
+      "Lesson: Always check file exists before reading",
+      "Pattern: Path.exists() before Path.read_text()",
+      "Caution: Check file permissions on Linux"
+    ],
+    "(ConnectionError|TimeoutError|HTTPError)": [
+      "Lesson: Always set timeouts on network calls",
+      "Pattern: Implement retry with exponential backoff",
+      "Tool: requests.adapters.HTTPAdapter for retries"
+    ],
+    "(NullPointerException|NoneType|null|undefined)": [
+      "Lesson: None checks before attribute access",
+      "Pattern: x.attr if x else default",
+      "Tool: Optional type hints for documentation"
+    ],
+
+    "___SEARCH_NAVIGATION___": "=== Code Search & Navigation ===",
+    "(search|find|grep|locate|where|definition|reference)": [
       "Protocol: The X-Ray Protocol (structural code search)",
-      "Tool: scripts/ops/xray.py for definitions/classes",
-      "Tool: Use Grep for text search, not structure",
-      "Distinction: Text search vs Structure search"
+      "Tool: scripts/ops/xray.py --type class/function/import",
+      "Tool: Use Grep for text search, Glob for file patterns",
+      "Distinction: Text search (grep) vs Structure search (xray)"
     ],
-    "(test|spec|unit|integration|pytest)": [
-      "Tool: .claude/tests/runner.py",
+    "(class|interface|type|struct|model|entity)": [
+      "Tool: xray.py --type class --name ClassName",
+      "Tool: xray.py shows inheritance hierarchy",
+      "Lesson: Check __init__.py for re-exports"
+    ],
+    "(function|method|def|signature|parameter|argument)": [
+      "Tool: xray.py --type function --name func_name",
+      "Tool: probe.py for runtime signature inspection",
+      "Lesson: Check for overloads and default values"
+    ],
+    "(import|module|package|dependency|require)": [
+      "Tool: xray.py --type import --name module_name",
+      "Tool: pip show package_name for location",
+      "Lesson: Circular imports = restructure needed"
+    ],
+
+    "___TESTING___": "=== Testing & Verification ===",
+    "(test|spec|unit|integration|pytest|unittest|mock)": [
+      "Tool: .claude/tests/runner.py for test suite",
       "Protocol: Run tests before committing",
       "Memory: Check test philosophy in CLAUDE.md",
-      "Action: Write tests for new features"
+      "Lesson: Test critical paths only - no getter tests",
+      "Hook: detect_test_failure.py tracks failures"
     ],
-    "(security|secret|key|token|credential|password)": [
+    "(mock|stub|fake|spy|patch|fixture)": [
+      "Tool: unittest.mock.patch for mocking",
+      "Lesson: Mock at boundaries, not internals",
+      "Caution: Over-mocking = testing implementation not behavior",
+      "Pattern: @pytest.fixture for reusable test data"
+    ],
+    "(coverage|assertion|expect|should|assert)": [
+      "Lesson: 100% coverage != bug-free",
+      "Lesson: Test behavior, not implementation",
+      "Pattern: Arrange-Act-Assert structure",
+      "Caution: One assertion per test is ideal"
+    ],
+    "(e2e|end-to-end|acceptance|smoke|regression)": [
+      "Protocol: The Headless Protocol for browser tests",
+      "Lesson: E2E tests are slow - use sparingly",
+      "Pattern: Test happy path + critical error paths",
+      "Tool: Playwright for cross-browser testing"
+    ],
+
+    "___SECURITY___": "=== Security & Secrets ===",
+    "(security|secret|key|token|credential|password|api.key)": [
       "Protocol: The Sentinel Protocol (audit.py for hardcoded secrets)",
       "Caution: NEVER hardcode credentials - use .env",
-      "Tool: pre_write_audit.py hook blocks deadly sins",
-      "Action: Check anti_patterns.md for security sins"
+      "Hook: pre_write_audit.py blocks deadly sins",
+      "Action: Check anti_patterns.md for security sins",
+      "Lesson: Rotate leaked credentials immediately"
     ],
-    "(install|pip|npm|package|dependency)": [
+    "(injection|xss|csrf|sanitize|escape|validate input)": [
+      "Protocol: The Sentinel Protocol - OWASP Top 10",
+      "Lesson: Never trust user input - validate everything",
+      "Lesson: Use parameterized queries for SQL",
+      "Lesson: HTML-escape all user content for display",
+      "Caution: eval() and exec() are security holes"
+    ],
+    "(encrypt|decrypt|hash|salt|bcrypt|cipher|ssl|tls)": [
+      "Lesson: Use bcrypt for passwords, not MD5/SHA1",
+      "Lesson: Never roll your own crypto",
+      "Tool: secrets module for random tokens",
+      "Caution: Store hashes, never plaintext passwords"
+    ],
+    "(permission|authorization|access control|role|privilege)": [
+      "Lesson: Default deny - whitelist permissions",
+      "Pattern: Check permissions at every layer",
+      "Caution: Client-side auth = no auth",
+      "Lesson: Log all permission denials"
+    ],
+
+    "___DEPENDENCIES___": "=== Package Management ===",
+    "(install|pip|npm|package|dependency|requirements|yarn)": [
       "Protocol: The MacGyver Protocol (Living off the Land)",
       "Tool: scripts/ops/inventory.py to check what's available",
       "Philosophy: Prefer stdlib over external dependencies",
-      "Action: Check if Python stdlib can solve it first"
+      "Action: Check if Python stdlib can solve it first",
+      "Lesson: Pin versions in requirements.txt"
     ],
-    "(commit|git|push|pr|pull request)": [
+    "(version|upgrade|update|outdated|compatibility|breaking)": [
+      "Lesson: Read CHANGELOG before upgrading",
+      "Tool: pip list --outdated for upgrade candidates",
+      "Caution: Major version bumps often break things",
+      "Pattern: Test in isolation before upgrading"
+    ],
+    "(virtualenv|venv|conda|environment|isolation)": [
+      "Pattern: python -m venv .venv && source .venv/bin/activate",
+      "Lesson: Never pip install --user in projects",
+      "Caution: Don't commit .venv to git"
+    ],
+
+    "___GIT_VCS___": "=== Git & Version Control ===",
+    "(commit|git|push|pr|pull request|merge|branch)": [
       "Protocol: The Sentinel Protocol (run audit.py first)",
       "Protocol: The Upkeep Protocol (run upkeep.py before commit)",
-      "Tool: scripts/ops/pre_commit.py",
-      "Action: Update index, verify requirements, clean scratch"
+      "Hook: Command prerequisite gate enforces /upkeep before commit",
+      "Action: Update index, verify requirements, clean scratch",
+      "Lesson: Commit message = what + why, not how"
     ],
-    "(memory|remember|forget|context|history)": [
+    "(rebase|cherry-pick|squash|amend|reset|revert)": [
+      "Caution: Never rebase shared/pushed branches",
+      "Lesson: git reflog is your safety net",
+      "Pattern: git rebase -i for cleaning up local commits",
+      "Caution: Force push = danger zone"
+    ],
+    "(conflict|merge|resolve|diff|patch)": [
+      "Tool: git diff --stat for overview",
+      "Lesson: Small, frequent merges > big bang merges",
+      "Pattern: git checkout --theirs/--ours for bulk resolution",
+      "Lesson: Conflicts in generated files = regenerate"
+    ],
+    "(stash|worktree|bisect|blame|log|history)": [
+      "Tool: git bisect for finding regression commits",
+      "Tool: git blame -L 10,20 file.py for line history",
+      "Pattern: git stash push -m 'description' for named stashes",
+      "Tool: git log --oneline --graph for visual history"
+    ],
+
+    "___MEMORY_CONTEXT___": "=== Memory & Context ===",
+    "(memory|remember|forget|context|history|state)": [
       "Protocol: The Elephant Protocol (persistent memory)",
-      "Tool: scripts/ops/remember.py",
+      "Tool: scripts/ops/remember.py add/view",
       "Memory: active_context.md (short-term)",
       "Memory: decisions.md (medium-term)",
       "Memory: lessons.md (long-term pain log)"
     ],
-    "(parallel|batch|concurrent|multiple|bulk)": [
+    "(session|conversation|turn|token|context window)": [
+      "Tool: /compact to reduce context size",
+      "Lesson: Context >200k tokens = degraded performance",
+      "Action: Prune completed tasks from context",
+      "Hook: token_tracker.py monitors usage"
+    ],
+    "(learn|lesson|mistake|gotcha|pitfall|caveat)": [
+      "Tool: /remember add lessons 'description'",
+      "Memory: lessons.md stores past trauma",
+      "Hook: detect_failure_auto_learn.py auto-captures",
+      "Philosophy: Fresh pain = clear memory"
+    ],
+
+    "___PERFORMANCE___": "=== Performance & Parallelism ===",
+    "(parallel|batch|concurrent|multiple|bulk|async)": [
       "Tool: scripts/lib/parallel.py for high-performance batching",
       "Protocol: Use parallel execution for >3 items",
       "Philosophy: Visual feedback via tqdm required",
-      "Lesson: Batch scripts must not crash on single failures"
+      "Lesson: Batch scripts must not crash on single failures",
+      "Hook: Native tool batching enforced by detect_batch.py"
     ],
-    "(json|parse|data|format)": [
-      "Tool: python3 -m json.tool (no jq needed)",
-      "Protocol: The MacGyver Protocol (stdlib over jq)",
-      "Tool: jq if available (check inventory.py)",
-      "Action: Use Python json module for complex parsing"
+    "(slow|performance|optimize|speed|latency|bottleneck)": [
+      "Protocol: Measure first, optimize second",
+      "Tool: cProfile for Python profiling",
+      "Lesson: Premature optimization = root of all evil",
+      "Action: Profile before and after changes",
+      "Tool: time command for quick benchmarks"
     ],
-    "(quality|lint|check|validate|audit)": [
-      "Protocol: The Sentinel Protocol (automated quality gates)",
-      "Tool: scripts/ops/audit.py",
-      "Tool: scripts/ops/drift_check.py for style",
-      "Action: Run in strict mode for CI/CD"
+    "(cache|memoize|redis|lru|ttl|invalidate)": [
+      "Tool: functools.lru_cache for simple memoization",
+      "Lesson: Cache invalidation is one of two hard problems",
+      "Pattern: TTL-based expiry for external data",
+      "Caution: Cached data can become stale"
     ],
-    "(think|plan|design|architect|approach)": [
+    "(background|async|queue|worker|job|celery)": [
+      "Hook: Background execution enforced for slow ops",
+      "Pattern: run_in_background=true for >5s operations",
+      "Tool: BashOutput to check background results",
+      "Lesson: Fire-and-forget needs error handling"
+    ],
+
+    "___META_COGNITION___": "=== Thinking & Planning ===",
+    "(think|plan|design|architect|approach|strategy)": [
       "Protocol: The Cartesian Protocol (meta-cognition)",
       "Tool: scripts/ops/think.py for decomposition",
       "Tool: scripts/ops/skeptic.py for hostile review",
-      "Philosophy: Think → Skepticize → Code"
+      "Philosophy: Think → Skepticize → Code",
+      "Tool: scripts/ops/council.py for multi-perspective"
     ],
-    "(research|docs|documentation|current|latest)": [
+    "(decide|choice|tradeoff|compare|alternative|option)": [
+      "Protocol: The Judge Protocol (ROI analysis)",
+      "Tool: scripts/ops/oracle.py --persona judge",
+      "Philosophy: Occam's Razor - simplest solution wins",
+      "Lesson: Document decisions in decisions.md"
+    ],
+    "(risk|danger|warning|careful|caution|concern)": [
+      "Protocol: The Skeptic Protocol (hostile review)",
+      "Tool: scripts/ops/oracle.py --persona skeptic",
+      "Hook: trigger_skeptic.py for risky operations",
+      "Lesson: If it feels risky, it probably is"
+    ],
+    "(assumption|guess|believe|think|probably|maybe)": [
+      "Hook: assumption_firewall.py blocks unverified claims",
+      "Protocol: The Probe Protocol - verify before assuming",
+      "Lesson: 'I think' = 'I don't know' - verify first",
+      "Action: Use verify.py to confirm assumptions"
+    ],
+    "(complex|complicated|difficult|hard|tricky|edge case)": [
+      "Protocol: The Cartesian Protocol (decompose)",
+      "Tool: think.py to break down complexity",
+      "Lesson: Complex = many simple parts",
+      "Action: Draw it out before coding"
+    ],
+
+    "___RESEARCH_DOCS___": "=== Research & Documentation ===",
+    "(research|docs|documentation|current|latest|up-to-date)": [
       "Protocol: The Research Protocol (Tavily search)",
-      "Tool: scripts/ops/research.py",
+      "Tool: scripts/ops/research.py for web search",
+      "Tool: scripts/ops/firecrawl.py for fetching full page content as markdown",
       "Caution: Training data cutoff is January 2025",
-      "Action: Always research before using updated libraries"
+      "Action: Always research before using updated libraries",
+      "Tool: WebFetch for specific URL content"
     ],
-    "(inspect|introspect|probe|verify|methods)": [
+    "(fetch.?page|read.?website|get.?url|download.?page|pull.?docs|ingest.?site)": [
+      "Tool: scripts/ops/firecrawl.py scrape <url> - Get clean markdown",
+      "Tool: scripts/ops/firecrawl.py crawl <url> - Get entire site",
+      "Lesson: Firecrawl returns LLM-ready markdown (cleaner than raw HTML)",
+      "Alternative: WebFetch for quick summaries, firecrawl for full content"
+    ],
+    "(inspect|introspect|probe|verify|methods|signature)": [
       "Protocol: The Probe Protocol (anti-hallucination)",
-      "Tool: scripts/ops/probe.py",
+      "Tool: scripts/ops/probe.py for runtime inspection",
       "Philosophy: Never guess API methods",
       "Action: Probe runtime to verify signatures"
     ],
-    "(consult|advice|oracle|reasoning)": [
+    "(consult|advice|oracle|reasoning|expert|opinion)": [
       "Protocol: The Oracle Protocol (external reasoning)",
-      "Tool: scripts/ops/consult.py",
-      "Use: Architecture decisions, complex design",
-      "Philosophy: Catch edge cases via external LLM"
+      "Tool: scripts/ops/oracle.py for single perspective",
+      "Tool: scripts/ops/council.py for multi-perspective",
+      "Use: Architecture decisions, complex design"
+    ],
+    "(example|sample|template|boilerplate|starter)": [
+      "Tool: Search GitHub for examples",
+      "Lesson: Copy working code > write from scratch",
+      "Action: Adapt examples to your context",
+      "Caution: Verify example code is secure"
+    ],
+
+    "___FILE_OPERATIONS___": "=== File & Path Operations ===",
+    "(file|path|directory|folder|read|write|create)": [
+      "Tool: pathlib.Path for modern path handling",
+      "Lesson: Use context managers: with open() as f:",
+      "Caution: Check file exists before reading",
+      "Pattern: Path.mkdir(parents=True, exist_ok=True)"
+    ],
+    "(json|yaml|toml|config|ini|parse|serialize)": [
+      "Tool: python3 -m json.tool for JSON formatting",
+      "Protocol: The MacGyver Protocol (stdlib over jq)",
+      "Lesson: json.loads() for strings, json.load() for files",
+      "Caution: YAML can execute code - use safe_load()"
+    ],
+    "(csv|excel|spreadsheet|tabular|pandas|dataframe)": [
+      "Tool: csv module for simple cases",
+      "Tool: pandas for complex data manipulation",
+      "Lesson: Always specify encoding='utf-8'",
+      "Caution: Excel dates are cursed - verify parsing"
+    ],
+    "(encode|decode|utf-8|binary|bytes|base64)": [
+      "Lesson: Strings are unicode, bytes are binary",
+      "Pattern: text.encode('utf-8') / bytes.decode('utf-8')",
+      "Tool: base64 module for encoding",
+      "Caution: 'rb' mode for binary files"
+    ],
+
+    "___PROCESS_SYSTEM___": "=== Process & System ===",
+    "(subprocess|shell|command|execute|run|system)": [
+      "Tool: subprocess.run() for simple commands",
+      "Caution: shell=True is a security risk",
+      "Pattern: subprocess.run([...], capture_output=True)",
+      "Lesson: Always check returncode"
+    ],
+    "(environment|env|variable|config|setting|dotenv)": [
+      "Tool: os.environ.get('VAR', 'default')",
+      "Lesson: Fail fast if required env vars missing",
+      "Pattern: Load .env early in application startup",
+      "Caution: Never log environment variables"
+    ],
+    "(signal|interrupt|kill|terminate|graceful|shutdown)": [
+      "Pattern: signal.signal(signal.SIGTERM, handler)",
+      "Lesson: Handle SIGTERM for graceful shutdown",
+      "Caution: SIGKILL cannot be caught",
+      "Tool: atexit module for cleanup handlers"
+    ],
+
+    "___CLAUDE_SPECIFIC___": "=== Claude Code Specific ===",
+    "(hook|lifecycle|pretool|posttool|session)": [
+      "Location: .claude/hooks/ for all hooks",
+      "Events: SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd",
+      "Tool: audit_hooks.py for hook validation",
+      "Lesson: Hooks must output valid JSON"
+    ],
+    "(confidence|tier|epistemology|evidence|certainty)": [
+      "Protocol: The Epistemological Protocol",
+      "Tool: scripts/ops/confidence.py for state",
+      "Hook: tier_gate.py enforces confidence tiers",
+      "Lesson: Start at 0%, gather evidence to increase"
+    ],
+    "(scratch|temporary|prototype|experiment|draft)": [
+      "Location: scratch/ for all temporary work",
+      "Protocol: Scratch-First Enforcement",
+      "Lesson: Write scripts to scratch/, promote to scripts/",
+      "Hook: scratch_flat_enforcer.py - no subdirectories"
+    ],
+    "(protocol|workflow|process|procedure|methodology)": [
+      "Tool: scripts/ops/protocols.py for protocol management",
+      "Hook: protocol_enforcer.py validates workflows",
+      "Memory: Protocol registry in session state",
+      "Lesson: Protocols are enforced, not suggested"
+    ],
+    "(swarm|oracle|council|batch|parallel oracle)": [
+      "Tool: swarm.py for massive parallel generation",
+      "Tool: oracle.py for single LLM consultation",
+      "Tool: council.py for multi-perspective (slower)",
+      "Lesson: Oracle 30x faster than council"
+    ],
+
+    "___DATA_STRUCTURES___": "=== Data Structures & Algorithms ===",
+    "(list|array|dict|dictionary|set|tuple|collection)": [
+      "Lesson: Use appropriate data structure for access pattern",
+      "Pattern: dict for O(1) lookup, list for ordered, set for unique",
+      "Tool: collections module for specialized structures",
+      "Lesson: defaultdict > checking key existence"
+    ],
+    "(sort|search|filter|map|reduce|comprehension)": [
+      "Lesson: List comprehensions > map/filter for readability",
+      "Pattern: sorted(items, key=lambda x: x.attr)",
+      "Tool: itertools for advanced iteration",
+      "Lesson: Generator expressions for memory efficiency"
+    ],
+    "(tree|graph|node|edge|traverse|bfs|dfs)": [
+      "Tool: Use dict of lists for simple graphs",
+      "Pattern: collections.deque for BFS",
+      "Lesson: Recursion limit in Python is 1000",
+      "Tool: sys.setrecursionlimit() if needed"
+    ],
+    "(regex|pattern|match|search|replace|parse)": [
+      "Tool: re module for regex",
+      "Lesson: Use raw strings: r'pattern'",
+      "Pattern: re.compile() for repeated use",
+      "Caution: Regex can be slow - consider alternatives"
+    ],
+
+    "___DEPLOYMENT___": "=== Deployment & DevOps ===",
+    "(deploy|release|production|staging|environment)": [
+      "Protocol: Run audit.py + void.py before deploy",
+      "Lesson: Test in staging before production",
+      "Caution: Feature flags for risky rollouts",
+      "Action: Have rollback plan ready"
+    ],
+    "(docker|container|image|dockerfile|compose)": [
+      "Lesson: Use multi-stage builds for smaller images",
+      "Pattern: .dockerignore for faster builds",
+      "Caution: Don't run as root in containers",
+      "Tool: docker-compose for multi-container apps"
+    ],
+    "(ci|cd|pipeline|github actions|workflow|automation)": [
+      "Lesson: CI should be fast (<10 min)",
+      "Pattern: Cache dependencies between runs",
+      "Caution: Don't store secrets in workflow files",
+      "Tool: Act for local GitHub Actions testing"
+    ],
+    "(log|monitor|alert|metric|trace|observability)": [
+      "Lesson: Log at appropriate levels (debug/info/warn/error)",
+      "Pattern: Structured logging (JSON) for parsing",
+      "Lesson: Include correlation IDs for tracing",
+      "Caution: Don't log sensitive data"
+    ],
+
+    "___LOGGING_OBSERVABILITY___": "=== Logging, Monitoring & Observability ===",
+    "(prometheus|grafana|opentelemetry|jaeger|zipkin|datadog)": [
+      "Tool: OpenTelemetry for vendor-neutral instrumentation",
+      "Pattern: Export metrics to Prometheus, traces to Jaeger",
+      "Lesson: Instrument at service boundaries first",
+      "Caution: High-cardinality labels kill Prometheus"
+    ],
+    "(instrument|instrumentation|span|trace id|correlation)": [
+      "Pattern: Add trace_id to all log messages",
+      "Lesson: Propagate context headers across services",
+      "Tool: OpenTelemetry auto-instrumentation",
+      "Action: Include request_id in error responses"
+    ],
+
+    "___BUILD_SYSTEMS___": "=== Build Systems & Toolchains ===",
+    "(webpack|rollup|vite|parcel|esbuild|bundler)": [
+      "Tool: Vite for modern fast builds",
+      "Lesson: Tree-shaking removes unused code",
+      "Caution: Dynamic imports break tree-shaking",
+      "Pattern: Code splitting for lazy loading"
+    ],
+    "(babel|typescript|ts-loader|swc|transpile)": [
+      "Tool: SWC is 20x faster than Babel",
+      "Lesson: Target ES2020+ for modern browsers",
+      "Caution: tsconfig.json paths need bundler alias"
+    ],
+    "(makefile|cmake|ninja|meson|bazel|build script)": [
+      "Pattern: Make for simple builds, CMake for complex C/C++",
+      "Lesson: Ninja is faster than Make for large projects",
+      "Tool: Bazel for hermetic reproducible builds"
+    ],
+    "(gradle|maven|sbt|cargo|poetry|pipenv)": [
+      "Tool: Poetry for Python dependency management",
+      "Lesson: Cargo is best-in-class for Rust",
+      "Pattern: Lock files for reproducible builds",
+      "Caution: Maven downloads the internet"
+    ],
+
+    "___CICD___": "=== CI/CD & Automation ===",
+    "(github actions|gitlab ci|circleci|jenkins|travis)": [
+      "Tool: GitHub Actions for GitHub-native CI",
+      "Pattern: Use matrix builds for cross-platform testing",
+      "Lesson: Cache node_modules/pip cache between runs",
+      "Caution: Secrets in env vars, not workflow files"
+    ],
+    "(pipeline|build step|test step|deploy step)": [
+      "Pattern: Fail fast - run fast tests first",
+      "Lesson: Parallelize independent steps",
+      "Tool: Use artifacts to pass data between jobs",
+      "Caution: Don't deploy on failing tests"
+    ],
+
+    "___CONFIG_ENVIRONMENTS___": "=== Configuration & Environments ===",
+    "(feature flag|toggle|env-specific|config override)": [
+      "Pattern: Feature flags for gradual rollouts",
+      "Lesson: Flags should have expiration dates",
+      "Caution: Too many flags = configuration spaghetti",
+      "Tool: LaunchDarkly, Unleash for flag management"
+    ],
+    "(dev environment|prod environment|staging|local)": [
+      "Lesson: Dev should mirror prod as closely as possible",
+      "Pattern: Use docker-compose for local dev",
+      "Caution: Never use prod credentials in dev",
+      "Tool: direnv for per-directory env vars"
+    ],
+
+    "___ARCHITECTURE___": "=== Architectural Patterns & System Design ===",
+    "(monolith|microservices|service-oriented|modular)": [
+      "Lesson: Start monolith, extract services when needed",
+      "Caution: Microservices add network complexity",
+      "Pattern: Modular monolith = best of both worlds",
+      "Philosophy: Distribution is not free"
+    ],
+    "(event-driven|message bus|pub.sub|kafka|rabbitmq)": [
+      "Pattern: Events for decoupling, commands for actions",
+      "Lesson: Idempotent consumers handle retries",
+      "Caution: Message ordering is hard",
+      "Tool: Kafka for high-throughput, RabbitMQ for routing"
+    ],
+    "(cqrs|event sourcing|saga|choreography|orchestration)": [
+      "Lesson: CQRS separates read and write models",
+      "Pattern: Event sourcing = append-only log of state changes",
+      "Caution: Event sourcing adds complexity",
+      "Tool: Saga pattern for distributed transactions"
+    ],
+    "(hexagonal|ports and adapters|clean architecture|ddd)": [
+      "Pattern: Domain logic in center, adapters at edges",
+      "Lesson: Depend on abstractions, not concretions",
+      "Philosophy: Domain-Driven Design for complex domains",
+      "Action: Define bounded contexts first"
+    ],
+    "(high-level design|system design|architecture diagram)": [
+      "Tool: scripts/ops/council.py for architectural decisions",
+      "Protocol: Think before you architect",
+      "Action: Draw boxes and arrows before coding",
+      "Lesson: Design for failure, not just success"
+    ],
+
+    "___DESIGN_PATTERNS___": "=== Design Patterns (GoF & Friends) ===",
+    "(factory|abstract factory|builder|prototype|singleton)": [
+      "Pattern: Factory for object creation abstraction",
+      "Lesson: Singleton is often an anti-pattern",
+      "Pattern: Builder for complex object construction",
+      "Caution: Prototype needs deep copy"
+    ],
+    "(strategy|state|observer|decorator|adapter|facade)": [
+      "Pattern: Strategy for swappable algorithms",
+      "Pattern: Observer for event notification",
+      "Pattern: Decorator for behavior extension",
+      "Pattern: Facade for simplified interfaces"
+    ],
+    "(repository|unit of work|service layer|data mapper)": [
+      "Pattern: Repository abstracts data access",
+      "Pattern: Unit of Work tracks changes",
+      "Lesson: Service layer contains business logic",
+      "Caution: Don't over-abstract simple CRUD"
+    ],
+    "(which pattern|design pattern for|best pattern)": [
+      "Philosophy: Patterns are tools, not goals",
+      "Lesson: Name the problem before choosing pattern",
+      "Action: Consider YAGNI - do you need a pattern?",
+      "Tool: scripts/ops/oracle.py for pattern advice"
+    ],
+
+    "___CODE_SMELLS___": "=== Code Smells & Technical Debt ===",
+    "(god object|god class|massive class|too many methods)": [
+      "Smell: Class doing too much = split it",
+      "Pattern: Single Responsibility Principle",
+      "Action: Extract collaborators",
+      "Lesson: >300 lines = refactor candidate"
+    ],
+    "(spaghetti|big ball of mud|tangled|coupled)": [
+      "Smell: Everything depends on everything",
+      "Action: Identify and break dependency cycles",
+      "Pattern: Dependency injection for loose coupling",
+      "Tool: xray.py to visualize dependencies"
+    ],
+    "(magic number|magic string|hardcoded)": [
+      "Smell: Unexplained literals in code",
+      "Pattern: Extract to named constants",
+      "Lesson: Constants should explain intent",
+      "Action: Use enums for related values"
+    ],
+    "(shotgun surgery|feature envy|inappropriate intimacy)": [
+      "Smell: Change requires editing many files",
+      "Action: Move related code together",
+      "Pattern: Colocate related logic",
+      "Philosophy: Cohesion over separation"
+    ],
+    "(too many responsibilities|violates srp|does everything)": [
+      "Smell: Function/class doing unrelated things",
+      "Pattern: Single Responsibility Principle",
+      "Action: Split into focused units",
+      "Lesson: If you need 'and' to describe it, split it"
+    ],
+
+    "___REQUIREMENTS___": "=== Requirements, Specs & Product Thinking ===",
+    "(requirements|spec|specification|prd|design doc)": [
+      "Protocol: Ambiguity Firewall - clarify before coding",
+      "Action: Write Refined Spec before implementation",
+      "Lesson: Vague requirements = wrong implementation",
+      "Tool: AskUserQuestion for clarification"
+    ],
+    "(user story|acceptance criteria|gherkin|given.when.then)": [
+      "Pattern: Given-When-Then for test scenarios",
+      "Lesson: Acceptance criteria define done",
+      "Tool: Gherkin for executable specs",
+      "Action: Write criteria before coding"
+    ],
+    "(edge cases|corner cases|non-functional requirements)": [
+      "Protocol: The Skeptic - think of failure modes",
+      "Action: List edge cases before implementation",
+      "Lesson: Happy path is not enough",
+      "Tool: oracle.py --persona skeptic for edge cases"
+    ],
+    "(clarify requirements|what should|unclear|ambiguous)": [
+      "Hook: assumption_firewall.py blocks vague specs",
+      "Action: Use AskUserQuestion tool",
+      "Protocol: Refined Spec before coding",
+      "Lesson: Ask early, not after implementation"
+    ],
+
+    "___EDUCATIONAL___": "=== Educational & Tutorial Mode ===",
+    "(teach me|learn|learning|from scratch|beginner)": [
+      "Mode: Slow down, explain fundamentals",
+      "Pattern: Build up from first principles",
+      "Action: Check prerequisite knowledge first",
+      "Lesson: Scaffolding helps learning"
+    ],
+    "(step by step|walk me through|explain each step)": [
+      "Mode: Verbose explanation mode",
+      "Pattern: Number each step explicitly",
+      "Action: Pause for understanding between steps",
+      "Lesson: Small steps > big leaps"
+    ],
+    "(explain like|eli5|how does.*work internally|intuition)": [
+      "Mode: Simplify without losing accuracy",
+      "Pattern: Use analogies to familiar concepts",
+      "Action: Build mental model before details",
+      "Lesson: Understanding > memorization"
+    ],
+    "(what is|how does|why does|when should)": [
+      "Mode: Conceptual explanation",
+      "Action: Define before demonstrating",
+      "Pattern: Compare and contrast with alternatives",
+      "Tool: Research for current best practices"
+    ],
+
+    "___EMOTIONAL_COGNITIVE___": "=== Emotional & Cognitive States ===",
+    "(stuck|can't figure out|no idea|lost|confused)": [
+      "Mode: Supportive problem decomposition",
+      "Action: Break problem into smaller parts",
+      "Tool: think.py for decomposition",
+      "Lesson: Step back and restate the problem"
+    ],
+    "(frustrated|annoyed|driving me crazy|ugh|argh)": [
+      "Mode: Empathetic but focused",
+      "Action: Acknowledge frustration, then solve",
+      "Lesson: Take a break if stuck >30 min",
+      "Tool: Rubber duck debugging helps"
+    ],
+    "(overwhelmed|too much|brain fried|burned out)": [
+      "Mode: Simplify and prioritize",
+      "Action: Focus on ONE thing at a time",
+      "Lesson: Scope creep causes overwhelm",
+      "Pattern: MVP first, enhancements later"
+    ],
+    "(talk me through|rubber duck|think out loud|sanity check)": [
+      "Mode: Collaborative reasoning",
+      "Action: Ask clarifying questions",
+      "Pattern: Verbalize assumptions",
+      "Lesson: Explaining reveals gaps"
+    ],
+    "(anxious about|worried about breaking|afraid to)": [
+      "Mode: Risk mitigation focus",
+      "Action: Identify what could go wrong",
+      "Pattern: Test in isolation first",
+      "Lesson: Rollback plans reduce anxiety"
+    ],
+
+    "___ML_DATA_SCIENCE___": "=== Machine Learning & Data Science ===",
+    "(pandas|numpy|scikit-learn|sklearn|dataframe)": [
+      "Tool: probe.py pandas.DataFrame for methods",
+      "Lesson: Vectorize operations, avoid loops",
+      "Pattern: df.apply() for row operations",
+      "Caution: Copy vs view semantics matter"
+    ],
+    "(pytorch|tensorflow|keras|jax|neural network)": [
+      "Lesson: PyTorch for research, TensorFlow for production",
+      "Pattern: Use DataLoader for batching",
+      "Caution: GPU memory management is critical",
+      "Tool: Research for latest API changes"
+    ],
+    "(train|training loop|validation|test set|epoch)": [
+      "Pattern: Train/validation/test split",
+      "Lesson: Never touch test set during development",
+      "Caution: Data leakage invalidates results",
+      "Tool: Early stopping prevents overfitting"
+    ],
+    "(overfitting|underfitting|regularization|dropout)": [
+      "Lesson: Overfitting = model memorizes, doesn't generalize",
+      "Pattern: Regularization (L1/L2), Dropout, Early stopping",
+      "Action: Plot learning curves to diagnose",
+      "Caution: More data often beats better models"
+    ],
+    "(gradient|backprop|loss function|optimizer|learning rate)": [
+      "Lesson: Learning rate is most important hyperparameter",
+      "Pattern: Start with Adam optimizer",
+      "Caution: Exploding/vanishing gradients",
+      "Tool: Learning rate schedulers help convergence"
+    ],
+    "(dataset|dataloader|data augmentation|feature engineering)": [
+      "Pattern: Augmentation for small datasets",
+      "Lesson: Feature engineering often beats model complexity",
+      "Tool: PyTorch DataLoader for batching",
+      "Caution: Augmentation must match domain"
+    ],
+    "(model serving|inference|onnx|torchscript|mlflow)": [
+      "Tool: ONNX for model portability",
+      "Pattern: TorchScript for production PyTorch",
+      "Lesson: Batch inference is much faster",
+      "Tool: MLflow for experiment tracking"
+    ],
+
+    "___WEB_FRONTEND___": "=== Web Frontend Frameworks & UI ===",
+    "(react|next.js|create-react-app|vite react)": [
+      "Tool: Vite for fast React development",
+      "Lesson: Next.js for SSR/SSG, CRA for SPA",
+      "Pattern: Functional components + hooks",
+      "Caution: useEffect dependency arrays matter"
+    ],
+    "(vue|nuxt|svelte|sveltekit|solidjs)": [
+      "Lesson: Vue for gradual adoption, Svelte for performance",
+      "Pattern: Composition API in Vue 3",
+      "Tool: SvelteKit for full-stack Svelte",
+      "Caution: Reactivity has gotchas in each framework"
+    ],
+    "(component|props|state|hooks|useeffect|usestate)": [
+      "Pattern: Lift state up for shared state",
+      "Lesson: useEffect for side effects only",
+      "Caution: Stale closures in useEffect",
+      "Pattern: Custom hooks for reusable logic"
+    ],
+    "(redux|mobx|zustand|recoil|pinia|state management)": [
+      "Lesson: Start with useState, add global state when needed",
+      "Pattern: Zustand for simple global state",
+      "Tool: Redux DevTools for debugging",
+      "Caution: Don't put everything in global state"
+    ],
+    "(hydration|ssr|csr|isr|server components)": [
+      "Lesson: SSR for SEO and initial load",
+      "Pattern: ISR for static + dynamic",
+      "Caution: Hydration mismatch errors",
+      "Tool: React Server Components for streaming"
+    ],
+
+    "___WEB_BACKEND___": "=== Backend & Web Frameworks ===",
+    "(express|fastify|nestjs|koa|hapi)": [
+      "Lesson: Express for simplicity, Fastify for performance",
+      "Pattern: NestJS for enterprise TypeScript",
+      "Tool: Express middleware ecosystem is huge",
+      "Caution: Error handling middleware order matters"
+    ],
+    "(django|flask|fastapi|bottle|starlette)": [
+      "Tool: FastAPI for modern Python APIs",
+      "Lesson: Django for batteries-included, Flask for minimal",
+      "Pattern: FastAPI + Pydantic for validation",
+      "Caution: Django ORM N+1 queries"
+    ],
+    "(rails|laravel|spring boot|asp.net core)": [
+      "Lesson: Rails for rapid prototyping",
+      "Pattern: Convention over configuration",
+      "Tool: Spring Boot for Java microservices",
+      "Caution: Magic can be hard to debug"
+    ],
+    "(middleware|route handler|controller|view)": [
+      "Pattern: Middleware for cross-cutting concerns",
+      "Lesson: Keep controllers thin",
+      "Pattern: Service layer for business logic",
+      "Caution: Middleware order matters"
+    ],
+    "(prisma|typeorm|sequelize|sqlalchemy|activerecord)": [
+      "Tool: Prisma for TypeScript, SQLAlchemy for Python",
+      "Lesson: ORMs hide SQL but not performance",
+      "Pattern: Use raw queries for complex operations",
+      "Caution: N+1 queries are silent killers"
+    ],
+
+    "___CONTAINERS_INFRA___": "=== DevOps, Containers & Infrastructure ===",
+    "(kubernetes|k8s|pod|deployment|service|ingress)": [
+      "Lesson: K8s for orchestration at scale",
+      "Pattern: Deployment for stateless, StatefulSet for stateful",
+      "Tool: kubectl for cluster management",
+      "Caution: K8s has a steep learning curve"
+    ],
+    "(helm chart|kustomize|operator|crd)": [
+      "Tool: Helm for templated K8s manifests",
+      "Pattern: Kustomize for overlay-based config",
+      "Lesson: Operators for complex stateful apps",
+      "Caution: Helm chart sprawl is real"
+    ],
+    "(terraform|pulumi|cloudformation|cdk|iac)": [
+      "Tool: Terraform for multi-cloud IaC",
+      "Pattern: Pulumi for programming language IaC",
+      "Lesson: State management is critical",
+      "Caution: terraform destroy can ruin your day"
+    ],
+    "(cluster|node pool|autoscaling|load balancer|hpa)": [
+      "Pattern: HPA for pod autoscaling",
+      "Lesson: Set resource requests and limits",
+      "Caution: Autoscaling needs headroom",
+      "Tool: metrics-server for HPA"
+    ],
+
+    "___DATA_ENGINEERING___": "=== Data Engineering & Pipelines ===",
+    "(etl|elt|data pipeline|batch job|stream processing)": [
+      "Pattern: ELT for data warehouses (transform in place)",
+      "Lesson: Batch for volume, stream for latency",
+      "Tool: dbt for SQL transformations",
+      "Caution: Idempotent pipelines are essential"
+    ],
+    "(airflow|prefect|dagster|luigi|orchestration)": [
+      "Tool: Airflow for complex DAGs",
+      "Lesson: Prefect/Dagster for modern Python-native",
+      "Pattern: Idempotent tasks with clear dependencies",
+      "Caution: Airflow scheduler can be bottleneck"
+    ],
+    "(spark|flink|beam|kafka streams|dask)": [
+      "Tool: Spark for batch, Flink for stream",
+      "Lesson: Beam for portable pipelines",
+      "Pattern: Dask for pandas-like distributed",
+      "Caution: Shuffle operations are expensive"
+    ],
+    "(data lake|warehouse|parquet|iceberg|delta lake)": [
+      "Pattern: Parquet for columnar storage",
+      "Tool: Delta Lake/Iceberg for ACID on lakes",
+      "Lesson: Partition by access patterns",
+      "Caution: Small files problem in lakes"
+    ],
+
+    "___MOBILE___": "=== Mobile Development ===",
+    "(android|kotlin|jetpack compose|activity|fragment)": [
+      "Tool: Jetpack Compose for modern Android UI",
+      "Lesson: ViewModel for UI state",
+      "Pattern: MVVM architecture",
+      "Caution: Activity lifecycle is complex"
+    ],
+    "(ios|swift|swiftui|uikit|storyboard)": [
+      "Tool: SwiftUI for declarative iOS UI",
+      "Lesson: Combine for reactive streams",
+      "Pattern: MVVM with Combine",
+      "Caution: SwiftUI previews can be slow"
+    ],
+    "(react native|flutter|dart|expo|cross-platform)": [
+      "Tool: Flutter for high-performance cross-platform",
+      "Lesson: React Native for React developers",
+      "Pattern: Expo for rapid prototyping",
+      "Caution: Native bridges add complexity"
+    ],
+    "(apk|ipa|play store|app store|mobile release)": [
+      "Lesson: App store review takes time",
+      "Pattern: CI/CD for mobile with Fastlane",
+      "Caution: Version codes must increment",
+      "Tool: TestFlight for iOS beta testing"
+    ],
+
+    "___GAME_DEV___": "=== Game Development & Graphics ===",
+    "(unity|unreal|godot|game engine)": [
+      "Tool: Unity for 2D/3D, beginner-friendly",
+      "Lesson: Godot for open-source, lightweight",
+      "Pattern: Unreal for AAA graphics",
+      "Caution: Engine lock-in is real"
+    ],
+    "(game loop|frame rate|fps|delta time|tick)": [
+      "Pattern: Fixed timestep for physics",
+      "Lesson: Decouple rendering from logic",
+      "Caution: Frame rate independence matters",
+      "Tool: Profiler for frame time analysis"
+    ],
+    "(physics engine|rigidbody|collider|collision detection)": [
+      "Pattern: Separate collision layers",
+      "Lesson: Continuous collision for fast objects",
+      "Caution: Physics can be non-deterministic",
+      "Tool: Debug collision visualization"
+    ],
+    "(shader|vertex shader|fragment shader|glsl|hlsl)": [
+      "Lesson: GPU programming is parallel",
+      "Pattern: Minimize texture samples",
+      "Caution: Branching is expensive in shaders",
+      "Tool: RenderDoc for shader debugging"
+    ],
+
+    "___I18N_L10N___": "=== Internationalization, Localization & Time ===",
+    "(i18n|l10n|localization|internationalization|translate)": [
+      "Pattern: Extract strings to resource files",
+      "Lesson: Plan for RTL languages",
+      "Caution: String concatenation breaks translations",
+      "Tool: ICU MessageFormat for plurals"
+    ],
+    "(timezone|utc|dst|daylight savings|date formatting)": [
+      "Lesson: Store dates in UTC, display in local",
+      "Caution: DST transitions create edge cases",
+      "Pattern: Use ISO 8601 for interchange",
+      "Tool: pytz/dateutil for Python timezones"
+    ],
+    "(encoding|utf-8|unicode|codec|mojibake)": [
+      "Lesson: UTF-8 everywhere, always",
+      "Pattern: Specify encoding explicitly",
+      "Caution: Mojibake = wrong encoding assumed",
+      "Tool: chardet for encoding detection"
+    ],
+
+    "___RESILIENCE___": "=== Error Handling & Resilience ===",
+    "(retry|backoff|exponential backoff|jitter)": [
+      "Pattern: Exponential backoff with jitter",
+      "Lesson: Cap maximum retry time",
+      "Caution: Retries can cause thundering herd",
+      "Tool: tenacity for Python retries"
+    ],
+    "(idempotent|idempotency key|exactly once)": [
+      "Lesson: Idempotent = safe to retry",
+      "Pattern: Use idempotency keys for APIs",
+      "Caution: Exactly-once is very hard",
+      "Tool: Database unique constraints help"
+    ],
+    "(circuit breaker|bulkhead|fallback|graceful degradation)": [
+      "Pattern: Circuit breaker prevents cascade failures",
+      "Lesson: Bulkhead isolates failures",
+      "Tool: resilience4j for Java, pybreaker for Python",
+      "Action: Define fallback behavior upfront"
+    ],
+    "(fail fast|resilience|fault tolerance|chaos engineering)": [
+      "Philosophy: Fail fast, recover faster",
+      "Lesson: Design for failure, not just success",
+      "Tool: Chaos Monkey for fault injection",
+      "Pattern: Health checks and readiness probes"
+    ],
+
+    "___ALGORITHMS___": "=== Algorithms, Complexity & DSA ===",
+    "(big o|time complexity|space complexity|asymptotic)": [
+      "Lesson: Big O describes worst case growth",
+      "Pattern: O(1) < O(log n) < O(n) < O(n log n) < O(n²)",
+      "Caution: Constants matter for small n",
+      "Action: Analyze before optimizing"
+    ],
+    "(dynamic programming|dp|memoization|tabulation)": [
+      "Pattern: DP = overlapping subproblems + optimal substructure",
+      "Lesson: Top-down (memo) vs bottom-up (tabulation)",
+      "Tool: functools.lru_cache for memoization",
+      "Action: Define recurrence relation first"
+    ],
+    "(greedy|backtracking|divide and conquer)": [
+      "Pattern: Greedy makes locally optimal choices",
+      "Lesson: Greedy doesn't always give global optimum",
+      "Pattern: Backtracking for constraint satisfaction",
+      "Tool: Draw recursion tree for understanding"
+    ],
+    "(binary search|two pointers|sliding window)": [
+      "Pattern: Binary search on sorted data",
+      "Lesson: Two pointers for pair problems",
+      "Pattern: Sliding window for subarray problems",
+      "Caution: Off-by-one errors are common"
+    ],
+    "(coding interview|leetcode|hackerrank|competitive)": [
+      "Pattern: Understand problem before coding",
+      "Lesson: Talk through approach first",
+      "Tool: Practice on LeetCode/HackerRank",
+      "Action: Write test cases before solution"
+    ],
+
+    "___MIGRATION_LEGACY___": "=== Migration, Legacy & Interoperability ===",
+    "(migrate from|port from|rewrite in|upgrade to)": [
+      "Protocol: Think before you migrate",
+      "Lesson: Strangler fig pattern for gradual migration",
+      "Caution: Big bang rewrites often fail",
+      "Action: Define success criteria first"
+    ],
+    "(backwards compatible|breaking change|api version)": [
+      "Pattern: Semantic versioning for APIs",
+      "Lesson: Breaking changes need migration path",
+      "Tool: API deprecation warnings",
+      "Caution: Backward compatibility has costs"
+    ],
+    "(interop|bridge|wrapper|adapter|legacy)": [
+      "Pattern: Adapter pattern for legacy integration",
+      "Lesson: Wrap legacy, don't modify it",
+      "Tool: Write integration tests first",
+      "Caution: Legacy often has undocumented behavior"
+    ],
+    "(schema migration|data migration|versioning)": [
+      "Tool: Alembic for SQLAlchemy migrations",
+      "Pattern: Forward-only migrations in production",
+      "Lesson: Test migrations on production data copy",
+      "Caution: Large table migrations can lock"
     ]
   },
+
   "random_constraints": [
     "Constraint: What if you couldn't use Python? How would you solve this in Bash?",
     "Constraint: What if you had to do this in 1 line? No loops, no functions.",
@@ -120,13 +1100,149 @@
     "Reliability: What if the network fails halfway through this operation?",
     "Lateral: How would a 1990s developer solve this without modern libraries?",
     "Inversion: Instead of asking 'how to do X', ask 'why do we need X at all?'",
-    "Constraint: What if you had to explain this to a non-technical stakeholder?"
+    "Constraint: What if you had to explain this to a non-technical stakeholder?",
+    "Adversarial: What's the worst input someone could send to break this?",
+    "Scale: What if this had to process 10TB of data?",
+    "Time: What if you had to ship this in 30 minutes?",
+    "Legacy: What if this had to run on Python 2.7?",
+    "Offline: What if there was no internet connection?",
+    "Recovery: What happens if this crashes mid-operation?",
+    "Audit: Could you explain every line of this code in court?",
+    "Minimalism: What's the least code that could work?",
+    "Paranoia: What if every external dependency disappears tomorrow?",
+    "Accessibility: What if the user is blind or using a screen reader?",
+    "Mobile: What if this had to work on a phone with 2G connection?",
+    "Debugging: How would you debug this at 3am with only logs?",
+    "Documentation: Would your future self understand this in 6 months?",
+    "Testing: How would you prove this works without running it?",
+    "Rollback: How do you undo this change if it breaks production?",
+    "Environment: What if this had to run inside a web browser using WebAssembly?",
+    "Serverless: What if this had to run on AWS Lambda with a 15-minute timeout?",
+    "Containerization: How would you package this if the final Docker image must be under 50MB?",
+    "Air-Gap: How do you deploy and update this on a server with absolutely no internet access?",
+    "Energy: What if this is running on a battery-powered device? How do you minimize drain?",
+    "OS: What if this needs to run natively on Windows 98?",
+    "Dependencies: What if you could only use the Standard Library? No package managers.",
+    "Filesystem: What if the disk is read-only?",
+    "Concurrency: What if this is running on a single-core CPU?",
+    "Streaming: What if the data never stops coming? How do you handle an infinite stream?",
+    "Cardinality: What if the input values have high cardinality (e.g., 1 billion unique user IDs)?",
+    "Corruption: How does the system behave if 1% of the input data is bit-flipped?",
+    "Latency: What if the database query takes 10 seconds to return?",
+    "Retention: What if you are legally required to delete this data after 24 hours?",
+    "Consistency: What if you are in an eventual consistency environment and the data you just wrote isn't there yet?",
+    "Format: What if the input changes from JSON to a proprietary binary format?",
+    "Privacy: How do you ensure no PII (Personally Identifiable Information) is ever logged?",
+    "Insider: What if the attacker has read-access to your source code repository?",
+    "Supply Chain: What if a library you use is hijacked to mine crypto? How would you detect it?",
+    "Compliance: How do you implement 'Right to be Forgotten' (GDPR) for this feature?",
+    "Cryptography: What if you have to process the data without writing plaintext to RAM?",
+    "Auth: What if the authentication token expires mid-request?",
+    "Localization: What if the user input is in Arabic (Right-to-Left text)?",
+    "Color: How would a colorblind user interpret the success/error state of this?",
+    "Input: What if the user is navigating solely via keyboard (no mouse)?",
+    "Cost: What if every CPU cycle costs $0.01? How do you make this cheaper?",
+    "Bus Factor: If you get hit by a bus, can the junior developer fix this tomorrow?",
+    "Functional: What if all variables had to be immutable?",
+    "No-Ifs: How would you write this logic without using 'if/else' statements?",
+    "Golfing: Can you write the core logic in under 140 characters?",
+    "Futurism: How would this algorithm need to change to be quantum-resistant?",
+    "Chaos: What if the system clock jumps backward by 1 hour during execution?",
+    "API: What if the third-party API you rely on starts rate-limiting you aggressively?"
   ],
+
+  "anti_patterns": {
+    "___COMMON_MISTAKES___": "=== Patterns That Trigger Warnings ===",
+    "(eval|exec)\\s*\\(": [
+      "DANGER: eval/exec are security vulnerabilities",
+      "Alternative: Use ast.literal_eval for safe parsing",
+      "Action: Refactor to avoid dynamic code execution"
+    ],
+    "except\\s*:": [
+      "WARNING: Bare except catches SystemExit, KeyboardInterrupt",
+      "Pattern: except Exception: for general errors",
+      "Best: Catch specific exceptions"
+    ],
+    "TODO|FIXME|HACK|XXX": [
+      "WARNING: Incomplete code detected",
+      "Action: Resolve TODOs before committing",
+      "Tool: void.py detects stub patterns"
+    ],
+    "print\\s*\\(": [
+      "WARNING: Use logging instead of print for production",
+      "Pattern: logger.debug() for development output",
+      "Action: Remove debug prints before commit"
+    ],
+    "time\\.sleep": [
+      "WARNING: Sleep is usually a code smell",
+      "Alternative: Use proper async/await or event-based",
+      "Exception: Rate limiting, retry backoff"
+    ],
+    "\\*\\s+import": [
+      "WARNING: Wildcard imports pollute namespace",
+      "Pattern: from module import specific_thing",
+      "Lesson: Explicit > implicit"
+    ],
+    "global\\s+": [
+      "WARNING: Global variables make code hard to reason about",
+      "Alternative: Pass as parameters or use classes",
+      "Exception: Module-level constants (UPPER_CASE)"
+    ],
+    "\\.append\\(.*\\)\\s*$": [
+      "CONSIDER: Building list in loop?",
+      "Alternative: List comprehension is often cleaner",
+      "Pattern: [x for x in items if condition]"
+    ]
+  },
+
   "meta": {
-    "version": "1.0.0",
-    "description": "The Synapse Map: Associative memory linking keywords to protocols, tools, and lessons",
-    "constraint_probability": 0.10,
+    "version": "3.0.0",
+    "description": "The Synapse Map v3: Comprehensive associative memory with 120+ patterns covering all major programming domains",
+    "constraint_probability": 0.06,
     "max_associations": 5,
-    "max_memories": 3
+    "max_memories": 3,
+    "categories": [
+      "browser_automation",
+      "database",
+      "api_networking",
+      "code_quality",
+      "debugging",
+      "error_types",
+      "search_navigation",
+      "testing",
+      "security",
+      "dependencies",
+      "git_vcs",
+      "memory_context",
+      "performance",
+      "meta_cognition",
+      "research_docs",
+      "file_operations",
+      "process_system",
+      "claude_specific",
+      "data_structures",
+      "deployment",
+      "logging_observability",
+      "build_systems",
+      "cicd",
+      "config_environments",
+      "architecture",
+      "design_patterns",
+      "code_smells",
+      "requirements",
+      "educational",
+      "emotional_cognitive",
+      "ml_data_science",
+      "web_frontend",
+      "web_backend",
+      "containers_infra",
+      "data_engineering",
+      "mobile",
+      "game_dev",
+      "i18n_l10n",
+      "resilience",
+      "algorithms",
+      "migration_legacy"
+    ]
   }
 }

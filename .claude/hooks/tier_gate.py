@@ -27,6 +27,23 @@ from auto_tuning import AutoTuner
 from meta_learning import record_manual_bypass, check_exception_rule
 from epistemology import load_session_state, get_confidence_tier
 
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        import os
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                # Check last 5000 chars for SUDO (recent messages)
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
+
 def validate_file_path(file_path: str) -> bool:
     """
     Validate file path to prevent path traversal attacks.
@@ -78,7 +95,19 @@ def main():
     tool_name = data.get("tool_name", "")
     tool_params = data.get("tool_input", {})
     turn = data.get("turn", 0)
-    prompt = data.get("prompt", "")
+    # SUDO escape hatch
+    if check_sudo_in_transcript(data):
+        output = {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+                "additionalContext": "⚠️ SUDO bypass - tier gate skipped"
+            }
+        }
+        print(json.dumps(output))
+        sys.exit(0)
+
+    prompt = ""  # PreToolUse hooks don't receive prompt directly
 
     # Load session state
     state = load_session_state(session_id)

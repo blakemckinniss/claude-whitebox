@@ -89,9 +89,37 @@ def check_implementation_divergence(user_examples, tool_name, params):
 
     return divergences if divergences else None
 
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        import os
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
+
+
 def main():
     # Read hook input from stdin
     hook_input = json.load(sys.stdin)
+
+    # SUDO escape hatch
+    if check_sudo_in_transcript(hook_input):
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "allow",
+                "additionalContext": "⚠️ SUDO bypass - assumption firewall check skipped"
+            }
+        }))
+        return 0
 
     tool_name = hook_input.get("tool_name")
     tool_params = hook_input.get("tool_input", {})

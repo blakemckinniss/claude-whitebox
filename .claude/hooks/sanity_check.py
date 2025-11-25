@@ -2,6 +2,7 @@
 """
 Sanity Check Hook: Detects when Claude is about to write code for complex libraries
 without first verifying the runtime API.
+Triggers on: UserPromptSubmit
 """
 import sys
 import json
@@ -61,5 +62,5 @@ if is_coding and using_risky_lib:
     sys.exit(0)
 
 # No warning needed
-print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse"}}))
+print(json.dumps({"hookSpecificOutput": {"hookEventName": "UserPromptSubmit", "additionalContext": ""}}))
 sys.exit(0)

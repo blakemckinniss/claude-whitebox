@@ -140,9 +140,9 @@ Track confidence: python3 scripts/ops/confidence.py status
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "UserPromptSubmit",
-                "continue": False,
-                "reason": block_message
-            }
+            },
+            "continue": False,
+            "stopReason": block_message
         }))
         sys.exit(0)
 

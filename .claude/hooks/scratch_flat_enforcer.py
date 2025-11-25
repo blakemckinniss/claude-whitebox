@@ -21,6 +21,25 @@ import json
 import re
 from pathlib import Path
 
+
+def check_sudo_in_transcript(data: dict) -> bool:
+    """Check if SUDO keyword is in recent transcript messages."""
+    transcript_path = data.get("transcript_path", "")
+    if not transcript_path:
+        return False
+    try:
+        import os
+        if os.path.exists(transcript_path):
+            with open(transcript_path, 'r') as tf:
+                transcript = tf.read()
+                # Check last 5000 chars for SUDO (recent messages)
+                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
+                return "SUDO" in last_chunk
+    except Exception:
+        pass
+    return False
+
+
 def validate_file_path(file_path: str) -> bool:
     """
     Validate file path to prevent path traversal attacks.
@@ -64,10 +83,11 @@ except Exception:
 
 tool_name = input_data.get("tool_name", "")
 tool_params = input_data.get("tool_input", {})
-prompt = input_data.get("prompt", "")
+# PreToolUse hooks don't receive 'prompt' - check transcript for SUDO
+sudo_bypass = check_sudo_in_transcript(input_data)
 
 # Check for SUDO bypass keyword
-if "SUDO" in prompt:
+if sudo_bypass:
     print(
         json.dumps(
             {
@@ -178,10 +198,14 @@ if tool_name == "Write":
 
                     # Check if it's allowed
                     if subdir not in ALLOWED_SCRATCH_SUBDIRS and not subdir.startswith("."):
-                        block_message = f"""🚫 SCRATCH FLAT STRUCTURE VIOLATION
+                        # Auto-flatten: scratch/auth/test.py → scratch/auth_test.py
+                        flat_name = after_scratch.replace("/", "_")
+                        flat_path = path_str.split("/scratch/")[0] + "/scratch/" + flat_name
 
-You attempted to write: {path.name}
-Location: scratch/{after_scratch}
+                        auto_fix_message = f"""🔧 AUTO-FLATTENED: scratch path normalized
+
+Original: scratch/{after_scratch}
+Fixed:    scratch/{flat_name}
 
 RULE: scratch/ MUST remain a flat, single-layer substrate
 
@@ -189,38 +213,23 @@ Philosophy:
   • scratch/ is a temporary workbench for quick operations
   • All files should be at scratch/ root level
   • Nested directories defeat the single-layer design
-  • Files should be discoverable with `ls scratch/`
 
-Current violation:
-  • You're creating: scratch/{subdir}/...
-  • This creates unwanted nesting
+The path was automatically flattened using underscore separators.
+For complex structures with real nesting, use projects/<name>/
 
-Allowed exceptions:
-  • scratch/archive/  (cleanup storage)
-  • scratch/__pycache__/  (Python runtime)
-  • scratch/.*  (hidden directories)
-
-Required action:
-  • Write directly to scratch/ root: scratch/{path.name}
-  • Use descriptive prefixes: scratch/{subdir}_{path.name}
-  • For complex structures, use projects/<name>/
-
-Example:
-  ❌ scratch/auth/test.py
-  ✅ scratch/auth_test.py
-  ✅ projects/auth_service/tests/test.py
-
-Bypass: Include "SUDO" keyword in prompt to override (logged for review)
-
-See CLAUDE.md § Scratch-First Enforcement Protocol"""
+See CLAUDE.md § Scratch Flat Structure Protocol"""
 
                         print(
                             json.dumps(
                                 {
                                     "hookSpecificOutput": {
                                         "hookEventName": "PreToolUse",
-                                        "permissionDecision": "deny",
-                                        "permissionDecisionReason": block_message,
+                                        "permissionDecision": "allow",
+                                        "permissionDecisionReason": auto_fix_message,
+                                        "updatedInput": {
+                                            "file_path": flat_path,
+                                            "content": tool_params.get("content", "")
+                                        }
                                     }
                                 }
                             )

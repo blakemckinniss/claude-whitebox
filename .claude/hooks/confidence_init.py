@@ -64,6 +64,10 @@ if turn == 0:
     initial_confidence = assess_initial_confidence(prompt)
     state["confidence"] = initial_confidence
 
+    # Ensure confidence_history exists (may be missing from old state files)
+    if "confidence_history" not in state:
+        state["confidence_history"] = []
+
     # Record in history
     state["confidence_history"].append(
         {
@@ -76,6 +80,9 @@ if turn == 0:
 
 # Increment turn counter
 state["turn_count"] = turn + 1
+
+# Store current prompt for PreToolUse hooks to access (SUDO bypass support)
+state["current_prompt"] = prompt
 
 # Save state
 save_session_state(session_id, state)
