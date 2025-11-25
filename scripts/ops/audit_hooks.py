@@ -759,11 +759,6 @@ class HookAuditor:
         if fixes:
             print(f"   Fixes Applied: {len(fixes)}")
 
-        # Hook explosion warning
-        total_hooks = stats.get("total_hook_files", 0)
-        if total_hooks > 30:
-            print(f"\n   ⚠️  HOOK EXPLOSION: {total_hooks} hooks (threshold: 30)")
-            print("      Consider consolidating related hooks")
 
         # Spec reference
         print("\n📚 Official Spec: https://docs.anthropic.com/en/hooks-reference")
