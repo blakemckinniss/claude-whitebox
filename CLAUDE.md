@@ -315,6 +315,7 @@ commands:
   playwright: "python3 scripts/ops/playwright.py"
   groq: "python3 scripts/ops/groq.py"
   drift_org: "python3 scripts/ops/drift_org.py"
+  audit_hooks: "python3 scripts/ops/audit_hooks.py"
 
 ## 📡 Required Footer
 Append to every significant response:
