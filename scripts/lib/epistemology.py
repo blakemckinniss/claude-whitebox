@@ -10,7 +10,7 @@ import fcntl
 import time
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 # Paths
 MEMORY_DIR = Path(__file__).resolve().parent.parent.parent / ".claude" / "memory"
@@ -158,6 +158,13 @@ CONFIDENCE_PENALTIES = {
     "sequential_when_parallel": -20,
     "manual_instead_of_script": -15,
     "ignore_performance_gate": -25,
+    # Delegation violations (offloading work to user)
+    "delegation_detected": -15,
+    "delegation_repeated": -25,  # Multiple violations in session
+    # Hack-around violations (patching around errors instead of fixing)
+    "hack_around_severe": -20,   # Bare except:pass, chmod 777, etc.
+    "hack_around_detected": -10, # Suspicious patterns
+    "hack_around_minor": -5,     # TODO/hack comments
 }
 
 # Tool -> Tier requirements
@@ -1374,3 +1381,202 @@ def delete_session_state(session_id: str) -> bool:
     except Exception as e:
         logging.error(f"Error deleting session {session_id}: {e}")
         return False
+
+
+# ==============================================================================
+# VERIFIED KNOWLEDGE TRACKING (Anti-Hallucination)
+# Added 2025-11-25 to support epistemic humility enforcement
+# ==============================================================================
+
+def record_verified_library(
+    session_id: str,
+    library_name: str,
+    verification_method: str,
+    turn: int,
+    methods: Optional[List[str]] = None,
+    source: Optional[str] = None,
+) -> None:
+    """
+    Record that a library/API has been verified via research, probe, or read.
+
+    Args:
+        session_id: Session identifier
+        library_name: Name of library (e.g., "boto3", "pandas")
+        verification_method: How it was verified ("research", "probe", "read")
+        turn: Current turn number
+        methods: Specific methods/classes verified (optional)
+        source: Source of verification (URL, file path, etc.)
+
+    Updates session state with verified_knowledge tracking.
+    """
+    state = load_session_state(session_id)
+    if not state:
+        state = initialize_session_state(session_id)
+
+    # Initialize verified_knowledge structure if needed
+    if "verified_knowledge" not in state:
+        state["verified_knowledge"] = {"libraries": {}, "patterns": {}}
+
+    # Record library verification
+    state["verified_knowledge"]["libraries"][library_name] = {
+        "via": verification_method,
+        "turn": turn,
+        "methods": methods or [],
+        "source": source or "",
+        "timestamp": datetime.now().isoformat(),
+    }
+
+    save_session_state(session_id, state)
+
+
+def record_verified_pattern(
+    session_id: str,
+    pattern_name: str,
+    source_file: str,
+    turn: int,
+) -> None:
+    """
+    Record that a code pattern has been verified by reading existing code.
+
+    Args:
+        session_id: Session identifier
+        pattern_name: Name of pattern (e.g., "async_await", "error_handling")
+        source_file: File where pattern was observed
+        turn: Current turn number
+    """
+    state = load_session_state(session_id)
+    if not state:
+        state = initialize_session_state(session_id)
+
+    if "verified_knowledge" not in state:
+        state["verified_knowledge"] = {"libraries": {}, "patterns": {}}
+
+    state["verified_knowledge"]["patterns"][pattern_name] = {
+        "via": "read",
+        "source": source_file,
+        "turn": turn,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+    save_session_state(session_id, state)
+
+
+def get_verified_libraries(session_id: str) -> Dict[str, Dict]:
+    """
+    Get all verified libraries for a session.
+
+    Returns:
+        Dict mapping library names to verification info
+    """
+    state = load_session_state(session_id)
+    if not state:
+        return {}
+
+    return state.get("verified_knowledge", {}).get("libraries", {})
+
+
+def is_library_verified(session_id: str, library_name: str) -> bool:
+    """
+    Check if a library has been verified in this session.
+
+    Args:
+        session_id: Session identifier
+        library_name: Name of library to check
+
+    Returns:
+        bool: True if library was verified
+    """
+    verified = get_verified_libraries(session_id)
+    return library_name in verified
+
+
+def extract_libraries_from_bash_output(
+    command: str,
+    output: str,
+) -> List[str]:
+    """
+    Extract library names from research.py or probe.py output.
+
+    Heuristic detection based on command and output patterns.
+
+    Args:
+        command: The bash command that was run
+        output: stdout from the command
+
+    Returns:
+        List of library names that were verified
+    """
+    libraries = []
+
+    # Research command: python3 scripts/ops/research.py "boto3 s3 upload"
+    if "research.py" in command:
+        # Extract search query
+        match = re.search(r'research\.py\s+["\']([^"\']+)["\']', command)
+        if match:
+            query = match.group(1).lower()
+            # Common library patterns in queries
+            known_libs = [
+                "boto3", "pandas", "numpy", "requests", "httpx", "aiohttp",
+                "fastapi", "flask", "django", "sqlalchemy", "pytorch", "torch",
+                "tensorflow", "transformers", "openai", "anthropic", "langchain",
+                "playwright", "selenium", "redis", "pymongo", "psycopg2",
+                "matplotlib", "seaborn", "scipy", "sklearn", "pillow",
+            ]
+            for lib in known_libs:
+                if lib in query:
+                    libraries.append(lib)
+
+    # Probe command: python3 scripts/ops/probe.py boto3.client
+    elif "probe.py" in command:
+        match = re.search(r'probe\.py\s+([a-zA-Z_][a-zA-Z0-9_\.]*)', command)
+        if match:
+            obj_path = match.group(1)
+            # Get top-level module
+            top_module = obj_path.split('.')[0]
+            libraries.append(top_module)
+
+    return libraries
+
+
+def extract_libraries_from_code_read(
+    file_path: str,
+    content: str,
+) -> List[str]:
+    """
+    Extract library imports from a Python file that was read.
+
+    When Claude reads existing code, the libraries used there
+    become "verified by example" - we know they work.
+
+    Args:
+        file_path: Path to file that was read
+        content: Content of the file
+
+    Returns:
+        List of library names found in imports
+    """
+    if not file_path.endswith(".py"):
+        return []
+
+    libraries = []
+
+    # Parse imports
+    try:
+        import ast
+        tree = ast.parse(content)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    top_module = alias.name.split('.')[0]
+                    libraries.append(top_module)
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    top_module = node.module.split('.')[0]
+                    libraries.append(top_module)
+    except SyntaxError:
+        # Fallback regex for partial files
+        import_pattern = r'^(?:import|from)\s+([a-zA-Z_][a-zA-Z0-9_]*)'
+        for match in re.finditer(import_pattern, content, re.MULTILINE):
+            libraries.append(match.group(1))
+
+    return list(set(libraries))

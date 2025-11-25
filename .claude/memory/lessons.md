@@ -165,3 +165,12 @@ Root cause analysis pattern: When void.py reveals gaps (CRUD asymmetry, error ha
 
 ### 2025-11-25 00:43
 [AUTO-LEARNED-SUCCESS] Novel solution: Created apply_coderabbit_fixes_part2.py (similar scripts: 2)
+
+### 2025-11-25 00:59
+[AUTO-LEARNED-SUCCESS] Novel solution: Created hack_around_gate.py (similar scripts: 2)
+
+### 2025-11-25 01:34
+[AUTO-LEARNED-SUCCESS] Novel solution: Created test_synapse_fire_v3.py (similar scripts: 2)
+
+### 2025-11-25 01:48
+Post-edit validation is critical: py_compile only checks SYNTAX, not imports. For library files (scripts/lib/), must actually import to catch NameError like 'List not defined'. Hook: post_edit_validator.py runs after Edit/Write on .py files and injects errors into context so Claude sees them immediately.

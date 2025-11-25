@@ -44,13 +44,8 @@ try:
 
     # SUDO escape hatch
     if check_sudo_in_transcript(input_data):
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "Stop",
-                "permissionDecision": "allow",
-                "additionalContext": "⚠️ SUDO bypass - hook check skipped"
-            }
-        }))
+        # Stop hooks don't support hookSpecificOutput - just exit cleanly
+        print(json.dumps({}))
         sys.exit(0)
 except Exception:
     # If parsing fails, exit silently (Stop hooks don't block)

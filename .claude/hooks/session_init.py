@@ -5,6 +5,8 @@ Triggers on: SessionStart
 """
 import sys
 import json
+import os
+import uuid
 from pathlib import Path
 
 # Add scripts/lib to path
@@ -16,17 +18,20 @@ from lib.epistemology import initialize_session_state
 # Load input
 try:
     input_data = json.load(sys.stdin)
-except Exception as e:
+except Exception:
     # SessionStart hooks may not have standard input
     input_data = {}
 
-# Get session ID - use stdin data or fallback to unknown
-session_id = input_data.get("session_id", "unknown")
+# Get session ID - try multiple sources, generate UUID as last resort
+session_id = input_data.get("session_id")
 
-# If still unknown, check environment (Claude Code sets this)
-if session_id == "unknown":
-    import os
-    session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+# Check environment variable
+if not session_id:
+    session_id = os.environ.get("CLAUDE_SESSION_ID")
+
+# Generate new UUID if still no session ID
+if not session_id:
+    session_id = str(uuid.uuid4())
 
 # Initialize session state
 state = initialize_session_state(session_id)

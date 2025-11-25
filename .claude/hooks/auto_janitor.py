@@ -86,12 +86,8 @@ Location: .claude/memory/archive/
 Files are archived (not deleted) and can be restored if needed.
 """
 
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "SessionEnd",
-                "additionalContext": message
-            }
-        }))
+        # SessionEnd hooks don't support hookSpecificOutput - just print message
+        print(message)
 
     sys.exit(0)
 

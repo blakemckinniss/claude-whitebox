@@ -1,13 +1,13 @@
 {
-  "total_evaluations": 126,
+  "total_evaluations": 161,
   "rules_triggered": {
     "verify_fixed_claims": 8,
     "tier_production_write": 15,
     "audit_production_write": 15,
-    "anti_sycophant_opinion": 9,
+    "anti_sycophant_opinion": 10,
     "council_complex_decision": 8,
     "detour_blocking_error": 6,
-    "upkeep_before_commit": 8,
+    "upkeep_before_commit": 10,
     "think_repeated_failures": 3,
     "background_slow_command": 3,
     "macgyver_install_blocked": 1,
@@ -15,7 +15,7 @@
     "stub_code_detected": 1
   },
   "rules_bypassed": {
-    "upkeep_before_commit": 1,
+    "upkeep_before_commit": 2,
     "scratch_manual_iteration": 1
   },
   "initialized_at": "2025-11-24T21:38:58.723924",
@@ -128,6 +128,45 @@
     },
     {
       "timestamp": "2025-11-25T00:43:42.622958",
+      "turn": 0,
+      "event": "UserPromptSubmit",
+      "tool": null,
+      "matches": [
+        {
+          "rule": "upkeep_before_commit",
+          "category": "workflow",
+          "enforcement": "block"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-25T01:05:29.771090",
+      "turn": 0,
+      "event": "UserPromptSubmit",
+      "tool": null,
+      "matches": [
+        {
+          "rule": "upkeep_before_commit",
+          "category": "workflow",
+          "enforcement": "block"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-25T01:27:29.847698",
+      "turn": 5,
+      "event": "UserPromptSubmit",
+      "tool": null,
+      "matches": [
+        {
+          "rule": "anti_sycophant_opinion",
+          "category": "epistemic",
+          "enforcement": "observe"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-11-25T09:37:48.356375",
       "turn": 0,
       "event": "UserPromptSubmit",
       "tool": null,
