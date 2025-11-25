@@ -22,8 +22,8 @@ def main():
     except (json.JSONDecodeError, ValueError):
         sys.exit(0)  # Silent fail if input malformed
 
-    tool_name = hook_input.get("toolName", "")
-    tool_params = hook_input.get("toolParams", {})
+    tool_name = hook_input.get("tool_name", "")
+    tool_params = hook_input.get("tool_input", {})
     result = hook_input.get("result", {})
 
     # Only process Bash tool

@@ -135,8 +135,8 @@ def main():
     # Read tool use data from stdin
     try:
         data = json.load(sys.stdin)
-        tool_name = data.get("toolName", "")
-        tool_params = data.get("toolParams", {})
+        tool_name = data.get("tool_name", "")
+        tool_params = data.get("tool_input", {})
 
         # Only enforce for production writes
         if tool_name not in ["Write", "Edit"]:

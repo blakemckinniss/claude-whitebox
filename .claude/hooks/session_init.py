@@ -21,7 +21,7 @@ except Exception as e:
     input_data = {}
 
 # Get session ID - use stdin data or fallback to unknown
-session_id = input_data.get("sessionId", "unknown")
+session_id = input_data.get("session_id", "unknown")
 
 # If still unknown, check environment (Claude Code sets this)
 if session_id == "unknown":

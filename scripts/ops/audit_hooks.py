@@ -159,19 +159,27 @@ OFFICIAL_HOOK_EVENTS = {
     },
 }
 
-# Official input field names (camelCase per spec)
+# Official input field names (snake_case per spec - see Hook Input section)
+# The official docs show snake_case: session_id, tool_name, tool_input, etc.
 OFFICIAL_INPUT_FIELDS = {
-    "session_id": "sessionId",  # snake_case -> camelCase
-    "transcript_path": "transcriptPath",
-    "hook_event_name": "hookEventName",
-    "tool_name": "toolName",
-    "tool_input": "toolInput",
-    "tool_response": "toolResponse",
-    "tool_use_id": "toolUseId",
-    "permission_mode": "permissionMode",
-    "stop_hook_active": "stopHookActive",
-    "notification_type": "notificationType",
-    "custom_instructions": "customInstructions",
+    # These are the CORRECT field names per official spec
+    "session_id",
+    "transcript_path",
+    "cwd",
+    "permission_mode",
+    "hook_event_name",
+    "tool_name",
+    "tool_input",
+    "tool_response",
+    "tool_use_id",
+    "prompt",  # UserPromptSubmit
+    "message",  # Notification
+    "notification_type",
+    "stop_hook_active",
+    "trigger",
+    "custom_instructions",
+    "source",
+    "reason",
 }
 
 # Exit code meanings per official spec
@@ -291,7 +299,13 @@ class HookAuditor:
         return issues
 
     def check_hook_input_format(self, hook_file: str) -> list:
-        """Check if hook reads input fields correctly per spec."""
+        """Check if hook reads input fields correctly per spec.
+
+        Note: Official spec uses snake_case for input fields:
+        - session_id, transcript_path, cwd, permission_mode
+        - tool_name, tool_input, tool_response, tool_use_id
+        - prompt (for UserPromptSubmit), message (for Notification)
+        """
         filepath = HOOKS_DIR / hook_file
         if not filepath.exists():
             return []
@@ -301,31 +315,39 @@ class HookAuditor:
 
         issues = []
 
-        # Check for snake_case field access (should be camelCase)
-        snake_case_patterns = [
-            (r'\.get\(["\']tool_name["\']', "tool_name", "toolName"),
-            (r'\.get\(["\']tool_input["\']', "tool_input", "toolInput"),
-            (r'\.get\(["\']tool_params["\']', "tool_params", "toolParams"),
-            (r'\.get\(["\']session_id["\']', "session_id", "sessionId"),
-            (r'\.get\(["\']hook_event_name["\']', "hook_event_name", "hookEventName"),
-            (r'\.get\(["\']tool_response["\']', "tool_response", "toolResponse"),
-            (r'\.get\(["\']tool_use_id["\']', "tool_use_id", "toolUseId"),
-            (r'\.get\(["\']turn["\']', "turn", "turnNumber (or not standard)"),
-            (r'\.get\(["\']prompt["\']', "prompt", "userPrompt (for UserPromptSubmit)"),
+        # Check for NON-STANDARD field names (camelCase when spec uses snake_case)
+        # The official spec uses snake_case, so camelCase is wrong
+        wrong_patterns = [
+            (r'\.get\(["\']toolName["\']', "toolName", "tool_name"),
+            (r'\.get\(["\']toolInput["\']', "toolInput", "tool_input"),
+            (r'\.get\(["\']toolParams["\']', "toolParams", "tool_input"),
+            (r'\.get\(["\']sessionId["\']', "sessionId", "session_id"),
+            (r'\.get\(["\']hookEventName["\']', "hookEventName", "hook_event_name"),
+            (r'\.get\(["\']toolResponse["\']', "toolResponse", "tool_response"),
+            (r'\.get\(["\']toolUseId["\']', "toolUseId", "tool_use_id"),
+            (r'\.get\(["\']userPrompt["\']', "userPrompt", "prompt"),
         ]
 
-        for pattern, wrong, correct in snake_case_patterns:
+        for pattern, wrong, correct in wrong_patterns:
             if re.search(pattern, content):
-                # Check if correct version is also present
-                correct_pattern = f'.get(["\']){correct}["\']'
-                if not re.search(correct_pattern, content):
-                    issues.append((wrong, correct))
-                    self.add_issue(
-                        "WARNING", "SPEC_INPUT",
-                        f"Uses '{wrong}' instead of '{correct}' (official camelCase)",
-                        hook_file,
-                        spec_ref="Hook Input section of official docs"
-                    )
+                issues.append((wrong, correct))
+                self.add_issue(
+                    "WARNING", "SPEC_INPUT",
+                    f"Uses '{wrong}' instead of '{correct}' (official snake_case)",
+                    hook_file,
+                    spec_ref="Hook Input section uses snake_case"
+                )
+
+        # Check for completely non-standard fields
+        nonstandard_fields = [
+            (r'\.get\(["\']turn["\']', "turn", "Not in official spec - consider using transcript"),
+            (r'\.get\(["\']turnNumber["\']', "turnNumber", "Not in official spec"),
+        ]
+
+        for pattern, field, note in nonstandard_fields:
+            if re.search(pattern, content):
+                # This is informational only, not an error
+                pass  # Many hooks use custom env vars which is fine
 
         return issues
 

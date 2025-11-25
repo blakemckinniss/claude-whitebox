@@ -14,7 +14,7 @@ except Exception:
     sys.exit(0)
 
 prompt = data.get("prompt", "").lower()
-session_id = data.get("sessionId", "unknown")
+session_id = data.get("session_id", "unknown")
 
 # Load session state to check confidence
 try:

@@ -20,8 +20,8 @@ def main():
     # Read hook input from stdin
     hook_input = json.loads(sys.stdin.read())
 
-    tool_name = hook_input.get("toolName")
-    tool_params = hook_input.get("toolParams", {})
+    tool_name = hook_input.get("tool_name")
+    tool_params = hook_input.get("tool_input", {})
     tool_result = hook_input.get("result", {})
 
     # Only track Write and Edit operations

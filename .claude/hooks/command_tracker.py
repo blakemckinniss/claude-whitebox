@@ -31,9 +31,9 @@ except Exception:
     )
     sys.exit(0)
 
-session_id = input_data.get("sessionId", "unknown")
-tool_name = input_data.get("toolName", "")
-tool_params = input_data.get("toolParams", {})
+session_id = input_data.get("session_id", "unknown")
+tool_name = input_data.get("tool_name", "")
+tool_params = input_data.get("tool_input", {})
 
 # Only track Bash commands (where workflow commands are executed)
 if tool_name != "Bash":

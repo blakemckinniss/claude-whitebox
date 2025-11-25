@@ -342,8 +342,8 @@ def main():
         print(json.dumps(output))
         sys.exit(0)
 
-    tool_name = input_data.get("toolName", "")
-    tool_input = input_data.get("toolInput", {})
+    tool_name = input_data.get("tool_name", "")
+    tool_input = input_data.get("tool_input", {})
     prompt = input_data.get("prompt", "")
 
     # Only enforce on Write/Edit to .claude/hooks/*.py

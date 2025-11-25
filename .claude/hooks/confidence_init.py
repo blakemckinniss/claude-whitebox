@@ -35,7 +35,7 @@ except Exception:
     )
     sys.exit(0)
 
-session_id = input_data.get("sessionId", "unknown")
+session_id = input_data.get("session_id", "unknown")
 prompt = input_data.get("prompt", "")
 
 if not prompt:

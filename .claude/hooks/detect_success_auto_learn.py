@@ -75,7 +75,7 @@ except Exception:
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse"}}))
     sys.exit(0)
 
-tool_name = input_data.get("toolName", "")
+tool_name = input_data.get("tool_name", "")
 tool_result = input_data.get("toolResult", {})
 session_state = get_session_state()
 
@@ -83,7 +83,7 @@ lessons_learned = []
 
 # Track verify.py successes after failures
 if tool_name == "Bash":
-    command = input_data.get("toolInput", {}).get("command", "")
+    command = input_data.get("tool_input", {}).get("command", "")
 
     if "verify.py" in command:
         exit_code = tool_result.get("exit_code", 0)
@@ -114,7 +114,7 @@ if tool_name == "Bash":
 
 # Detect novel scratch scripts (potential promotion candidates)
 elif tool_name == "Write":
-    file_path = input_data.get("toolInput", {}).get("file_path", "")
+    file_path = input_data.get("tool_input", {}).get("file_path", "")
     
     # Validate file path (per official docs security best practices)
     if file_path and not validate_file_path(file_path):
@@ -139,7 +139,7 @@ elif tool_name == "Write":
 
 # Detect successful agent delegation (agent returns without error)
 elif tool_name == "Task":
-    agent_type = input_data.get("toolInput", {}).get("subagent_type", "unknown")
+    agent_type = input_data.get("tool_input", {}).get("subagent_type", "unknown")
     error = tool_result.get("error")
 
     # Track agent usage

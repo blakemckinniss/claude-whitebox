@@ -6,8 +6,8 @@ Triggers on: PreToolUse
 import sys, json
 
 input_data = json.load(sys.stdin)
-tool = input_data.get('toolName', '')
-params = input_data.get('toolParams', {})
+tool = input_data.get("tool_name", '')
+params = input_data.get("tool_input", {})
 
 # Quick pattern detection for demo
 block = False

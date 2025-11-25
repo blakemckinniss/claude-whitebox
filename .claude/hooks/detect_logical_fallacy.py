@@ -216,7 +216,7 @@ def main():
     # Read tool use data from stdin
     try:
         data = json.load(sys.stdin)
-        tool_name = data.get("toolName", "")
+        tool_name = data.get("tool_name", "")
         tool_output = data.get("toolOutput", "")
 
         # Only analyze tools that produce text output (not file operations)

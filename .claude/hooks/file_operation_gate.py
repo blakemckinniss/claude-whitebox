@@ -137,9 +137,9 @@ def main():
         print(json.dumps(output))
         sys.exit(0)
 
-    session_id = data.get("sessionId", "unknown")
-    tool_name = data.get("toolName", "")
-    tool_params = data.get("toolParams", {})
+    session_id = data.get("session_id", "unknown")
+    tool_name = data.get("tool_name", "")
+    tool_params = data.get("tool_input", {})
     prompt = data.get("prompt", "")
 
     # Only validate file operations

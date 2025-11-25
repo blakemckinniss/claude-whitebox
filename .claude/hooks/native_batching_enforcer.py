@@ -143,10 +143,10 @@ def main():
     except Exception:
         sys.exit(0)
 
-    tool_name = data.get("toolName", "")
+    tool_name = data.get("tool_name", "")
     turn = int(data.get("turnNumber", 0))
-    session_id = data.get("sessionId", "unknown")
-    prompt = data.get("userPrompt", "")
+    session_id = data.get("session_id", "unknown")
+    prompt = data.get("prompt", "")
 
     # Only track batchable tools
     batchable_tools = ["Read", "Grep", "Glob", "WebFetch", "WebSearch"]

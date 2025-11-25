@@ -20,8 +20,8 @@ except Exception:
     }))
     sys.exit(0)
 
-tool_name = input_data.get("toolName", "")
-tool_params = input_data.get("toolParams", {})
+tool_name = input_data.get("tool_name", "")
+tool_params = input_data.get("tool_input", {})
 
 # Only intercept Write operations
 if tool_name != "Write":

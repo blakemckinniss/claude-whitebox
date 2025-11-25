@@ -38,10 +38,10 @@ def main():
     except Exception:
         sys.exit(0)
 
-    tool_name = data.get("toolName", "")
-    tool_input = data.get("toolParams", {})
+    tool_name = data.get("tool_name", "")
+    tool_input = data.get("tool_input", {})
     turn = int(data.get("turnNumber", 0))
-    prompt = data.get("userPrompt", "")
+    prompt = data.get("prompt", "")
 
     # Only track file operation tools
     if tool_name not in ["Read", "Grep", "Glob", "Edit"]:

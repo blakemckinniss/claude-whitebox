@@ -122,8 +122,8 @@ def main():
         sys.exit(0)
 
     # Get tool info
-    tool_name = input_data.get("toolName", "")
-    tool_input = input_data.get("toolInput", {})
+    tool_name = input_data.get("tool_name", "")
+    tool_input = input_data.get("tool_input", {})
 
     if tool_name not in ["Write", "Edit"]:
         sys.exit(0)

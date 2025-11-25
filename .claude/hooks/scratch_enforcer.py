@@ -42,9 +42,9 @@ def main():
     except Exception:
         sys.exit(0)
 
-    tool_name = data.get("toolName", "")
+    tool_name = data.get("tool_name", "")
     turn = int(data.get("turnNumber", 0))
-    session_id = data.get("sessionId", "unknown")
+    session_id = data.get("session_id", "unknown")
 
     # Only track file operation tools
     if tool_name not in ["Read", "Grep", "Glob", "Edit"]:

@@ -26,8 +26,8 @@ except Exception:
     # If parsing fails, exit silently (Stop hooks don't block)
     sys.exit(0)
 
-session_id = input_data.get("sessionId", "unknown")
-transcript_path = input_data.get("transcriptPath")
+session_id = input_data.get("session_id", "unknown")
+transcript_path = input_data.get("transcript_path")
 
 if not transcript_path or not Path(transcript_path).exists():
     sys.exit(0)

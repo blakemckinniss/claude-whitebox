@@ -94,8 +94,8 @@ def main():
         sys.exit(0)
 
     # Extract tool info
-    tool_name = input_data.get('toolName', '')
-    tool_input = input_data.get('toolInput', {})
+    tool_name = input_data.get("tool_name", '')
+    tool_input = input_data.get("tool_input", {})
     tool_result = input_data.get('toolResult', {})
     turn = input_data.get('turn', 0)
 

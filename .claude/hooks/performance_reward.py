@@ -51,9 +51,9 @@ except json.JSONDecodeError as e:
 
 
     sys.exit(1)
-session_id = input_data.get("sessionId", "unknown")
-tool_name = input_data.get("toolName", "")
-tool_params = input_data.get("toolParams", {})
+session_id = input_data.get("session_id", "unknown")
+tool_name = input_data.get("tool_name", "")
+tool_params = input_data.get("tool_input", {})
 conversation_history = input_data.get("conversationHistory", [])
 
 # Detect performance optimizations
@@ -81,7 +81,7 @@ if conversation_history:
         tool_uses = last_msg.get("tool_uses", [])
         if len(tool_uses) >= 3:
             # Same tool type called multiple times in one message = parallel
-            tool_types = [use.get("toolName") for use in tool_uses]
+            tool_types = [use.get("tool_name") for use in tool_uses]
             if len(set(tool_types)) == 1 and tool_types[0] in ["Read", "Grep", "Glob"]:
                 reward_type = "parallel_tool_calls"
                 reward_message = f"🚀 PARALLEL EXECUTION: {len(tool_uses)}x {tool_types[0]} in parallel (+15%)"
@@ -91,7 +91,7 @@ if tool_name == "Task":
     if conversation_history:
         last_msg = conversation_history[-1]
         if last_msg.get("role") == "assistant":
-            task_count = sum(1 for use in last_msg.get("tool_uses", []) if use.get("toolName") == "Task")
+            task_count = sum(1 for use in last_msg.get("tool_uses", []) if use.get("tool_name") == "Task")
             if task_count >= 2:
                 reward_type = "parallel_agent_delegation"
                 reward_message = f"🚀 PARALLEL AGENTS: {task_count} agents delegated in parallel (+15%)\n💡 Agent context is FREE - each runs in separate context window!"

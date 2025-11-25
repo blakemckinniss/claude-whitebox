@@ -19,8 +19,8 @@ def main():
     # Read hook input from stdin
     hook_input = json.loads(sys.stdin.read())
 
-    tool_name = hook_input.get("toolName")
-    tool_params = hook_input.get("toolParams", {})
+    tool_name = hook_input.get("tool_name")
+    tool_params = hook_input.get("tool_input", {})
 
     # Only intercept Write and Edit operations
     if tool_name not in ["Write", "Edit"]:

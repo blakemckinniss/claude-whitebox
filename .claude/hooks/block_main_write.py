@@ -24,8 +24,8 @@ def main():
     except (json.JSONDecodeError, ValueError):
         sys.exit(0)
 
-    tool_name = hook_input.get("toolName", "")
-    tool_params = hook_input.get("toolParams", {})
+    tool_name = hook_input.get("tool_name", "")
+    tool_params = hook_input.get("tool_input", {})
 
     # Only process Write tool
     if tool_name != "Write":

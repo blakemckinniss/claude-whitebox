@@ -17,8 +17,8 @@ except Exception:
     sys.exit(0)
 
 # Extract data (Claude hooks use camelCase keys)
-tool_name = input_data.get("toolName", "unknown")
-session_id = input_data.get("sessionId", "unknown")
+tool_name = input_data.get("tool_name", "unknown")
+session_id = input_data.get("session_id", "unknown")
 
 # Log file
 PROJECT_DIR = Path.cwd()

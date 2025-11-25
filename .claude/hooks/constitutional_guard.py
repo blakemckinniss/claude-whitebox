@@ -81,8 +81,8 @@ def main():
         print(json.dumps(output))
         sys.exit(0)
 
-    tool_name = data.get("toolName", "")
-    tool_params = data.get("toolParams", {})
+    tool_name = data.get("tool_name", "")
+    tool_params = data.get("tool_input", {})
     prompt = data.get("prompt", "")
 
     # Only intercept Write and Edit tools

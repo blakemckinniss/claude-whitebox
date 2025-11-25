@@ -12,8 +12,8 @@ import os
 
 # Load input
 data = json.load(sys.stdin)
-tool_name = data.get("toolName", "")
-tool_params = data.get("toolParams", {})
+tool_name = data.get("tool_name", "")
+tool_params = data.get("tool_input", {})
 
 # Only trigger on Bash tool with browser-related commands
 if tool_name != "Bash":

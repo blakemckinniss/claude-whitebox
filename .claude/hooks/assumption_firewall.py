@@ -93,8 +93,8 @@ def main():
     # Read hook input from stdin
     hook_input = json.load(sys.stdin)
 
-    tool_name = hook_input.get("toolName")
-    tool_params = hook_input.get("toolParams", {})
+    tool_name = hook_input.get("tool_name")
+    tool_params = hook_input.get("tool_input", {})
     history = hook_input.get("conversationHistory", [])
 
     # Extract user examples from conversation

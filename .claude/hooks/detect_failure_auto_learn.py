@@ -75,14 +75,14 @@ except Exception:  # Hook resilience requires catching all JSON errors
     sys.stdout.write(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse"}}))
     sys.exit(0)
 
-tool_name = input_data.get("toolName", "")
+tool_name = input_data.get("tool_name", "")
 tool_result = input_data.get("toolResult", {})
 
 lessons_learned = []
 
 # Detect verify.py failures
 if tool_name == "Bash":
-    command = input_data.get("toolInput", {}).get("command", "")
+    command = input_data.get("tool_input", {}).get("command", "")
 
     if "verify.py" in command:
         exit_code = tool_result.get("exit_code", 0)
@@ -109,7 +109,7 @@ if tool_name == "Bash":
 elif tool_name == "Edit":
     error = extract_tool_error(tool_result)
     if error and "read" in error.lower():
-        file_path = input_data.get("toolInput", {}).get("file_path", "unknown")
+        file_path = input_data.get("tool_input", {}).get("file_path", "unknown")
         
         # Validate file path (per official docs security best practices)
         if file_path and not validate_file_path(file_path):
@@ -123,7 +123,7 @@ elif tool_name == "Edit":
 elif tool_name == "Task":
     error = extract_tool_error(tool_result)
     if error:
-        agent_type = input_data.get("toolInput", {}).get("subagent_type", "unknown")
+        agent_type = input_data.get("tool_input", {}).get("subagent_type", "unknown")
         # Only log if error is concise
         if len(str(error)) < 200:
             lesson = f"Agent {agent_type} failed: {error}"

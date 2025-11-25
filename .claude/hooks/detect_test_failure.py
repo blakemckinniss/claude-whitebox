@@ -65,7 +65,7 @@ def main():
         sys.exit(0)
 
     # Check if this is Bash tool
-    tool_name = input_data.get('toolName', '')
+    tool_name = input_data.get("tool_name", '')
     if tool_name != 'Bash':
         print(json.dumps({
             "hookSpecificOutput": {
@@ -76,7 +76,7 @@ def main():
         sys.exit(0)
 
     # Extract command info
-    tool_input = input_data.get('toolInput', {})
+    tool_input = input_data.get("tool_input", {})
     tool_result = input_data.get('toolResult', {})
     turn = input_data.get('turn', 0)
 

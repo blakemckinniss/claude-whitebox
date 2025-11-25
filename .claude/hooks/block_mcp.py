@@ -8,7 +8,7 @@ try:
 except (json.JSONDecodeError, ValueError):
     sys.exit(0)
 
-tool_name = input_data.get("toolName", "Unknown")
+tool_name = input_data.get("tool_name", "Unknown")
 
 # The JSON response that forces the block
 output = {
