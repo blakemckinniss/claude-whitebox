@@ -55,7 +55,8 @@ node_modules/
 *.secret
 
 # Project-specific
-scratch/archive/
+scratch/*
+!scratch/.gitkeep
 projects/
 
 # Claude ephemeral files - session state and telemetry (not persistent knowledge)
