@@ -1,255 +1,122 @@
 #!/usr/bin/env python3
 """
-Root Pollution Gate Hook: Prevents creating files/folders in repository root
-Triggers on: PreToolUse (Write, Bash mkdir/touch)
-Purpose: Hard-block root pollution - enforce clean architecture zones
+Root Pollution Gate: PreToolUse hook blocking writes to repository root.
+
+Hook Type: PreToolUse (matcher: Write|Edit)
+Latency Target: <5ms
+
+Enforces CLAUDE.md Hard Block #1:
+"NEVER create new files in root. Use projects/, scratch/."
 """
+
 import sys
 import json
-import re
 from pathlib import Path
 
-def check_sudo_in_transcript(data: dict) -> bool:
-    """Check if SUDO keyword is in recent transcript messages."""
-    transcript_path = data.get("transcript_path", "")
-    if not transcript_path:
-        return False
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+# Allowed top-level directories for writes
+ALLOWED_PREFIXES = (
+    "projects/",
+    "scratch/",
+    "scripts/",
+    ".claude/",
+)
+
+# Files that ARE allowed at root (existing config files)
+ALLOWED_ROOT_FILES = {
+    ".gitignore",
+    ".python-version",
+    "pyproject.toml",
+    "requirements.txt",
+    "package.json",
+    "Makefile",
+    "README.md",
+    "LICENSE",
+    "CLAUDE.md",  # Project constitution - legitimate root config
+}
+
+
+def output_result(decision: str = "approve", reason: str = ""):
+    """Output hook result."""
+    result = {"hookSpecificOutput": {"hookEventName": "PreToolUse"}}
+    if decision == "block":
+        result["decision"] = "block"
+        result["reason"] = reason
+    print(json.dumps(result))
+
+
+def normalize_path(file_path: str) -> str:
+    """Convert to relative path from project root."""
     try:
-        import os
-        if os.path.exists(transcript_path):
-            with open(transcript_path, 'r') as tf:
-                transcript = tf.read()
-                # Check last 5000 chars for SUDO (recent messages)
-                last_chunk = transcript[-5000:] if len(transcript) > 5000 else transcript
-                return "SUDO" in last_chunk
+        p = Path(file_path)
+        if p.is_absolute():
+            try:
+                return str(p.relative_to(PROJECT_ROOT))
+            except ValueError:
+                return str(p)
+        return str(p)
     except Exception:
-        pass
+        return file_path
+
+
+def is_root_pollution(rel_path: str) -> bool:
+    """Check if path pollutes repository root."""
+    # Already in allowed directory
+    if any(rel_path.startswith(prefix) for prefix in ALLOWED_PREFIXES):
+        return False
+
+    # Allowed root config file
+    if rel_path in ALLOWED_ROOT_FILES:
+        return False
+
+    # Check if it's a root-level file (no directory component)
+    parts = Path(rel_path).parts
+    if len(parts) == 1:
+        # Single filename at root = pollution
+        return True
+
+    # Check if first directory is not allowed
+    if parts[0] not in {"projects", "scratch", "scripts", ".claude"}:
+        return True
+
     return False
 
 
-
-def validate_file_path(file_path: str) -> bool:
-    """
-    Validate file path to prevent path traversal attacks.
-    Per official docs: "Block path traversal - Check for .. in file paths"
-    """
-    if not file_path:
-        return True
-
-    # Normalize path to resolve any . or .. components
-    normalized = str(Path(file_path).resolve())
-
-    # Check for path traversal attempts
-    if '..' in file_path:
-        return False
-
-    return True
-
-
-# Load input
-try:
-    input_data = json.load(sys.stdin)
-
-    # SUDO escape hatch
-    if check_sudo_in_transcript(input_data):
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "allow",
-                "additionalContext": "⚠️ SUDO bypass - hook check skipped"
-            }
-        }))
+def main():
+    try:
+        data = json.load(sys.stdin)
+    except (json.JSONDecodeError, ValueError):
+        output_result()
         sys.exit(0)
-except Exception:
-    # Fail open on parse error
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": "PreToolUse",
-                    "permissionDecision": "allow",
-                }
-            }
+
+    tool_name = data.get("tool_name", "")
+    tool_input = data.get("tool_input", {})
+
+    # Only check Write and Edit
+    if tool_name not in ("Write", "Edit"):
+        output_result()
+        sys.exit(0)
+
+    file_path = tool_input.get("file_path", "")
+    if not file_path:
+        output_result()
+        sys.exit(0)
+
+    rel_path = normalize_path(file_path)
+
+    if is_root_pollution(rel_path):
+        output_result(
+            decision="block",
+            reason=f"**ROOT POLLUTION BLOCKED** (Hard Block #1)\n"
+                   f"Path: {rel_path}\n"
+                   f"Use: projects/, scratch/, or scripts/ instead."
         )
-    )
+        sys.exit(0)
+
+    output_result()
     sys.exit(0)
 
-tool_name = input_data.get("tool_name", "")
-tool_params = input_data.get("tool_input", {})
 
-# ============================================================================
-# Allowed root-level files (whitelist)
-# ============================================================================
-ALLOWED_ROOT_FILES = {
-    ".gitignore",
-    "CLAUDE.md",
-    "README.md",
-    "requirements.txt",
-    "package.json",
-    "pyproject.toml",
-    "setup.py",
-}
-
-# Allowed root directories
-ALLOWED_ROOT_DIRS = {
-    ".claude",
-    ".git",
-    "projects",
-    "scratch",
-    "scripts",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-    "__pycache__",
-    ".venv",
-    "venv",
-    "node_modules",
-}
-
-# ============================================================================
-# RULE: Write tool cannot create root-level files (except whitelist)
-# ============================================================================
-if tool_name == "Write":
-    file_path = tool_params.get("file_path", "")
-
-    if file_path:
-        path = Path(file_path)
-
-        # Check if writing to root (no parent dirs except root)
-        try:
-            # Get path relative to repo root
-            parts = path.parts
-
-            # If path has only 2 parts (e.g., /home/jinx/workspace/claude-whitebox/foo.py)
-            # Then it's root-level (after removing leading /)
-            if len(parts) > 0:
-                # Check if it's a root-level file
-                filename = path.name
-
-                # Heuristic: if path contains /claude-whitebox/ followed by just a filename
-                path_str = str(path)
-                if "/claude-whitebox/" in path_str:
-                    after_root = path_str.split("/claude-whitebox/", 1)[1]
-
-                    # If no slashes after root, it's a root file
-                    if "/" not in after_root:
-                        # Check whitelist
-                        if filename not in ALLOWED_ROOT_FILES:
-                            # Auto-redirect to scratch/
-                            redirected_path = path_str.replace(f"/claude-whitebox/{filename}", f"/claude-whitebox/scratch/{filename}")
-
-                            auto_fix_message = f"""🔧 AUTO-REDIRECTED: root file moved to scratch/
-
-Original: {filename} (repository root)
-Fixed:    scratch/{filename}
-
-RULE: NEVER create new files in repository root
-
-The file was automatically redirected to scratch/.
-If this should be a permanent file, move it to:
-  • projects/<name>/ for user projects
-  • scripts/ops/ for operational tools
-
-Whitelist (allowed in root):
-  • {', '.join(sorted(ALLOWED_ROOT_FILES))}
-
-See CLAUDE.md § Hard Block #1 (Root Pollution Ban)"""
-
-                            print(
-                                json.dumps(
-                                    {
-                                        "hookSpecificOutput": {
-                                            "hookEventName": "PreToolUse",
-                                            "permissionDecision": "allow",
-                                            "permissionDecisionReason": auto_fix_message,
-                                            "updatedInput": {
-                                                "file_path": redirected_path,
-                                                "content": tool_params.get("content", "")
-                                            }
-                                        }
-                                    }
-                                )
-                            )
-                            sys.exit(0)
-        except Exception:
-            # If path parsing fails, allow (fail open)
-            pass
-
-# ============================================================================
-# RULE: Bash mkdir/touch cannot create root-level dirs/files (except whitelist)
-# ============================================================================
-if tool_name == "Bash":
-    command = tool_params.get("command", "")
-
-    # Detect mkdir/touch/echo > at root level
-    # Note: Exclude & from capture to avoid matching shell redirects like 2>&1
-    patterns = [
-        r"mkdir\s+([^\s/]+)$",  # mkdir dirname (no path)
-        r"touch\s+([^\s/]+)$",  # touch filename (no path)
-        r"echo\s+[^|]*>\s*([^\s/&]+)$",  # echo > filename (exclude & for 2>&1)
-        r"cat\s+[^|]*>\s*([^\s/&]+)$",  # cat > filename (exclude & for 2>&1)
-    ]
-
-    for pattern in patterns:
-        match = re.search(pattern, command)
-        if match:
-            target = match.group(1)
-
-            # Check if it's a root-level target (no slashes)
-            if "/" not in target and target not in ALLOWED_ROOT_FILES and target not in ALLOWED_ROOT_DIRS:
-                block_message = f"""🚫 ROOT POLLUTION BLOCKED
-
-You attempted to create: {target}
-Command: {command}
-Location: Repository root
-
-RULE: NEVER create new files/directories in repository root
-
-Allowed zones:
-  • projects/<name>/  - User projects
-  • scratch/         - Prototypes, temp files
-  • scripts/ops/     - Operational tools
-
-Whitelisted root items:
-  • Files: {', '.join(sorted(ALLOWED_ROOT_FILES))}
-  • Dirs: {', '.join(sorted(d for d in ALLOWED_ROOT_DIRS if not d.startswith('.')))}
-
-Why:
-  - Root pollution creates clutter
-  - Template must stay clean for future projects
-  - Architecture zones enforce separation of concerns
-
-Required action:
-  • Use projects/<name>/{target} for user projects
-  • Use scratch/{target} for temporary work
-  • Use scripts/ops/{target} for operational tools
-
-See CLAUDE.md § Hard Block #1 (Root Pollution Ban)"""
-
-                print(
-                    json.dumps(
-                        {
-                            "hookSpecificOutput": {
-                                "hookEventName": "PreToolUse",
-                                "permissionDecision": "deny",
-                                "permissionDecisionReason": block_message,
-                            }
-                        }
-                    )
-                )
-                sys.exit(0)
-
-# ============================================================================
-# All checks passed - allow action
-# ============================================================================
-print(
-    json.dumps(
-        {
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "allow",
-            }
-        }
-    )
-)
-sys.exit(0)
+if __name__ == "__main__":
+    main()
