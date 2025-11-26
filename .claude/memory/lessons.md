@@ -174,3 +174,75 @@ Root cause analysis pattern: When void.py reveals gaps (CRUD asymmetry, error ha
 
 ### 2025-11-25 01:48
 Post-edit validation is critical: py_compile only checks SYNTAX, not imports. For library files (scripts/lib/), must actually import to catch NameError like 'List not defined'. Hook: post_edit_validator.py runs after Edit/Write on .py files and injects errors into context so Claude sees them immediately.
+
+### 2025-11-25 19:23
+[AUTO-LEARNED-SUCCESS] Novel solution: Created synapse_fire_v4.py (similar scripts: 2)
+
+### 2025-11-25 19:28
+[AUTO-LEARNED-SUCCESS] Novel solution: Created synapse_content_blocker.py (similar scripts: 3)
+
+### 2025-11-25 20:24
+[AUTO-LEARNED-SUCCESS] Novel solution: Created groq_gate.py (similar scripts: 2)
+
+### 2025-11-25 21:18
+**Problem:** groq_gate.py got 401 Unauthorized despite valid key in .env file.
+
+**Root Cause:** Hook checked `os.environ.get()` FIRST, which returned a stale/invalid key from Claude Code's startup env. The valid key in `.env` was never reached because the fallback only triggered if os.environ was empty.
+
+**Mechanism:** Claude Code loads env vars at startup and they persist. Shell may have old keys from previous sessions. `core.py` uses `load_dotenv(override=True)` to fix this for scripts, but hooks don't import core.py.
+
+**Solution:** In hooks, read `.env` file FIRST (source of truth), fall back to `os.environ` only for CI/Docker scenarios.
+
+**Lesson:** For hooks that need secrets: Priority is `.env` > `os.environ`. Never trust shell environment for API keys - it may be stale. See `.claude/docs/HOOKS_REFERENCE.md` for the correct pattern.
+
+### 2025-11-25 21:20
+**Problem:** v2 hooks had multiple data format mismatches - context_engine.py expected `[{pattern, associations}]` but synapses.json has `{regex: [associations]}`. session_end.py expected `[{timestamp, context}]` but sudo_session.json has `{authorized_files: [...]}`.
+
+**Root Cause:** Hooks were written without reading the actual data files first. Assumed formats instead of verifying.
+
+**Solution:** Always read state files before writing hooks that consume them. Use defensive parsing that handles multiple formats.
+
+**Lesson:** NEVER assume JSON schema. Read the actual file first. Handle both expected AND legacy formats gracefully.
+
+### 2025-11-26 02:00
+- [unresearched_libs] Used without research: session, session_state, Path, dead, previous
+- [2025-11-26] [auto] Missing module: foobar (context: python test.py)
+
+### 2025-11-26 02:19
+- [file_complexity] Edited settings.json 5x - review for API quirks or complexity
+- [file_complexity] Edited research_nudge.py 3x - review for API quirks or complexity
+- [file_complexity] Edited production_gate.py 4x - review for API quirks or complexity
+- [unresearched_libs] Used without research: runtime, text, error, Path, a, ,
+        ],
+        , errors, name, oracle, web, , , prompt, lessons, code
+- [domain_focus] Session focused on data (75% confidence)
+
+### 2025-11-26 02:27
+- [file_complexity] Edited settings.json 5x - review for API quirks or complexity
+- [file_complexity] Edited research_nudge.py 3x - review for API quirks or complexity
+- [file_complexity] Edited session_state.py 4x - review for API quirks or complexity
+- [file_complexity] Edited production_gate.py 4x - review for API quirks or complexity
+- [file_complexity] Edited memory_injector.py 3x - review for API quirks or complexity
+- [unresearched_libs] Used without research: synapse_core, name, List, lessons, session_state, code, oracle, Dict, , , error, web, spark, files, errors, Enum, pollutes, prompt, dataclass, transcript, Path, runtime, a, flawed, text, enum, ,
+        ],
+        
+
+### 2025-11-26 02:32
+- [file_complexity] Edited settings.json 7x - review for API quirks or complexity
+- [file_complexity] Edited research_nudge.py 3x - review for API quirks or complexity
+- [file_complexity] Edited session_state.py 6x - review for API quirks or complexity
+- [file_complexity] Edited production_gate.py 4x - review for API quirks or complexity
+- [file_complexity] Edited memory_injector.py 3x - review for API quirks or complexity
+- [unresearched_libs] Used without research: a, goal, Enum, name, code, Path, session_state, dataclass, synapse_core, spark, prompt, error, transcript, web, enum, errors, ,
+        ],
+        , flawed, load_state, runtime, pollutes, Dict, lessons, text, , , files, oracle, List, original
+
+### 2025-11-26 02:37
+- [unresearched_libs] Used without research: urllib, Path
+
+### 2025-11-26 03:04
+- [domain_focus] Session focused on infrastructure (100% confidence)
+
+### 2025-11-26 12:30
+- [file_complexity] Edited CLAUDE.md 5x - review for API quirks or complexity
+- [unresearched_libs] Used without research: Path, previous, this, concurrent, session_state

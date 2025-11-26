@@ -512,29 +512,11 @@
       "Usage: For tasks that don't fit specialized agents"
     ],
     "___CLAUDE_SPECIFIC___": "=== Claude Code Specific ===",
-    "(hook|lifecycle|pretool|posttool|session|gate|enforcement)": [
-      "REFERENCE: .claude/docs/HOOKS_REFERENCE.md - Full hook documentation",
-      "Events: SessionStart (<200ms), UserPromptSubmit (<100ms), PreToolUse (~350ms), PostToolUse (<50ms), Stop, SessionEnd (<1000ms)",
-      "INPUT: JSON via stdin with tool_name, tool_input, transcript_path, session_id",
-      "OUTPUT: {hookSpecificOutput: {hookEventName, decision, reason, additionalContext}}",
-      "CRITICAL: Read .env FIRST for secrets, os.environ may have stale keys from old sessions",
-      "CRITICAL: NEVER print debug to stdout - breaks JSON protocol. Use file logging.",
-      "CRITICAL: Read actual state files BEFORE writing hooks that consume them - never assume schema",
-      "USE: audit_hooks.py for hook validation"
-    ],
-    "(401|unauthorized|api.?key|secret|credential).*(hook|gate)": [
-      "HISTORICAL FAILURE: groq_gate.py got 401 because os.environ had stale key",
-      "ROOT CAUSE: Claude Code loads env at startup, shell may have old keys",
-      "FIX: Read .env file FIRST (source of truth), fall back to os.environ for CI/Docker",
-      "PATTERN: Walk up directories to find .env, parse KEYNAME= lines explicitly",
-      "LESSON: core.py uses load_dotenv(override=True) for same reason"
-    ],
-    "(hook.*(format|schema|json)|data.?format|mismatch)": [
-      "HISTORICAL FAILURE: v2 hooks assumed JSON schemas without reading actual files",
-      "synapses.json: {regex: [associations]} NOT [{pattern, associations}]",
-      "sudo_session.json: {authorized_files: [...]} NOT [{timestamp, context}]",
-      "FIX: Always Read state files BEFORE writing hooks that consume them",
-      "PATTERN: Handle both expected AND legacy formats with isinstance() checks"
+    "(hook|lifecycle|pretool|posttool|session)": [
+      "Location: .claude/hooks/ for all hooks",
+      "Events: SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd",
+      "USE: audit_hooks.py for hook validation",
+      "RULE: Hooks must output valid JSON"
     ],
     "(confidence|tier|epistemology|evidence|certainty)": [
       "TRIGGER: The Epistemological Protocol \u2192 RUN: /[command]",
