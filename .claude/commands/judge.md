@@ -4,4 +4,4 @@ argument-hint: [proposal]
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/oracle.py --persona judge "$ARGUMENTS"`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/oracle.py --persona judge "$ARGUMENTS"`

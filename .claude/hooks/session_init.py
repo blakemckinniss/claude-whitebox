@@ -13,6 +13,7 @@ This hook fires when Claude Code starts a new session and:
 Silent by default - outputs brief status only if resuming work or issues detected.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import os

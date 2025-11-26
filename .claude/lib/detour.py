@@ -26,9 +26,8 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-# Paths - .claude/lib/detour.py -> .claude/lib -> scripts -> project_root
-# SUDO: Path fix verified via epistemology.py pattern (parent.parent.parent)
-MEMORY_DIR = Path(__file__).resolve().parent.parent.parent / ".claude" / "memory"
+# Paths - .claude/lib -> .claude -> .claude/memory
+MEMORY_DIR = Path(__file__).resolve().parent.parent / "memory"
 DETOUR_STACK_FILE = MEMORY_DIR / "detour_stack.json"
 
 

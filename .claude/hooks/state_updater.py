@@ -12,6 +12,7 @@ This hook fires AFTER every tool call and:
 Silent by default - no output unless debugging.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re

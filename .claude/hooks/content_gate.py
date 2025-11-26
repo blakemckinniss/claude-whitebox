@@ -17,6 +17,7 @@ SEVERITY LEVELS:
 - BLOCK: SUDO bypass allowed (shell=True, bare except)
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re
@@ -45,14 +46,14 @@ CONTENT_BLOCKING_PATTERNS: Dict[str, Dict] = {
         "severity": "critical",
         "message": "Code injection vulnerability (eval/exec)",
         "suggestion": "Use ast.literal_eval() for safe parsing",
-        "exclusions": [".claude/scratch/", "test_", ".md", "_test.py"]
+        "exclusions": [".claude/tmp/", "test_", ".md", "_test.py"]
     },
     "sql_injection": {
         "pattern": r'(f["\']SELECT|f["\']INSERT|f["\']UPDATE|f["\']DELETE|"SELECT.*"\s*\+)',
         "severity": "critical",
         "message": "SQL injection risk (string formatting in SQL)",
         "suggestion": "Use parameterized queries: cursor.execute('...?', (val,))",
-        "exclusions": [".claude/scratch/", ".md"]
+        "exclusions": [".claude/tmp/", ".md"]
     },
 
     # BLOCK - Should not reach production (SUDO bypass allowed)
@@ -61,7 +62,7 @@ CONTENT_BLOCKING_PATTERNS: Dict[str, Dict] = {
         "severity": "block",
         "message": "Shell injection risk (shell=True)",
         "suggestion": "Use shell=False with list args",
-        "exclusions": [".claude/scratch/"]
+        "exclusions": [".claude/tmp/"]
     },
     "bare_except": {
         "pattern": r"except\s*:\s*$",
@@ -75,35 +76,35 @@ CONTENT_BLOCKING_PATTERNS: Dict[str, Dict] = {
         "severity": "block",
         "message": "Wildcard import pollutes namespace",
         "suggestion": "Import specific names",
-        "exclusions": ["__init__.py", ".claude/scratch/"]
+        "exclusions": ["__init__.py", ".claude/tmp/"]
     },
     "log_secrets": {
         "pattern": r'(print|log|logger)\s*\([^)]*\b(password|token|secret|api_key|credential)\b',
         "severity": "block",
         "message": "Logging sensitive data",
         "suggestion": "Never log credentials",
-        "exclusions": [".claude/scratch/", ".md"]
+        "exclusions": [".claude/tmp/", ".md"]
     },
     "hardcoded_creds": {
         "pattern": r'(password|secret|api_key)\s*=\s*["\'][^"\']{8,}["\']',
         "severity": "block",
         "message": "Hardcoded credentials detected",
         "suggestion": "Use environment variables or secrets manager",
-        "exclusions": [".claude/scratch/", "test_", ".md", ".example"]
+        "exclusions": [".claude/tmp/", "test_", ".md", ".example"]
     },
     "pickle_loads": {
         "pattern": r"pickle\.loads?\s*\(",
         "severity": "block",
         "message": "pickle.load is unsafe with untrusted data",
         "suggestion": "Use JSON or validate source",
-        "exclusions": [".claude/scratch/", "test_"]
+        "exclusions": [".claude/tmp/", "test_"]
     },
     "yaml_unsafe": {
         "pattern": r"yaml\.(load|unsafe_load)\s*\([^)]*\)",
         "severity": "block",
         "message": "yaml.load without Loader is unsafe",
         "suggestion": "Use yaml.safe_load()",
-        "exclusions": [".claude/scratch/"]
+        "exclusions": [".claude/tmp/"]
     },
 }
 

@@ -46,7 +46,7 @@ COOLDOWN = 45
 LAST_ANALYSIS_FILE = MEMORY_DIR / "assumption_ledger_last.json"
 
 # Skip these (low-risk or scratch work)
-SKIP_PATHS = (".claude/scratch/", ".claude/memory/", "node_modules/", "__pycache__/")
+SKIP_PATHS = (".claude/tmp/", ".claude/memory/", "node_modules/", "__pycache__/")
 
 # =============================================================================
 # SYSTEM PROMPT
@@ -157,7 +157,12 @@ Extract 1-3 hidden assumptions in this code change."""
         content = result['choices'][0]['message']['content']
         return json.loads(content)
 
-    except (GroqAPIError, json.JSONDecodeError, KeyError, IndexError):
+    except (GroqAPIError, json.JSONDecodeError, KeyError, IndexError) as e:
+        try:
+            from hook_logging import log_hook_error
+            log_hook_error("assumption_ledger", e, {"model": MODEL})
+        except ImportError:
+            pass
         return None
 
 

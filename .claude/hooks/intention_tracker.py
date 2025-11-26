@@ -16,6 +16,7 @@ Patterns detected:
 - Multiple items: "files X, Y, and Z", "check A and B"
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re

@@ -1,0 +1,21 @@
+# Whitebox SDK Dependencies
+
+# HTTP requests (oracle.py, research.py, firecrawl.py, groq.py)
+requests>=2.31.0
+
+# Browser automation (bdg.py - Chrome DevTools Protocol)
+websockets>=12.0
+
+# Browser automation (playwright.py - optional, auto-installs)
+playwright>=1.40.0
+
+# Code quality tools (audit.py)
+ruff>=0.1.0
+bandit>=1.7.0
+radon>=6.0.0
+
+# API Keys expected in environment:
+# - OPENROUTER_API_KEY (oracle.py, council.py)
+# - TAVILY_API_KEY (research.py)
+# - FIRECRAWL_API_KEY (firecrawl.py)
+# - GROQ_API_KEY (groq.py)

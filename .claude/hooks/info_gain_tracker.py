@@ -108,7 +108,7 @@ def format_stall_warning(state: dict) -> str:
     ]
 
     if reads >= READS_BEFORE_BLOCK:
-        lines.append("  💡 Consider: Write what you know to .claude/scratch/ to crystallize.")
+        lines.append("  💡 Consider: Write what you know to .claude/tmp/ to crystallize.")
 
     return "\n".join(lines)
 

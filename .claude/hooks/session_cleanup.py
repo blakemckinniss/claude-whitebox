@@ -5,13 +5,14 @@ Session Cleanup Hook v3: SessionEnd hook for cleanup and persistence.
 This hook fires when Claude Code session ends and:
 - Persists learned patterns to long-term memory
 - Updates lessons.md with session insights
-- Cleans up .claude/scratch/ temporary files
+- Cleans up .claude/tmp/ temporary files
 - Generates session summary for telemetry
 - Saves final state snapshot
 
 Silent by default - performs cleanup in background.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import time
@@ -28,11 +29,11 @@ from session_state import (
 # CONFIGURATION
 # =============================================================================
 
-SCRATCH_DIR = Path(__file__).resolve().parent.parent.parent / "scratch"
-LESSONS_FILE = MEMORY_DIR / "lessons.md"
+SCRATCH_DIR = Path(__file__).resolve().parent.parent / "tmp"  # .claude/hooks -> .claude -> .claude/tmp
+LESSONS_FILE = MEMORY_DIR / "__lessons.md"
 SESSION_LOG_FILE = MEMORY_DIR / "session_log.jsonl"
 
-# Files in .claude/scratch/ older than this get cleaned (in seconds)
+# Files in .claude/tmp/ older than this get cleaned (in seconds)
 SCRATCH_CLEANUP_AGE = 86400  # 24 hours
 
 # Minimum edits to a file before generating a lesson
@@ -155,7 +156,7 @@ def persist_lessons(lessons: list[dict]):
 # =============================================================================
 
 def cleanup_scratch():
-    """Clean up old files in .claude/scratch/ directory."""
+    """Clean up old files in .claude/tmp/ directory."""
     if not SCRATCH_DIR.exists():
         return []
 

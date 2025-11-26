@@ -10,6 +10,7 @@ This hook fires on every user prompt and:
 Sparse by design - only speaks when useful.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re
@@ -22,80 +23,9 @@ from session_state import (
 )
 
 # =============================================================================
-# OPS SCRIPT TRIGGERS
-# =============================================================================
-
-# Map prompt patterns to ops scripts
-OPS_TRIGGERS = {
-    "research": [
-        r"how\s+(do|does|to)",
-        r"what\s+(is|are|does)",
-        r"documentation",
-        r"docs\s+for",
-        r"latest\s+(api|version|syntax)",
-        r"(fastapi|pydantic|langchain|anthropic|openai)",
-    ],
-    "probe": [
-        r"what\s+methods",
-        r"api\s+signature",
-        r"inspect.*object",
-        r"(pandas|boto3|playwright).*api",
-    ],
-    "xray": [
-        r"find.*(class|function|method)",
-        r"where\s+is.*defined",
-        r"list.*functions",
-    ],
-    "think": [
-        r"break.*down",
-        r"decompose",
-        r"step.*by.*step",
-        r"how.*approach",
-    ],
-    "verify": [
-        r"check\s+if",
-        r"verify.*exists",
-        r"confirm.*works",
-    ],
-    "bdg": [
-        r"chrome\s*devtools",
-        r"\bcdp\b",
-        r"devtools\s*protocol",
-        r"headless\s*(chrome|browser)",
-        r"browser.*dom",
-        r"dom.*query",
-        r"extract.*html.*page",
-        r"scrape.*dynamic",
-        r"js.*render",
-        r"javascript.*page",
-        r"browser.*screenshot",
-        r"browser.*pdf",
-        r"page.*cookies",
-        r"intercept.*network",
-        r"debug.*browser",
-    ],
-}
-
-# =============================================================================
 # RELEVANCE DETECTION
 # =============================================================================
-
-def detect_ops_suggestion(prompt: str, state) -> dict | None:
-    """Detect if prompt matches an ops script trigger."""
-    prompt_lower = prompt.lower()
-
-    for script, patterns in OPS_TRIGGERS.items():
-        if script not in state.ops_scripts:
-            continue
-        for pattern in patterns:
-            if re.search(pattern, prompt_lower):
-                return {
-                    "script": script,
-                    "command": f"python3 .claude/ops/{script}.py",
-                    "reason": f"Prompt matches '{pattern}' pattern",
-                }
-
-    return None
+# NOTE: Ops script suggestions moved to ops_awareness.py to avoid duplication
 
 
 def should_inject_context(state) -> bool:
@@ -119,7 +49,7 @@ def should_inject_context(state) -> bool:
     return False
 
 
-def format_context(state, ops_suggestion: dict | None) -> str:
+def format_context(state) -> str:
     """Format context for injection."""
     parts = []
 
@@ -127,13 +57,6 @@ def format_context(state, ops_suggestion: dict | None) -> str:
     state_context = generate_context(state)
     if state_context:
         parts.append(f"📊 {state_context}")
-
-    # Ops suggestion (only if matched)
-    if ops_suggestion:
-        parts.append(
-            f"🔧 Consider: `{ops_suggestion['script']}` - "
-            f"Run: {ops_suggestion['command']}"
-        )
 
     return "\n".join(parts)
 
@@ -163,18 +86,13 @@ def main():
     add_domain_signal(state, user_prompt[:200])
     save_state(state)
 
-    # Check for ops suggestion
-    ops_suggestion = detect_ops_suggestion(user_prompt, state)
-
-    # Decide if we should inject context
-    should_inject = should_inject_context(state) or ops_suggestion
-
-    if not should_inject:
+    # Decide if we should inject context (ops suggestions handled by ops_awareness.py)
+    if not should_inject_context(state):
         print(json.dumps({}))
         sys.exit(0)
 
     # Format and output context
-    context = format_context(state, ops_suggestion)
+    context = format_context(state)
 
     if context:
         output = {"additionalContext": context}

@@ -16,6 +16,7 @@ Behavior:
 3. After 3+ failures or 5+ turns with 2+ failures: Inject pivot nudge
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re

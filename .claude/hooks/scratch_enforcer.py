@@ -6,7 +6,7 @@ Hook Type: PostToolUse
 Latency Target: <10ms (counter-based, no API calls)
 
 Problem: Claude does repetitive manual operations instead of writing scripts
-Solution: Track tool call patterns, suggest .claude/scratch/ script after N repetitions
+Solution: Track tool call patterns, suggest .claude/tmp/ script after N repetitions
 """
 
 import sys
@@ -27,22 +27,22 @@ REPETITIVE_PATTERNS = {
     "multi_file_edit": {
         "tools": ["Edit", "Write"],
         "threshold": 4,
-        "suggestion": "Consider writing a .claude/scratch/ script to batch these edits"
+        "suggestion": "Consider writing a .claude/tmp/ script to batch these edits"
     },
     "multi_file_read": {
         "tools": ["Read"],
         "threshold": 5,
-        "suggestion": "Use Glob/Grep or write a .claude/scratch/ analysis script"
+        "suggestion": "Use Glob/Grep or write a .claude/tmp/ analysis script"
     },
     "multi_bash": {
         "tools": ["Bash"],
         "threshold": 4,
-        "suggestion": "Chain commands with && or write a .claude/scratch/ script"
+        "suggestion": "Chain commands with && or write a .claude/tmp/ script"
     },
     "multi_grep": {
         "tools": ["Grep"],
         "threshold": 4,
-        "suggestion": "Write a .claude/scratch/ script for complex multi-pattern search"
+        "suggestion": "Write a .claude/tmp/ script for complex multi-pattern search"
     }
 }
 
@@ -128,7 +128,7 @@ def main():
 
     if suggestion:
         output = {
-            "additionalContext": f"🔄 REPETITIVE PATTERN DETECTED:\n   {suggestion}\n   (.claude/scratch/ scripts are faster than manual iteration)"
+            "additionalContext": f"🔄 REPETITIVE PATTERN DETECTED:\n   {suggestion}\n   (.claude/tmp/ scripts are faster than manual iteration)"
         }
     else:
         output = {}

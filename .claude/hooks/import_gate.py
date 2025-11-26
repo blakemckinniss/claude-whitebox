@@ -13,6 +13,7 @@ Catches:
 Prevents the "ModuleNotFoundError" frustration loop.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 from typing import List, Dict
@@ -105,7 +106,7 @@ def main():
     warning = format_issues(issues, file_path)
     output_hook_result(
         "PreToolUse",
-        additional_context=f"⚠️ IMPORT WARNING:\n{warning}\nConsider: pip install <missing>"
+        context=f"⚠️ IMPORT WARNING:\n{warning}\nConsider: pip install <missing>"
     )
     sys.exit(0)
 

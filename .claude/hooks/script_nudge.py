@@ -57,7 +57,7 @@ def main():
     if reason:
         context = (
             f"⚡ SCRIPT OPPORTUNITY: {reason}\n"
-            f"→ Consider: .claude/scratch/solve_$(date +%s).py\n"
+            f"→ Consider: .claude/tmp/solve_$(date +%s).py\n"
             f"→ Or proceed if this is genuinely a one-liner"
         )
         print(json.dumps({

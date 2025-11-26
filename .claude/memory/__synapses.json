@@ -3,14 +3,14 @@
     "___BROWSER_AUTOMATION___": "=== Web Scraping & Browser ===",
     "(scrape|crawl|browser|selenium|e2e|headless|playwright|puppeteer|screenshot|render)": [
       "TRIGGER: The Headless Protocol (Playwright browser automation) \u2192 RUN: /[command]",
-      "USE: scripts/lib/browser.py - get_browser_session() context manager",
-      "USE: scripts/ops/firecrawl.py - API-based scraping (simpler than Playwright)",
+      "USE: .claude/lib/browser.py - get_browser_session() context manager",
+      "USE: .claude/ops/firecrawl.py - API-based scraping (simpler than Playwright)",
       "RULE: Do NOT use requests/BeautifulSoup for JavaScript sites",
       "RULE: Playwright auto-setup via auto_playwright_setup.py hook",
       "DO: Use 'async with get_browser_session() as page:'"
     ],
     "(firecrawl|web.?to.?markdown|html.?to.?markdown|extract.?content|site.?content|page.?content|get.?webpage)": [
-      "USE: scripts/ops/firecrawl.py - Firecrawl API for web scraping",
+      "USE: .claude/ops/firecrawl.py - Firecrawl API for web scraping",
       "Usage: firecrawl scrape <url> - Single page to markdown",
       "Usage: firecrawl crawl <url> --limit N - Crawl entire site",
       "Usage: firecrawl status <job_id> - Check async crawl progress",
@@ -75,13 +75,13 @@
     ],
     "(quality|lint|check|validate|audit|review)": [
       "TRIGGER: The Sentinel Protocol (automated quality gates) \u2192 RUN: /[command]",
-      "USE: scripts/ops/audit.py - security & complexity check",
-      "USE: scripts/ops/void.py - completeness check",
+      "USE: .claude/ops/audit.py - security & complexity check",
+      "USE: .claude/ops/void.py - completeness check",
       "ENFORCED BY: pre_write_audit.py blocks deadly sins",
       "DO: Run in strict mode for CI/CD"
     ],
     "(complexity|cyclomatic|cognitive|maintainability|readability)": [
-      "USE: scripts/ops/audit.py --complexity",
+      "USE: .claude/ops/audit.py --complexity",
       "RULE: Functions >20 lines = refactor candidate",
       "RULE: Cyclomatic complexity >10 = split function",
       "PRINCIPLE: Flat is better than nested"
@@ -95,7 +95,7 @@
     "(bug|error|fail|exception|crash|broken|issue|problem)": [
       "TRIGGER: The MacGyver Protocol (improvise if tools missing) \u2192 RUN: /[command]",
       "CHECK: Search lessons.md for similar errors",
-      "USE: scripts/ops/inventory.py to check available tools",
+      "USE: .claude/ops/inventory.py to check available tools",
       "DO: Write to lessons.md after fixing",
       "ENFORCED BY: detect_failure_auto_learn.py captures failures"
     ],
@@ -151,7 +151,7 @@
     "___SEARCH_NAVIGATION___": "=== Code Search & Navigation ===",
     "(search|find|grep|locate|where|definition|reference)": [
       "TRIGGER: The X-Ray Protocol (structural code search) \u2192 RUN: /[command]",
-      "USE: scripts/ops/xray.py --type class/function/import",
+      "USE: .claude/ops/xray.py --type class/function/import",
       "USE: Use Grep for text search, Glob for file patterns",
       "Distinction: Text search (grep) vs Structure search (xray)"
     ],
@@ -262,7 +262,7 @@
     "___MEMORY_CONTEXT___": "=== Memory & Context ===",
     "(memory|remember|forget|context|history|state)": [
       "TRIGGER: The Elephant Protocol (persistent memory) \u2192 RUN: /[command]",
-      "USE: scripts/ops/remember.py add/view",
+      "USE: .claude/ops/remember.py add/view",
       "CHECK: active_context.md (short-term)",
       "CHECK: decisions.md (medium-term)",
       "CHECK: lessons.md (long-term pain log)"
@@ -281,7 +281,7 @@
     ],
     "___PERFORMANCE___": "=== Performance & Parallelism ===",
     "(parallel|batch|concurrent|multiple|bulk|async)": [
-      "ITERATION >3 items: Write script to scratch/, use parallel.py",
+      "ITERATION >3 items: Write script to .claude/tmp/, use parallel.py",
       "BANNED: Bash loops on files (Hard Block #6)",
       "USE: swarm.py for 10+ parallel operations"
     ],
@@ -311,13 +311,13 @@
     ],
     "(decide|choice|tradeoff|compare|alternative|option)": [
       "TRIGGER: The Judge Protocol (ROI analysis) \u2192 RUN: /[command]",
-      "USE: scripts/ops/oracle.py --persona judge",
+      "USE: .claude/ops/oracle.py --persona judge",
       "PRINCIPLE: Occam's Razor - simplest solution wins",
       "RULE: Document decisions in decisions.md"
     ],
     "(risk|danger|warning|careful|caution|concern)": [
       "TRIGGER: The Skeptic Protocol (hostile review) \u2192 RUN: /[command]",
-      "USE: scripts/ops/oracle.py --persona skeptic",
+      "USE: .claude/ops/oracle.py --persona skeptic",
       "ENFORCED BY: trigger_skeptic.py for risky operations",
       "RULE: If it feels risky, it probably is"
     ],
@@ -341,28 +341,28 @@
     ],
     "(research|docs|documentation|current|latest|up-to-date)": [
       "TRIGGER: The Research Protocol (Tavily search) \u2192 RUN: /[command]",
-      "USE: scripts/ops/research.py for web search",
-      "USE: scripts/ops/firecrawl.py for fetching full page content as markdown",
+      "USE: .claude/ops/research.py for web search",
+      "USE: .claude/ops/firecrawl.py for fetching full page content as markdown",
       "BANNED: Training data cutoff is January 2025 (consequences follow)",
       "DO: Always research before using updated libraries",
       "WARNING: WebFetch is BANNED - use firecrawl.py instead"
     ],
     "(fetch.?page|read.?website|get.?url|download.?page|pull.?docs|ingest.?site)": [
-      "USE: scripts/ops/firecrawl.py scrape <url> - Get clean markdown",
-      "USE: scripts/ops/firecrawl.py crawl <url> - Get entire site",
+      "USE: .claude/ops/firecrawl.py scrape <url> - Get clean markdown",
+      "USE: .claude/ops/firecrawl.py crawl <url> - Get entire site",
       "RULE: Firecrawl returns LLM-ready markdown (cleaner than raw HTML)",
       "Alternative: WebFetch for quick summaries, firecrawl for full content"
     ],
     "(inspect|introspect|probe|verify|methods|signature)": [
       "TRIGGER: The Probe Protocol (anti-hallucination) \u2192 RUN: /[command]",
-      "USE: scripts/ops/probe.py for runtime inspection",
+      "USE: .claude/ops/probe.py for runtime inspection",
       "PRINCIPLE: Never guess API methods",
       "DO: Probe runtime to verify signatures"
     ],
     "(consult|advice|oracle|reasoning|expert|opinion)": [
       "TRIGGER: The Oracle Protocol (external reasoning) \u2192 RUN: /[command]",
-      "USE: scripts/ops/oracle.py for single perspective",
-      "USE: scripts/ops/council.py for multi-perspective",
+      "USE: .claude/ops/oracle.py for single perspective",
+      "USE: .claude/ops/council.py for multi-perspective",
       "Use: Architecture decisions, complex design"
     ],
     "(example|sample|template|boilerplate|starter)": [
@@ -372,19 +372,19 @@
       "BANNED: Verify example code is secure (consequences follow)"
     ],
     "(find.?class|find.?function|where.?is.?defined|class.?definition|function.?definition|import.?location)": [
-      "USE: scripts/ops/xray.py --type class --name <Name> - Find class definitions",
-      "USE: scripts/ops/xray.py --type function --name <Name> - Find function definitions",
-      "USE: scripts/ops/xray.py --type import --name <module> - Find import locations",
+      "USE: .claude/ops/xray.py --type class --name <Name> - Find class definitions",
+      "USE: .claude/ops/xray.py --type function --name <Name> - Find function definitions",
+      "USE: .claude/ops/xray.py --type import --name <module> - Find import locations",
       "Prefer: xray.py over Grep for structural code searches (AST-based)"
     ],
     "(audit|security|vulnerabilities|secrets|complexity|quality.?check)": [
-      "USE: scripts/ops/audit.py <file> - Security scan, complexity, secrets detection",
-      "USE: scripts/ops/void.py <file> - Find stubs, TODOs, incomplete implementations",
-      "USE: scripts/ops/drift_check.py - Check project consistency and style drift",
+      "USE: .claude/ops/audit.py <file> - Security scan, complexity, secrets detection",
+      "USE: .claude/ops/void.py <file> - Find stubs, TODOs, incomplete implementations",
+      "USE: .claude/ops/drift_check.py - Check project consistency and style drift",
       "Required: Run audit + void before production commits"
     ],
     "(parallel|batch|many.?files|bulk|swarm|multiple.?perspectives)": [
-      "ITERATION >3 items: Write script to scratch/, use parallel.py",
+      "ITERATION >3 items: Write script to .claude/tmp/, use parallel.py",
       "BANNED: Bash loops on files (Hard Block #6)",
       "USE: swarm.py for 10+ parallel operations"
     ],
@@ -399,10 +399,10 @@
       "COMMIT MSG: What + Why, not How. Under 72 chars."
     ],
     "(remember|lesson|decision|memory|learned|mistake)": [
-      "USE: scripts/ops/remember.py add lessons '<text>' - Store a lesson",
-      "USE: scripts/ops/remember.py add decisions '<text>' - Record a decision",
-      "USE: scripts/ops/spark.py '<topic>' - Retrieve associative memories",
-      "USE: scripts/ops/evidence.py review - Review gathered evidence"
+      "USE: .claude/ops/remember.py add lessons '<text>' - Store a lesson",
+      "USE: .claude/ops/remember.py add decisions '<text>' - Record a decision",
+      "USE: .claude/ops/spark.py '<topic>' - Retrieve associative memories",
+      "USE: .claude/ops/evidence.py review - Review gathered evidence"
     ],
     "___FILE_OPERATIONS___": "=== File & Path Operations ===",
     "(file|path|directory|folder|read|write|create)": [
@@ -499,7 +499,7 @@
       "PRINCIPLE: Prevents documentation drift",
       "Tools: Bash, Read, Write, Edit, Glob, Grep"
     ],
-    "(production code|scripts/ops|scripts/lib|promote script)": [
+    "(production code|.claude/ops|.claude/lib|promote script)": [
       "Agent: Task(subagent_type='script-smith') - AUTO-INVOKE for production",
       "DO: ONLY agent allowed to Write to production dirs",
       "Gates: Enforces audit/void/drift quality checks",
@@ -538,24 +538,24 @@
     ],
     "(confidence|tier|epistemology|evidence|certainty)": [
       "TRIGGER: The Epistemological Protocol \u2192 RUN: /[command]",
-      "USE: scripts/ops/confidence.py for state",
+      "USE: .claude/ops/confidence.py for state",
       "ENFORCED BY: tier_gate.py enforces confidence tiers",
       "RULE: Start at 0%, gather evidence to increase"
     ],
     "(scratch|temporary|prototype|experiment|draft)": [
-      "Location: scratch/ for all temporary work",
+      "Location: .claude/tmp/ for all temporary work",
       "TRIGGER: Scratch-First Enforcement \u2192 RUN: /[command]",
-      "RULE: Write scripts to scratch/, promote to scripts/",
+      "RULE: Write scripts to .claude/tmp/, promote to .claude/ops/",
       "ENFORCED BY: scratch_flat_enforcer.py - no subdirectories"
     ],
     "(protocol|workflow|process|procedure|methodology)": [
-      "USE: scripts/ops/protocols.py for protocol management",
+      "USE: .claude/ops/protocols.py for protocol management",
       "ENFORCED BY: protocol_enforcer.py validates workflows",
       "CHECK: Protocol registry in session state",
       "RULE: Protocols are enforced, not suggested"
     ],
     "(swarm|oracle|council|batch|parallel oracle)": [
-      "ITERATION >3 items: Write script to scratch/, use parallel.py",
+      "ITERATION >3 items: Write script to .claude/tmp/, use parallel.py",
       "BANNED: Bash loops on files (Hard Block #6)",
       "USE: swarm.py for 10+ parallel operations"
     ],
@@ -724,7 +724,7 @@
       "PRINCIPLE: Patterns are tools, not goals",
       "RULE: Name the problem before choosing pattern",
       "DO: Consider YAGNI - do you need a pattern?",
-      "USE: scripts/ops/oracle.py for pattern advice"
+      "USE: .claude/ops/oracle.py for pattern advice"
     ],
     "___CODE_SMELLS___": "=== Code Smells & Technical Debt ===",
     "(god object|god class|massive class|too many methods)": [

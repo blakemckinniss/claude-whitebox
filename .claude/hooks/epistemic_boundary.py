@@ -20,6 +20,7 @@ Different from assumption_ledger:
 - epistemic_boundary: Rule-based check of session evidence
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re
@@ -225,7 +226,7 @@ def main():
     filepath = tool_input.get("file_path", "")
 
     # Skip scratch and memory files
-    if ".claude/scratch/" in filepath or ".claude/memory" in filepath:
+    if ".claude/tmp/" in filepath or ".claude/memory" in filepath:
         print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
         sys.exit(0)
 

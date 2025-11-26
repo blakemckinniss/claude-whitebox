@@ -27,8 +27,8 @@ This directory contains 18 custom slash commands that wrap the Whitebox SDK ops 
 | Command | Description | Usage |
 |---------|-------------|-------|
 | `/verify` | 🤥 Reality Check - Anti-gaslighting verification | `/verify file_exists .env` |
-| `/audit` | 🛡️ The Sheriff - Code quality audit | `/audit scripts/ops/council.py` |
-| `/void` | 🕳️ The Void Hunter - Completeness checking | `/void scripts/ops/` |
+| `/audit` | 🛡️ The Sheriff - Code quality audit | `/audit .claude/ops/council.py` |
+| `/void` | 🕳️ The Void Hunter - Completeness checking | `/void .claude/ops/` |
 | `/drift` | ⚖️ The Court - Style consistency check | `/drift` |
 
 ## 🛠️ Operations (Project Management)
@@ -75,5 +75,5 @@ This directory contains 18 custom slash commands that wrap the Whitebox SDK ops 
 ## 📚 Related Documentation
 
 - See `CLAUDE.md` for full protocol descriptions
-- See `scripts/ops/` for the underlying Python scripts
+- See `.claude/ops/` for the underlying Python scripts
 - See Claude Code docs for slash command syntax: https://docs.claude.com/en/slash-commands

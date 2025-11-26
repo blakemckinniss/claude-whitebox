@@ -16,6 +16,7 @@ Behavior:
 - Blocks: Edit, Write, Task (continuation without verification)
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 

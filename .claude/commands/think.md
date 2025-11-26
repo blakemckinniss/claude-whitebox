@@ -4,4 +4,4 @@ argument-hint: [problem]
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/think.py "$ARGUMENTS"`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/think.py "$ARGUMENTS"`

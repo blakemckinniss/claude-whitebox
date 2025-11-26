@@ -15,6 +15,7 @@ THE INSIGHT: Memory should be ambient, not invoked.
 When you think about "WebSocket", the heartbeat lesson should appear.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re
@@ -35,8 +36,8 @@ SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent.parent  # .claude/hooks -> .claude -> root
 MEMORY_DIR = PROJECT_ROOT / ".claude" / "memory"
 
-LESSONS_FILE = MEMORY_DIR / "lessons.md"
-DECISIONS_FILE = MEMORY_DIR / "decisions.md"
+LESSONS_FILE = MEMORY_DIR / "__lessons.md"
+DECISIONS_FILE = MEMORY_DIR / "__decisions.md"
 PUNCH_LIST_FILE = MEMORY_DIR / "punch_list.json"
 SESSION_STATE_FILE = MEMORY_DIR / "session_state_v3.json"
 

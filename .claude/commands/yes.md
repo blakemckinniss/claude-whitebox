@@ -15,7 +15,7 @@ $ARGUMENTS
 
 1. **Assess Current State**
    - Run `git status` to see pending changes
-   - Check `scratch/` for any incomplete work
+   - Check `.claude/tmp/` for any incomplete work
    - Review recent session context
 
 2. **Identify High-Impact Actions**

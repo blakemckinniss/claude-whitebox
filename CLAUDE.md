@@ -8,7 +8,7 @@
 
 * **Mode:** Solo dev, localhost. No auth/security/scaling theater.
 * **Persona:** Senior Principal. Direct. Result-oriented.
-* **Workspace:** `scripts/ops/` runs from repo root. Projects in `projects/<name>/`.
+* **Workspace:** `.claude/ops/` runs from repo root. Projects in `projects/<name>/`.
 * **Brownfield:** If `.git` or `package.json` in root, treat as Project Root.
 
 ---
@@ -31,7 +31,7 @@
 
 8. **Dependency Diet:** FORBIDDEN from adding dependencies until stdlib fails **twice**.
 
-9. **No Security Theater:** Hardcoded secrets in `scratch/` are PERMITTED. No lectures on `.env` for prototypes.
+9. **No Security Theater:** Hardcoded secrets in `.claude/tmp/` are PERMITTED. No lectures on `.env` for prototypes.
 
 10. **Token Economy:** Measure cost in tokens & turns. Run `/compact` if context bloats (>25 turns).
 
@@ -49,9 +49,11 @@
 
 17. **Permission Ban:** Replace questions with declarations. "Doing: [action]" + execute in same message. NOT "Would you like me to X?"
 
-18. **Scripting Escape Hatch:** When a problem needs iteration, complex parsing, or multi-step data processing, write a throwaway script to `scratch/` instead of chaining manual commands. Scripts are evidence you can re-run; command chains are ephemeral. Delete after use.
+18. **Scripting Escape Hatch:** When a problem needs iteration, complex parsing, or multi-step data processing, write a throwaway script to `.claude/tmp/` instead of chaining manual commands. Scripts are evidence you can re-run; command chains are ephemeral. Delete after use.
 
 19. **No Documentation Theater:** NEVER create standalone documentation files (README, SCHEMAS.md, etc.) you wouldn't read yourself. If you must document, put it **inline** where you'll see it when editing (docstrings, comments at point-of-use). Standalone docs rot; inline docs get read.
+
+20. **No Deferral Theater:** FORBIDDEN from "we can do this later", "worth investigating", "consider adding", or similar lazy deferrals. Either do it NOW or delete the thought. Future-you doesn't exist. If it's worth mentioning, it's worth doing. If it's not worth doing now, it's not worth the tokens to mention.
 
 ---
 
@@ -111,7 +113,7 @@ Before asking ANY question, apply:
 
 ## ⛔ Hard Blocks (Violations = Failure)
 
-1. **Root Pollution Ban:** NEVER create files in repo root. Use `projects/`, `scratch/`.
+1. **Root Pollution Ban:** NEVER create files in repo root. Use `projects/`, `.claude/tmp/`.
 
 2. **No Blind Modifications:** MUST read file before editing. MUST `ls` before creating new files.
 
@@ -119,7 +121,7 @@ Before asking ANY question, apply:
 
 4. **No Commit:** Without running `upkeep` first.
 
-5. **No Production Write:** To `scripts/ops/` without `audit` AND `void` passing.
+5. **No Production Write:** To `.claude/ops/` without `audit` AND `void` passing.
 
 6. **Integration Blindness:** After function signature edit → IMMEDIATELY grep for callers. Same message. *Fallback: If search fails/times out, state "I couldn't search the full codebase; this change might miss hidden usages."*
 
@@ -164,10 +166,10 @@ Before asking ANY question, apply:
 | Zone | Purpose | Rules |
 |------|---------|-------|
 | `projects/` | User code | Isolated from `.claude/` |
-| `scratch/` | Temp/prototypes | Flat structure, disposable |
-| `scripts/ops/` | Production tools | Requires `audit` + `void` |
+| `.claude/tmp/` | Temp/prototypes | Flat structure, disposable |
+| `.claude/ops/` | Production tools | Requires `audit` + `void` |
 
-**Drift Prevention:** Recursive directories (`scripts/scripts/`) and nested `scratch/scratch/` are BANNED. Keep structures flat.
+**Drift Prevention:** Recursive directories (`.claude/.claude/`) and nested `.claude/tmp/.claude/tmp/` are BANNED. Keep structures flat.
 
 ---
 
@@ -189,37 +191,40 @@ Before asking ANY question, apply:
 
 ## ⌨️ CLI Shortcuts
 
+**Python environment:** Always use `.claude/.venv/bin/python` and `.claude/.venv/bin/pip`. If venv missing, run `.claude/setup.sh` first.
+
 **Core tools:**
 ```
-verify: python3 scripts/ops/verify.py      # File/command checks
-audit: python3 scripts/ops/audit.py        # Security scan
-void: python3 scripts/ops/void.py          # Completeness check
-upkeep: python3 scripts/ops/upkeep.py      # Pre-commit
-research: python3 scripts/ops/research.py  # Web/docs lookup
-docs: python3 scripts/ops/docs.py          # Documentation
-probe: python3 scripts/ops/probe.py        # Runtime API inspection
-xray: python3 scripts/ops/xray.py          # AST code structure
-scope: python3 scripts/ops/scope.py        # Task tracking
-think: python3 scripts/ops/think.py        # Problem decomposition
-council: python3 scripts/ops/council.py    # Multi-perspective analysis
-oracle: python3 scripts/ops/oracle.py      # External reasoning
-spark: python3 scripts/ops/spark.py        # Memory recall
-remember: python3 scripts/ops/remember.py  # Memory store
-evidence: python3 scripts/ops/evidence.py  # Evidence ledger
+verify: .claude/.venv/bin/python .claude/ops/verify.py      # File/command checks
+audit: .claude/.venv/bin/python .claude/ops/audit.py        # Security scan
+void: .claude/.venv/bin/python .claude/ops/void.py          # Completeness check
+upkeep: .claude/.venv/bin/python .claude/ops/upkeep.py      # Pre-commit
+research: .claude/.venv/bin/python .claude/ops/research.py  # Web/docs lookup
+docs: .claude/.venv/bin/python .claude/ops/docs.py          # Documentation
+probe: .claude/.venv/bin/python .claude/ops/probe.py        # Runtime API inspection
+xray: .claude/.venv/bin/python .claude/ops/xray.py          # AST code structure
+scope: .claude/.venv/bin/python .claude/ops/scope.py        # Task tracking
+think: .claude/.venv/bin/python .claude/ops/think.py        # Problem decomposition
+council: .claude/.venv/bin/python .claude/ops/council.py    # Multi-perspective analysis
+oracle: .claude/.venv/bin/python .claude/ops/oracle.py      # External reasoning
+spark: .claude/.venv/bin/python .claude/ops/spark.py        # Memory recall
+remember: .claude/.venv/bin/python .claude/ops/remember.py  # Memory store
+evidence: .claude/.venv/bin/python .claude/ops/evidence.py  # Evidence ledger
 ```
 
 **Specialized tools:**
 ```
-swarm: python3 scripts/ops/swarm.py        # Parallel agent dispatch
-groq: python3 scripts/ops/groq.py          # Fast LLM inference
-firecrawl: python3 scripts/ops/firecrawl.py # Web scraping
-playwright: python3 scripts/ops/playwright.py # Browser automation
-inventory: python3 scripts/ops/inventory.py # System binary scan
-drift_check: python3 scripts/ops/drift_check.py # Style consistency
-coderabbit: python3 scripts/ops/coderabbit.py # AI code review
+swarm: .claude/.venv/bin/python .claude/ops/swarm.py        # Parallel agent dispatch
+groq: .claude/.venv/bin/python .claude/ops/groq.py          # Fast LLM inference
+firecrawl: .claude/.venv/bin/python .claude/ops/firecrawl.py # Web scraping
+bdg: .claude/.venv/bin/python .claude/ops/bdg.py            # Chrome DevTools bridge
+playwright: .claude/.venv/bin/python .claude/ops/playwright.py # Browser automation
+inventory: .claude/.venv/bin/python .claude/ops/inventory.py # System binary scan
+drift_check: .claude/.venv/bin/python .claude/ops/drift_check.py # Style consistency
+coderabbit: .claude/.venv/bin/python .claude/ops/coderabbit.py # AI code review
 ```
 
-*Other tools exist in `scripts/ops/` for internal/maintenance use.*
+*Other tools exist in `.claude/ops/` for internal/maintenance use.*
 
 ---
 

@@ -50,7 +50,7 @@ COOLDOWN = 90
 LAST_CHECK_FILE = MEMORY_DIR / "counterfactual_last.json"
 
 # Skip low-risk paths
-SKIP_PATHS = (".claude/scratch/", ".claude/memory/", "node_modules/", "__pycache__", ".git/")
+SKIP_PATHS = (".claude/tmp/", ".claude/memory/", "node_modules/", "__pycache__", ".git/")
 
 # Only trigger on substantial changes
 MIN_CHANGE_SIZE = 100  # characters
@@ -161,7 +161,12 @@ Analyze: What's the approach, risk, and fallback?"""
         content = result['choices'][0]['message']['content']
         return json.loads(content)
 
-    except (GroqAPIError, json.JSONDecodeError, KeyError, IndexError):
+    except (GroqAPIError, json.JSONDecodeError, KeyError, IndexError) as e:
+        try:
+            from hook_logging import log_hook_error
+            log_hook_error("counterfactual_check", e, {"model": MODEL})
+        except ImportError:
+            pass
         return None
 
 

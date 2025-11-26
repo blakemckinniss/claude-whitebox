@@ -4,4 +4,4 @@ argument-hint:
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/upkeep.py`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/upkeep.py`

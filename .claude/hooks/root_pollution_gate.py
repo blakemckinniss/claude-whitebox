@@ -6,7 +6,7 @@ Hook Type: PreToolUse (matcher: Write|Edit)
 Latency Target: <5ms
 
 Enforces CLAUDE.md Hard Block #1:
-"NEVER create new files in root. Use projects/, .claude/scratch/."
+"NEVER create new files in root. Use projects/, .claude/tmp/."
 """
 
 import sys
@@ -109,7 +109,7 @@ def main():
             decision="block",
             reason=f"**ROOT POLLUTION BLOCKED** (Hard Block #1)\n"
                    f"Path: {rel_path}\n"
-                   f"Use: projects/ or .claude/scratch/ instead."
+                   f"Use: projects/ or .claude/tmp/ instead."
         )
         sys.exit(0)
 

@@ -17,6 +17,7 @@ Different from gap_detector (which warns about violations). This hook
 suggests POSITIVE actions, not just blocks negative ones.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 from pathlib import Path

@@ -55,9 +55,9 @@ def main():
     # Determine memory file paths
     memory_dir = os.path.join(_project_root, ".claude", "memory")
     memory_files = {
-        "context": os.path.join(memory_dir, "active_context.md"),
-        "decisions": os.path.join(memory_dir, "decisions.md"),
-        "lessons": os.path.join(memory_dir, "lessons.md"),
+        "context": os.path.join(memory_dir, "__active_context.md"),
+        "decisions": os.path.join(memory_dir, "__decisions.md"),
+        "lessons": os.path.join(memory_dir, "__lessons.md"),
     }
 
     # Validate memory directory exists

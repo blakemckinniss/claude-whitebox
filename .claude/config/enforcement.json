@@ -20,7 +20,7 @@
     },
     "scratch_write": {
       "min_confidence": 31,
-      "description": "Minimum confidence required to write to scratch/ (experimentation)",
+      "description": "Minimum confidence required to write to .claude/tmp/ (experimentation)",
       "tier": "HYPOTHESIS"
     },
     "delete_operation": {
@@ -45,8 +45,8 @@
     },
     "HYPOTHESIS": {
       "range": [31, 70],
-      "description": "Can write to scratch/, no production code",
-      "allowed_actions": ["Write (scratch/)", "Bash (read-only)", "Task (delegation at 40%+)"]
+      "description": "Can write to .claude/tmp/, no production code",
+      "allowed_actions": ["Write (.claude/tmp/)", "Bash (read-only)", "Task (delegation at 40%+)"]
     },
     "CERTAINTY": {
       "range": [71, 100],

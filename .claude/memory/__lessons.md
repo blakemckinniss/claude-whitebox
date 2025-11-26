@@ -4,9 +4,9 @@
 
 ### 2025-11-20: Simple relative paths break in subdirectories
 
-**Problem:** Initial scaffolder used `../lib` for imports, failed for scripts in `scripts/category/`.
+**Problem:** Initial scaffolder used `../lib` for imports, failed for scripts in `.claude/ops/`.
 
-**Solution:** Implemented tree-walking to find project root by searching for `scripts/lib/core.py`.
+**Solution:** Implemented tree-walking to find project root by searching for `.claude/lib/core.py`.
 
 **Lesson:** Never assume script location depth. Always search upward for anchor files.
 
@@ -15,7 +15,7 @@
 
 ### 2025-11-20: Indexer test falsely failed on footer text
 
-**Problem:** Test checked if "index.py" existed in file, but it appeared in footer "Last updated by scripts/index.py".
+**Problem:** Test checked if "index.py" existed in file, but it appeared in footer "Last updated by .claude/ops/index.py".
 
 **Solution:** Extract only table section for assertions, ignore metadata.
 
@@ -50,7 +50,7 @@
 
 **Problem:** Processing 100+ files sequentially takes minutes.
 
-**Solution:** Implemented `scripts/lib/parallel.py` with ThreadPoolExecutor.
+**Solution:** Implemented `.claude/lib/parallel.py` with ThreadPoolExecutor.
 
 **Lesson:** For 3+ items, always use parallel execution. Users notice performance.
 
@@ -123,7 +123,7 @@ CRITICAL FAILURE MODE IDENTIFIED: Advisory hooks are insufficient for preventing
 
 
 ### 2025-11-22 02:36
-Council Protocol Gap Analysis: Root cause of vague council output (INVESTIGATE verdicts, philosophical debate) was NOT open-ended queries but MISSING LITERAL CONTEXT. External Gemini received full 856-line CLAUDE.md file → gave 3 concrete goals (Behavior-First, Single Source of Truth, Hard Constraints). Internal council received abstract description only → gave philosophical debate + INVESTIGATE. Solution: Enhanced context_builder.py to auto-detect and include mentioned files (CLAUDE.md, scripts/ops/council.py, etc.) using regex patterns. Files ≤500 lines included in full, >500 lines truncated (first 250 + last 250). Now council automatically receives literal artifacts when files mentioned in proposal. Concrete input = Concrete output. Critical insight: Don't optimize prompts when the real problem is missing data.
+Council Protocol Gap Analysis: Root cause of vague council output (INVESTIGATE verdicts, philosophical debate) was NOT open-ended queries but MISSING LITERAL CONTEXT. External Gemini received full 856-line CLAUDE.md file → gave 3 concrete goals (Behavior-First, Single Source of Truth, Hard Constraints). Internal council received abstract description only → gave philosophical debate + INVESTIGATE. Solution: Enhanced context_builder.py to auto-detect and include mentioned files (CLAUDE.md, .claude/ops/council.py, etc.) using regex patterns. Files ≤500 lines included in full, >500 lines truncated (first 250 + last 250). Now council automatically receives literal artifacts when files mentioned in proposal. Concrete input = Concrete output. Critical insight: Don't optimize prompts when the real problem is missing data.
 
 
 ### 2025-11-22 02:36
@@ -134,7 +134,7 @@ The DRY Fallacy in Prompt Engineering: Software engineering's DRY (Don't Repeat 
 
 
 ### 2025-11-22 22:04
-Project Architecture: Created projects/ directory as USER ZONE for future projects. Template structure: projects/.template/{src,tests,docs,data}. Projects are isolated from .claude/ implementation (gitignored except template). Architecture zones now: projects/ (user work), scratch/ (temp), scripts/ops/ (prod tools), .claude/memory/ (brain), .claude/hooks/ (system). Each user project manages its own git repo independently.
+Project Architecture: Created projects/ directory as USER ZONE for future projects. Template structure: projects/.template/{src,tests,docs,data}. Projects are isolated from .claude/ implementation (gitignored except template). Architecture zones now: projects/ (user work), .claude/tmp/ (temp), .claude/ops/ (prod tools), .claude/memory/ (brain), .claude/hooks/ (system). Each user project manages its own git repo independently.
 
 
 
@@ -143,10 +143,10 @@ Project Architecture: Created projects/ directory as USER ZONE for future projec
 Fixed PreToolUse:Bash hook errors. Three hooks had incorrect output formats: (1) detect_install.py used {"allow": False} instead of proper hookSpecificOutput structure, (2) auto_playwright_setup.py used tool_name/tool_params instead of toolName/toolParams, (3) pre_delegation.py used "action": "allow" instead of "permissionDecision": "allow". All PreToolUse hooks MUST return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow|deny", "permissionDecisionReason": "..."}}
 
 ### 2025-11-23 21:16
-ASSUMPTION FIREWALL PROTOCOL - User input = ground truth. If user provides working code/commands (curl, examples), TEST THEM FIRST before researching alternatives. Research = supplementary context, never override user examples. When research contradicts user input, HALT and ask which is correct. Never implement solutions that diverge from user-provided working examples without explicit confirmation. See scratch/assumption_failure_analysis.md for catastrophic failure case study.
+ASSUMPTION FIREWALL PROTOCOL - User input = ground truth. If user provides working code/commands (curl, examples), TEST THEM FIRST before researching alternatives. Research = supplementary context, never override user examples. When research contradicts user input, HALT and ask which is correct. Never implement solutions that diverge from user-provided working examples without explicit confirmation. See .claude/tmp/assumption_failure_analysis.md for catastrophic failure case study.
 
 ### 2025-11-23 21:55
-Root cause analysis pattern: When void.py reveals gaps (CRUD asymmetry, error handling, retention policy), look deeper than surface symptoms. Example: Memory directory unbounded growth was SYMPTOM (fixed with gitignore), but ROOT CAUSE was missing cleanup/pruning in epistemology.py. Solution: Created retention policy scripts (scratch/fix_epistemology_gaps.py) and documented migration path (scratch/epistemology_patches.py). Fix the library, not just the symptoms.
+Root cause analysis pattern: When void.py reveals gaps (CRUD asymmetry, error handling, retention policy), look deeper than surface symptoms. Example: Memory directory unbounded growth was SYMPTOM (fixed with gitignore), but ROOT CAUSE was missing cleanup/pruning in epistemology.py. Solution: Created retention policy scripts (.claude/tmp/fix_epistemology_gaps.py) and documented migration path (.claude/tmp/epistemology_patches.py). Fix the library, not just the symptoms.
 
 ### 2025-11-24 20:58
 [AUTO-LEARNED-SUCCESS] Novel solution: Created detour_lib_fixed.py (similar scripts: 2)
@@ -173,7 +173,7 @@ Root cause analysis pattern: When void.py reveals gaps (CRUD asymmetry, error ha
 [AUTO-LEARNED-SUCCESS] Novel solution: Created test_synapse_fire_v3.py (similar scripts: 2)
 
 ### 2025-11-25 01:48
-Post-edit validation is critical: py_compile only checks SYNTAX, not imports. For library files (scripts/lib/), must actually import to catch NameError like 'List not defined'. Hook: post_edit_validator.py runs after Edit/Write on .py files and injects errors into context so Claude sees them immediately.
+Post-edit validation is critical: py_compile only checks SYNTAX, not imports. For library files (.claude/lib/), must actually import to catch NameError like 'List not defined'. Hook: post_edit_validator.py runs after Edit/Write on .py files and injects errors into context so Claude sees them immediately.
 
 ### 2025-11-25 19:23
 [AUTO-LEARNED-SUCCESS] Novel solution: Created synapse_fire_v4.py (similar scripts: 2)

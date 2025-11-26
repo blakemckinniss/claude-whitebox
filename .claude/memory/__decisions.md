@@ -8,12 +8,12 @@
 **Consequences:** Requires writing more scripts, but provides full control and visibility.
 
 ### 2025-11-20: Script-First Development
-**Decision:** Use scaffolder (`scripts/scaffold.py`) to generate all new tools with SDK compliance built-in.
+**Decision:** Use scaffolder (`.claude/ops/scaffold.py`) to generate all new tools with SDK compliance built-in.
 **Reason:** Ensures consistency (logging, dry-run, error handling) across all scripts.
 **Consequences:** Slightly slower initial development, but eliminates technical debt.
 
 ### 2025-11-20: Parallel Execution Standard
-**Decision:** Use `scripts/lib/parallel.py` for any operation processing 3+ items.
+**Decision:** Use `.claude/lib/parallel.py` for any operation processing 3+ items.
 **Reason:** Significant performance improvement for I/O-bound operations, with progress visibility.
 **Consequences:** Requires understanding of concurrent execution patterns.
 

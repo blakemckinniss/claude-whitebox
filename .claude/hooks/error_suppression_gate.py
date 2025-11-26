@@ -17,6 +17,7 @@ Behavior:
 - Blocks: Edit, Write, Task, etc. (continuation tools)
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import time

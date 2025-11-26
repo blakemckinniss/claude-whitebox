@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The Janitor: Scans the project, updates indexes, verifies requirements, and cleans .claude/scratch/
+The Janitor: Scans the project, updates indexes, verifies requirements, and cleans .claude/tmp/
 """
 import sys
 import os
@@ -210,7 +210,7 @@ def check_dependencies(dry_run):
 
 
 def check_scratch(dry_run):
-    """Check .claude/scratch/ for old files and warn about cleanup."""
+    """Check .claude/tmp/ for old files and warn about cleanup."""
     print("\n" + "=" * 70)
     print("🧹 [JANITOR] Checking Scratch Directory...")
     print("=" * 70)
@@ -218,10 +218,10 @@ def check_scratch(dry_run):
     scratch_dir = os.path.join(_project_root, "scratch")
 
     if not os.path.exists(scratch_dir):
-        print("  ℹ️  .claude/scratch/ directory does not exist")
+        print("  ℹ️  .claude/tmp/ directory does not exist")
         return True
 
-    # Find all files in .claude/scratch/
+    # Find all files in .claude/tmp/
     scratch_files = []
     for item in os.listdir(scratch_dir):
         item_path = os.path.join(scratch_dir, item)
@@ -229,7 +229,7 @@ def check_scratch(dry_run):
             scratch_files.append(item_path)
 
     if not scratch_files:
-        print("  ✅ .claude/scratch/ is clean (no files)")
+        print("  ✅ .claude/tmp/ is clean (no files)")
         return True
 
     # Check for old files (>24 hours)
@@ -241,7 +241,7 @@ def check_scratch(dry_run):
         if mtime < cutoff_time:
             old_files.append((filepath, mtime))
 
-    print(f"  📊 Found {len(scratch_files)} file(s) in .claude/scratch/")
+    print(f"  📊 Found {len(scratch_files)} file(s) in .claude/tmp/")
 
     if old_files:
         print(f"  ⚠️  {len(old_files)} file(s) are older than 24 hours:")
@@ -288,7 +288,7 @@ def consolidate_lessons(dry_run):
 
 
 def rebuild_scratch_index(dry_run):
-    """Rebuild .claude/scratch/ semantic index for associative memory"""
+    """Rebuild .claude/tmp/ semantic index for associative memory"""
     print("\n" + "=" * 70)
     print("🗂️  [JANITOR] Rebuilding Scratch Index...")
     print("=" * 70)
@@ -358,7 +358,7 @@ def log_maintenance(dry_run):
 
 def main():
     parser = setup_script(
-        "The Janitor: Scans the project, updates indexes, verifies requirements, and cleans .claude/scratch/"
+        "The Janitor: Scans the project, updates indexes, verifies requirements, and cleans .claude/tmp/"
     )
 
     args = parser.parse_args()

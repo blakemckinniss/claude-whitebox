@@ -4,4 +4,4 @@ argument-hint: [add|view] [type] [content...]
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/remember.py $ARGUMENTS`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/remember.py $ARGUMENTS`

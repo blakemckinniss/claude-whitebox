@@ -4,4 +4,4 @@ argument-hint: [status|add|reset] [args...]
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/confidence.py $ARGUMENTS`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/confidence.py $ARGUMENTS`

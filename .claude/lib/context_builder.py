@@ -67,8 +67,8 @@ class ContextConfig:
 
     # Paths (relative to project root)
     MEMORY_DIR = ".claude/memory"
-    LESSONS_FILE = "lessons.md"
-    DECISIONS_FILE = "decisions.md"
+    LESSONS_FILE = "__lessons.md"
+    DECISIONS_FILE = "__decisions.md"
     DIGESTS_DIR = "session_digests"
     AUDIT_DIR = "context_audit"
 

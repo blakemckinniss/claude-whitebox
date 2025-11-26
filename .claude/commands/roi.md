@@ -12,7 +12,7 @@ Analyze context and implement the highest ROI concepts.
 
 1. **Context Gathering** (if no arguments):
    - Scan recent conversation for proposed ideas/improvements
-   - Check scratch/ for pending proposals
+   - Check .claude/tmp/ for pending proposals
    - Review any TODO comments or enhancement requests
 
 2. **ROI Ranking:**

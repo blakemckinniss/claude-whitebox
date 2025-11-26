@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 session_init.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python session_init.py"
           }
         ]
       }
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 stop_cleanup.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python stop_cleanup.py"
           }
         ]
       }
@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 session_cleanup.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python session_cleanup.py"
           }
         ]
       }
@@ -35,114 +35,135 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 prompt_disclaimer.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python prompt_disclaimer.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 context_injector.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python context_injector.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 ops_awareness.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python ops_awareness.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 project_context.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python project_context.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 ops_nudge.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python ops_nudge.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 memory_injector.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python memory_injector.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 goal_anchor.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python goal_anchor.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 intention_tracker.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python intention_tracker.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 proactive_nudge.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python proactive_nudge.py"
           }
         ]
       }
     ],
     "PreToolUse": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python python_path_injector.py"
+          }
+        ]
+      },
+      {
         "matcher": ".*",
         "hooks": [
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 counterfactual_check.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python counterfactual_check.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 gap_detector.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python gap_detector.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 tool_preference.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python tool_preference.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 production_gate.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python production_gate.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 probe_gate.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python probe_gate.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 sunk_cost_detector.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python sunk_cost_detector.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 assumption_ledger.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python assumption_ledger.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 background_enforcer.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python background_enforcer.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 root_pollution_gate.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python root_pollution_gate.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 loop_detector.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python loop_detector.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 error_suppression_gate.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python error_suppression_gate.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 integration_gate.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python integration_gate.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 epistemic_boundary.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python epistemic_boundary.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 research_gate.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python research_gate.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 oracle_gate.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python oracle_gate.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 script_nudge.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python script_nudge.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 doc_theater_gate.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python doc_theater_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python content_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python import_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python thinking_coach.py"
           }
         ]
       }
@@ -153,23 +174,23 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 state_updater.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python state_updater.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 scratch_enforcer.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python scratch_enforcer.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 auto_learn.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python auto_learn.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 velocity_tracker.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python velocity_tracker.py"
           },
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 info_gain_tracker.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python info_gain_tracker.py"
           }
         ]
       }

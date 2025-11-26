@@ -14,6 +14,7 @@ UPGRADE from v3: Uses AST-based semantic stub detection.
 Enforces CLAUDE.md rule: "No Production Write without audit AND void passing"
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import subprocess

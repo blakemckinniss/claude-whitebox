@@ -214,7 +214,7 @@ def new_feature():
 ## Enforcement
 
 These patterns are detected automatically by:
-1. **The Sentinel (`scripts/ops/audit.py`)** - Static analysis + custom regex
+1. **The Sentinel (`.claude/ops/audit.py`)** - Static analysis + custom regex
 2. **Pre-Write Hook (`.claude/hooks/pre_write_audit.py`)** - Blocks deadly sins before write
 3. **Manual Review** - Code reviews reference this document
 

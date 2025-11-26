@@ -21,6 +21,7 @@ Signals:
 Output: Warning message to inject self-reflection before continuing.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 from collections import Counter

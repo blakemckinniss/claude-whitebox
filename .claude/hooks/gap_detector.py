@@ -14,6 +14,7 @@ THE CORE INSIGHT:
 "Consider reading the file." (ignored)
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re
@@ -124,7 +125,7 @@ def check_iteration_loop(state) -> Directive | None:
     if not is_iteration_detected(state):
         return None
 
-    message = "**REDIRECT.** 4+ similar tool calls detected. Write script to `.claude/scratch/`."
+    message = "**REDIRECT.** 4+ similar tool calls detected. Write script to `.claude/tmp/`."
 
     # v3.4: Check nudge history
     show, severity = should_nudge(state, "iteration_loop", message)
@@ -138,7 +139,7 @@ def check_iteration_loop(state) -> Directive | None:
         return Directive(
             strength=DirectiveStrength.BLOCK,  # Escalate to block!
             category="trajectory",
-            message="🚨 **ITERATION LOOP BLOCKED** (ignored 3x). MUST write to `.claude/scratch/` now.",
+            message="🚨 **ITERATION LOOP BLOCKED** (ignored 3x). MUST write to `.claude/tmp/` now.",
             time_saved="~15 min"
         )
 

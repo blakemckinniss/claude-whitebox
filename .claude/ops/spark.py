@@ -27,7 +27,7 @@ from core import setup_script, finalize, logger, handle_debug  # noqa: E402
 def query_lessons(keywords, max_results=3):
     """Scans the Pain Log for past trauma related to these keywords."""
     matches = []
-    lessons_path = os.path.join(_project_root, ".claude", "memory", "lessons.md")
+    lessons_path = os.path.join(_project_root, ".claude", "memory", "__lessons.md")
 
     try:
         with open(lessons_path, "r") as f:
@@ -98,7 +98,7 @@ def main():
 
     try:
         # Load synapse map
-        synapse_path = os.path.join(_project_root, ".claude", "memory", "synapses.json")
+        synapse_path = os.path.join(_project_root, ".claude", "memory", "__synapses.json")
 
         with open(synapse_path, "r") as f:
             synapses = json.load(f)

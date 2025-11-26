@@ -26,7 +26,7 @@ from datetime import datetime
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
 MEMORY_DIR = PROJECT_ROOT / ".claude" / "memory"
-LESSONS_FILE = MEMORY_DIR / "lessons.md"
+LESSONS_FILE = MEMORY_DIR / "__lessons.md"
 AUTO_LEARN_STATE = MEMORY_DIR / "auto_learn_state.json"
 
 # =============================================================================

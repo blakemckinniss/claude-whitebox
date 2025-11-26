@@ -16,6 +16,7 @@ Behavior:
 3. If drift detected: Inject reminder of original goal
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 

@@ -4,4 +4,4 @@ argument-hint: [--fix] [--json] [--strict]
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/audit_hooks.py $ARGUMENTS`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/audit_hooks.py $ARGUMENTS`

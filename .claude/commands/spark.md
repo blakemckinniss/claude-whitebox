@@ -4,4 +4,4 @@ argument-hint: [topic]
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/spark.py "$ARGUMENTS"`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/spark.py "$ARGUMENTS"`

@@ -19,6 +19,7 @@ FLAW CATEGORIES:
 6. SCOPE_CREEP - Adding unrequested features
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re

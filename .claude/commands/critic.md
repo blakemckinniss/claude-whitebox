@@ -4,4 +4,4 @@ argument-hint: [idea]
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/oracle.py --persona critic "$ARGUMENTS"`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/oracle.py --persona critic "$ARGUMENTS"`

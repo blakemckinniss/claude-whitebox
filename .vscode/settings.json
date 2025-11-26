@@ -3,7 +3,7 @@
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.indexing": true,
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.extraPaths": ["scripts/lib"],
+    "python.analysis.extraPaths": [".claude/lib"],
 
     // Testing - pytest
     "python.testing.pytestEnabled": true,
@@ -11,19 +11,26 @@
 
     // Exclude disposable/generated paths from analysis
     "python.analysis.exclude": [
-        "scratch/**",
-        ".claude/session/**"
+        ".claude/tmp/**",
+        ".claude/session/**",
+        ".claude/.venv/**"
     ],
 
     // File exclusions from explorer
     "files.exclude": {
         "**/__pycache__": true,
-        "**/*.pyc": true
+        "**/*.pyc": true,
+        ".ruff_cache": true,
+        ".mypy_cache": true,
+        ".claude/.venv": true
     },
 
     // Search exclusions
     "search.exclude": {
-        "scratch/**": true,
-        ".claude/session/**": true
+        ".claude/tmp/**": true,
+        ".claude/session/**": true,
+        ".ruff_cache/**": true,
+        ".mypy_cache/**": true,
+        ".claude/.venv/**": true
     }
 }

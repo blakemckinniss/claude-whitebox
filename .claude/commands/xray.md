@@ -4,4 +4,4 @@ argument-hint: [--type TYPE] [--name NAME] [path]
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/xray.py $ARGUMENTS`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/xray.py $ARGUMENTS`

@@ -59,8 +59,8 @@ secrets/
 # Project-specific
 # =============================================================================
 # Scratch is disposable prototyping space
-scratch/*
-!scratch/.gitkeep
+.claude/tmp/*
+!.claude/tmp/.gitkeep
 
 # Projects directory for user workspaces
 projects/
@@ -71,8 +71,7 @@ projects/
 # JSON state files (transient)
 .claude/memory/*.json
 # Exception: synapses are accumulated knowledge
-!.claude/memory/synapses.json
-!.claude/memory/synapses_v2.json
+!.claude/memory/__synapses.json
 
 # Logs and locks
 .claude/memory/*.jsonl

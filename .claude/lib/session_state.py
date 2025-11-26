@@ -34,10 +34,11 @@ from dataclasses import dataclass, field, asdict
 # PATHS
 # =============================================================================
 
-HOOK_DIR = Path(__file__).resolve().parent
-MEMORY_DIR = HOOK_DIR.parent / "memory"
+LIB_DIR = Path(__file__).resolve().parent  # .claude/lib
+CLAUDE_DIR = LIB_DIR.parent  # .claude
+MEMORY_DIR = CLAUDE_DIR / "memory"
 STATE_FILE = MEMORY_DIR / "session_state_v3.json"
-OPS_DIR = Path(__file__).resolve().parent.parent.parent / ".claude" / "ops"
+OPS_DIR = Path(__file__).resolve().parent.parent / "ops"  # .claude/lib -> .claude -> .claude/ops
 
 # =============================================================================
 # DOMAIN DETECTION
@@ -484,12 +485,12 @@ def detect_gaps(state: SessionState, context: dict = None) -> list[Gap]:
         file_seen = was_file_read(state, filepath) or filepath in state.files_edited
         if filepath and not file_seen:
             # Exceptions:
-            # 1. New files in .claude/scratch/
+            # 1. New files in .claude/tmp/
             # 2. File doesn't exist (new file creation)
             # 3. Explicitly marked as new_file
             # 4. For Edit: old_string exists in file (implicit proof we have context)
             file_exists = Path(filepath).exists() if filepath else False
-            is_scratch = ".claude/scratch/" in filepath
+            is_scratch = ".claude/tmp/" in filepath
 
             # Fallback: if old_string matches file content, state tracking failed but we have context
             has_implicit_context = False

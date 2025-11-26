@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
 # Paths
-MEMORY_DIR = Path(__file__).resolve().parent.parent.parent / ".claude" / "memory"
+MEMORY_DIR = Path(__file__).resolve().parent.parent / "memory"  # .claude/lib -> .claude -> .claude/memory
 STATE_FILE = MEMORY_DIR / "confidence_state.json"  # Global state (backward compat)
 
 # Confidence Tiers (Graduated System - 6 tiers)
@@ -45,7 +45,7 @@ TIER_PRIVILEGES = {
     },
     "WORKING": {
         "write_scratch": True,
-        "edit_scratch": True,  # Can Edit .claude/scratch/ (with read check)
+        "edit_scratch": True,  # Can Edit .claude/tmp/ (with read check)
         "edit_production": False,
         "write_production": False,
         "git_read": True,  # Can run git status/diff/log
@@ -307,9 +307,9 @@ def get_confidence_tier(confidence: int) -> Tuple[str, str]:
     if TIER_IGNORANCE[0] <= confidence <= TIER_IGNORANCE[1]:
         return "IGNORANCE", "Read/Research/Probe only, no coding"
     elif TIER_HYPOTHESIS[0] <= confidence <= TIER_HYPOTHESIS[1]:
-        return "HYPOTHESIS", "Can write to .claude/scratch/ only (no Edit)"
+        return "HYPOTHESIS", "Can write to .claude/tmp/ only (no Edit)"
     elif TIER_WORKING[0] <= confidence <= TIER_WORKING[1]:
-        return "WORKING", "Can Edit .claude/scratch/, git read-only"
+        return "WORKING", "Can Edit .claude/tmp/, git read-only"
     elif TIER_CERTAINTY[0] <= confidence <= TIER_CERTAINTY[1]:
         return "CERTAINTY", "Production access with MANDATORY quality gates"
     elif TIER_TRUSTED[0] <= confidence <= TIER_TRUSTED[1]:
@@ -402,7 +402,7 @@ Confidence Penalty: {CONFIDENCE_PENALTIES['edit_before_read']}%"""
     # EDIT TOOL: Graduated restrictions by tier
     if tool_name == "Edit":
         file_path = tool_input.get("file_path", "")
-        is_scratch = file_path.startswith(".claude/scratch/") or "/scratch/" in file_path
+        is_scratch = file_path.startswith(".claude/tmp/") or "/scratch/" in file_path
         is_production = not is_scratch
 
         # HYPOTHESIS (31-50%): Edit blocked entirely
@@ -416,11 +416,11 @@ Required: 51%+ (WORKING tier)
 Edit modifies existing code (higher risk than Write).
 Gather more evidence before editing.
 
-Current tier allows: Write to .claude/scratch/ only
+Current tier allows: Write to .claude/tmp/ only
 Confidence Penalty: -10%"""
             return False, message, "tier_violation", "enforce"
 
-        # WORKING (51-70%): Can Edit .claude/scratch/, but not production
+        # WORKING (51-70%): Can Edit .claude/tmp/, but not production
         if tier_name == "WORKING" and is_production:
             message = f"""🚫 PRODUCTION EDIT BLOCKED AT WORKING TIER
 
@@ -428,7 +428,7 @@ Action: Edit {Path(file_path).name}
 Your Confidence: {current_confidence}% ({tier_name} TIER)
 Required: 71%+ (CERTAINTY tier)
 
-You can Edit .claude/scratch/ files, but production requires CERTAINTY tier.
+You can Edit .claude/tmp/ files, but production requires CERTAINTY tier.
 Gather more evidence before editing production code.
 
 Confidence Penalty: -10%"""
@@ -461,7 +461,7 @@ Confidence Penalty: {CONFIDENCE_PENALTIES['edit_before_read']}%"""
     # WRITE TOOL: Graduated restrictions by tier
     if tool_name == "Write":
         file_path = tool_input.get("file_path", "")
-        is_scratch = file_path.startswith(".claude/scratch/") or "/scratch/" in file_path
+        is_scratch = file_path.startswith(".claude/tmp/") or "/scratch/" in file_path
         is_production = not is_scratch
 
         # IGNORANCE (0-30%): No Write at all
@@ -478,7 +478,7 @@ Allowed actions: Read, Research, Probe, Ask questions
 Confidence Penalty: -10%"""
             return False, message, "tier_violation", "enforce"
 
-        # HYPOTHESIS (31-50%): Can Write .claude/scratch/ only
+        # HYPOTHESIS (31-50%): Can Write .claude/tmp/ only
         if tier_name == "HYPOTHESIS" and is_production:
             message = f"""🚫 PRODUCTION WRITE BLOCKED AT HYPOTHESIS TIER
 
@@ -486,7 +486,7 @@ Action: Write {Path(file_path).name}
 Your Confidence: {current_confidence}% ({tier_name} TIER)
 Required: 71%+ (CERTAINTY tier)
 
-You can write to .claude/scratch/ for experiments, but production requires CERTAINTY.
+You can write to .claude/tmp/ for experiments, but production requires CERTAINTY.
 Gather more evidence before writing production code.
 
 Confidence Penalty: -10%"""
@@ -500,7 +500,7 @@ Action: Write {Path(file_path).name}
 Your Confidence: {current_confidence}% ({tier_name} TIER)
 Required: 71%+ (CERTAINTY tier)
 
-WORKING tier allows editing .claude/scratch/, but production writes require CERTAINTY.
+WORKING tier allows editing .claude/tmp/, but production writes require CERTAINTY.
 Gather more evidence (run tests, verify, etc.) to reach 71%.
 
 Confidence Penalty: -10%"""

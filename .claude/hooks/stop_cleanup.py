@@ -23,6 +23,7 @@ NOTE: Stop hooks do NOT support hookSpecificOutput - only PreToolUse,
 UserPromptSubmit, and PostToolUse have hookSpecificOutput schemas.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 from pathlib import Path

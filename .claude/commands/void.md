@@ -4,4 +4,4 @@ argument-hint: [file_or_dir]
 allowed-tools: Bash
 ---
 
-!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/void.py $ARGUMENTS`
+!`python3 $CLAUDE_PROJECT_DIR/.claude/ops/void.py $ARGUMENTS`

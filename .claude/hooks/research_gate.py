@@ -21,6 +21,7 @@ Different from existing hooks:
 - ops_nudge.py: Suggests tools, doesn't block
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 from pathlib import Path
@@ -92,7 +93,7 @@ def main():
             sys.exit(0)
 
     # Skip scratch files (prototyping zone)
-    if ".claude/scratch/" in filepath:
+    if ".claude/tmp/" in filepath:
         print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
         sys.exit(0)
 

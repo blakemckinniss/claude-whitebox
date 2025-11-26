@@ -20,6 +20,7 @@ Different from existing hooks:
 - thinking_coach.py: Suggests decomposition, doesn't require oracle
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 
