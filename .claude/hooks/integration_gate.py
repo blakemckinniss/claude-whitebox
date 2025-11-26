@@ -51,20 +51,26 @@ def main():
 
     # Auto-expire old pending greps (> 5 turns old)
     current_turn = state.turn_count
+    old_count = len(state.pending_integration_greps)
     state.pending_integration_greps = [
         g for g in state.pending_integration_greps
         if current_turn - g.get("turn", 0) <= 5
     ]
+    expired = old_count - len(state.pending_integration_greps)
 
-    # Check for integration blindness
-    should_block, message = check_integration_blindness(state, tool_name, tool_input)
-
-    # If Grep clears a pending item, save state
+    # If Grep, clear matching pending items BEFORE checking should_block
+    # This ensures the check sees the cleared state
     if tool_name == "Grep":
         pattern = tool_input.get("pattern", "")
         if pattern:
             clear_integration_grep(state, pattern)
-            save_state(state)
+
+    # Save state if anything changed (expiry or grep clear)
+    if expired > 0 or tool_name == "Grep":
+        save_state(state)
+
+    # Check for integration blindness (now sees cleared state)
+    should_block, message = check_integration_blindness(state, tool_name, tool_input)
 
     if should_block:
         output_result(decision="block", reason=message)
