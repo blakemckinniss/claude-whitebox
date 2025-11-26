@@ -60,22 +60,24 @@ scratch/*
 projects/
 
 # Claude ephemeral files - session state (NOT persistent knowledge)
-# Keep: lessons.md, decisions.md, synapses.json (accumulated knowledge)
-.claude/memory/*_state*.json
-.claude/memory/*_telemetry*.json
-.claude/memory/*_last.json
-.claude/memory/*_violations.json
+# Ignore all JSON/JSONL in memory EXCEPT whitelisted knowledge files
+.claude/memory/*.json
 .claude/memory/*.jsonl
 .claude/memory/*.lock
+.claude/memory/*.txt
+# Whitelist: accumulated knowledge (tracked)
+!.claude/memory/lessons.md
+!.claude/memory/decisions.md
+!.claude/memory/anti_patterns.md
+!.claude/memory/active_context.md
+!.claude/memory/synapses.json
+!.claude/memory/synapses_v2.json
+# Directories
 .claude/memory/session_digests/
 .claude/memory/context_audit/
 .claude/memory/deliberations/
+# Other ephemeral
 .claude/memory/upkeep_log.md
 .claude/memory/performance_dashboard.md
-.claude/memory/hook_registry.json
-.claude/memory/scratch_index.json
-.claude/memory/punch_list.json
-.claude/memory/sudo_*.json
-.claude/memory/*_backup.json
 .claude/settings.v1.json
 .claude/tests/

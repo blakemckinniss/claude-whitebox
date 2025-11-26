@@ -197,13 +197,14 @@ For complex multi-step work:
 
 ```
 ### 🚦 Execution State
-* **Confidence:** [Low/Medium/High]
-* **Status:** [done / next]
-* **Blockers:** [optional - what's stuck waiting on user/external]
-* **Assumptions:** [optional - implicit decisions made]
-* **Next Steps:** [optional - actionable items for follow-up]
-* **Learned:** [optional - key insights from this session]
-* **Friction:** [optional - what slowed progress + recommendations to reduce]
+* 🎯 **Confidence:** [Low/Medium/High]
+* 📍 **Status:** [done / next]
+* 🚧 **Blockers:** [optional - what's stuck waiting on user/external]
+* 💭 **Assumptions:** [optional - implicit decisions made]
+* ➡️ **Next Steps:** [optional - actionable items for follow-up]
+* 💡 **Learned:** [optional - key insights from this session]
+* ⚡ **Friction:** [optional - what slowed progress + recommendations to reduce]
+* 💊 **Hard Truth:** [optional - honest assessment user needs to hear]
 ```
 
 Skip for simple responses. Include optional fields only when substantive.
