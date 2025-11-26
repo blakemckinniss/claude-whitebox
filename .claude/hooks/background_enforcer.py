@@ -178,8 +178,8 @@ def main():
     suspicious_keywords = ["install", "build", "test", "compile"]
     if any(kw in command.lower() for kw in suspicious_keywords) and not is_background:
         context = (
-            f"⚡ POTENTIALLY SLOW: Command contains build/test keywords.\n"
-            f"Consider: run_in_background=true for commands >5s"
+            "⚡ POTENTIALLY SLOW: Command contains build/test keywords.\n"
+            "Consider: run_in_background=true for commands >5s"
         )
         output_hook_result("PreToolUse", context=context)
         sys.exit(0)

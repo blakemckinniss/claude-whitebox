@@ -21,7 +21,7 @@ import sys
 import json
 import time
 
-from session_state import load_state, save_state
+from session_state import load_state
 
 
 # Tools allowed even with unresolved errors (for debugging)

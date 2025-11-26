@@ -225,7 +225,7 @@ def main():
     filepath = tool_input.get("file_path", "")
 
     # Skip scratch and memory files
-    if "scratch/" in filepath or ".claude/memory" in filepath:
+    if ".claude/scratch/" in filepath or ".claude/memory" in filepath:
         print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
         sys.exit(0)
 

@@ -27,7 +27,7 @@ if str(HOOK_DIR) not in sys.path:
     sys.path.insert(0, str(HOOK_DIR))
 
 # Import state machine
-from session_state import (
+from session_state import (  # noqa: E402
     load_state, save_state,
     track_approach, check_sunk_cost, get_turns_since_op
 )

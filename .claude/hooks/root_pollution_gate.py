@@ -6,7 +6,7 @@ Hook Type: PreToolUse (matcher: Write|Edit)
 Latency Target: <5ms
 
 Enforces CLAUDE.md Hard Block #1:
-"NEVER create new files in root. Use projects/, scratch/."
+"NEVER create new files in root. Use projects/, .claude/scratch/."
 """
 
 import sys
@@ -18,8 +18,6 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 # Allowed top-level directories for writes
 ALLOWED_PREFIXES = (
     "projects/",
-    "scratch/",
-    "scripts/",
     ".claude/",
     ".vscode/",  # IDE configuration - must be at root
 )
@@ -78,7 +76,7 @@ def is_root_pollution(rel_path: str) -> bool:
         return True
 
     # Check if first directory is not allowed
-    if parts[0] not in {"projects", "scratch", "scripts", ".claude"}:
+    if parts[0] not in {"projects", ".claude"}:
         return True
 
     return False
@@ -111,7 +109,7 @@ def main():
             decision="block",
             reason=f"**ROOT POLLUTION BLOCKED** (Hard Block #1)\n"
                    f"Path: {rel_path}\n"
-                   f"Use: projects/, scratch/, or scripts/ instead."
+                   f"Use: projects/ or .claude/scratch/ instead."
         )
         sys.exit(0)
 

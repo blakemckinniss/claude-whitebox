@@ -34,7 +34,7 @@ KEY_FILES = {
 }
 
 # Directories that matter
-KEY_DIRS = ["src", "lib", "scripts", "tests", "docs", ".claude", "projects", "scratch"]
+KEY_DIRS = ["src", "lib", ".claude", "tests", "docs", "projects", "scratch"]
 
 # =============================================================================
 # CONTEXT GATHERING
@@ -64,12 +64,12 @@ def get_git_context() -> dict:
     # Uncommitted changes count
     status = run_git_command(["git", "status", "--porcelain"])
     if status:
-        lines = [l for l in status.split('\n') if l.strip()]
+        lines = [line for line in status.split('\n') if line.strip()]
         # Modified in worktree (not staged): ' M' or 'MM' second char
-        modified = len([l for l in lines if len(l) > 1 and l[1] == 'M'])
-        untracked = len([l for l in lines if l.startswith('??')])
+        modified = len([line for line in lines if len(line) > 1 and line[1] == 'M'])
+        untracked = len([line for line in lines if line.startswith('??')])
         # Staged: first char in MADRC (but not '?' or ' ')
-        staged = len([l for l in lines if len(l) > 0 and l[0] in 'MADRC'])
+        staged = len([line for line in lines if len(line) > 0 and line[0] in 'MADRC'])
         if modified or untracked or staged:
             context["uncommitted"] = {"modified": modified, "untracked": untracked, "staged": staged}
 

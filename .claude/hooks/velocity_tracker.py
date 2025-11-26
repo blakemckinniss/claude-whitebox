@@ -24,7 +24,7 @@ Output: Warning message to inject self-reflection before continuing.
 import sys
 import json
 from collections import Counter
-from session_state import load_state, save_state
+from session_state import load_state
 
 # =============================================================================
 # PATTERNS

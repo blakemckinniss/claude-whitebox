@@ -19,8 +19,7 @@ import json
 import os
 import re
 import subprocess
-import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -254,7 +253,7 @@ def run_spark(text: str, timeout: float = 3.0) -> Optional[Dict]:
         if not project_root:
             current = Path(__file__).resolve().parent
             while current != current.parent:
-                if (current / "scripts" / "ops" / "spark.py").exists():
+                if (current / ".claude" / "ops" / "spark.py").exists():
                     project_root = str(current)
                     break
                 current = current.parent
@@ -263,7 +262,7 @@ def run_spark(text: str, timeout: float = 3.0) -> Optional[Dict]:
             return None
 
         result = subprocess.run(
-            ["python3", "scripts/ops/spark.py", text[:500], "--json"],
+            ["python3", ".claude/ops/spark.py", text[:500], "--json"],
             capture_output=True,
             text=True,
             timeout=timeout,

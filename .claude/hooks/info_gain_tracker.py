@@ -42,7 +42,7 @@ READ_TOOLS = {"Read", "Grep", "Glob"}
 # Bash patterns that indicate progress (not just exploration)
 PROGRESS_BASH_PATTERNS = [
     "pytest", "npm test", "npm run", "cargo test", "cargo build",
-    "python3 scripts/ops/verify", "python3 scripts/ops/audit",
+    "python3 .claude/ops/verify", "python3 .claude/ops/audit",
     "git commit", "git add", "pip install", "npm install",
 ]
 
@@ -108,7 +108,7 @@ def format_stall_warning(state: dict) -> str:
     ]
 
     if reads >= READS_BEFORE_BLOCK:
-        lines.append("  💡 Consider: Write what you know to scratch/ to crystallize.")
+        lines.append("  💡 Consider: Write what you know to .claude/scratch/ to crystallize.")
 
     return "\n".join(lines)
 

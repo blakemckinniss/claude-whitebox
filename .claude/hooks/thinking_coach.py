@@ -22,10 +22,8 @@ FLAW CATEGORIES:
 import sys
 import json
 import re
-import os
 from pathlib import Path
-from typing import List, Dict, Optional
-from dataclasses import dataclass
+from typing import List
 
 # Import from synapse_core
 from synapse_core import (

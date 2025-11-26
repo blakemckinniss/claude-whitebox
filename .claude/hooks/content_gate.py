@@ -20,7 +20,7 @@ SEVERITY LEVELS:
 import sys
 import json
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from synapse_core import (
     check_sudo_in_transcript,
@@ -29,7 +29,7 @@ from synapse_core import (
 
 # Try to import AST analyzer, fall back to regex-only if unavailable
 try:
-    from ast_analysis import SecurityAnalyzer, has_critical_violations
+    from ast_analysis import SecurityAnalyzer
     AST_AVAILABLE = True
 except ImportError:
     AST_AVAILABLE = False
@@ -45,14 +45,14 @@ CONTENT_BLOCKING_PATTERNS: Dict[str, Dict] = {
         "severity": "critical",
         "message": "Code injection vulnerability (eval/exec)",
         "suggestion": "Use ast.literal_eval() for safe parsing",
-        "exclusions": ["scratch/", "test_", ".md", "_test.py"]
+        "exclusions": [".claude/scratch/", "test_", ".md", "_test.py"]
     },
     "sql_injection": {
         "pattern": r'(f["\']SELECT|f["\']INSERT|f["\']UPDATE|f["\']DELETE|"SELECT.*"\s*\+)',
         "severity": "critical",
         "message": "SQL injection risk (string formatting in SQL)",
         "suggestion": "Use parameterized queries: cursor.execute('...?', (val,))",
-        "exclusions": ["scratch/", ".md"]
+        "exclusions": [".claude/scratch/", ".md"]
     },
 
     # BLOCK - Should not reach production (SUDO bypass allowed)
@@ -61,7 +61,7 @@ CONTENT_BLOCKING_PATTERNS: Dict[str, Dict] = {
         "severity": "block",
         "message": "Shell injection risk (shell=True)",
         "suggestion": "Use shell=False with list args",
-        "exclusions": ["scratch/"]
+        "exclusions": [".claude/scratch/"]
     },
     "bare_except": {
         "pattern": r"except\s*:\s*$",
@@ -75,35 +75,35 @@ CONTENT_BLOCKING_PATTERNS: Dict[str, Dict] = {
         "severity": "block",
         "message": "Wildcard import pollutes namespace",
         "suggestion": "Import specific names",
-        "exclusions": ["__init__.py", "scratch/"]
+        "exclusions": ["__init__.py", ".claude/scratch/"]
     },
     "log_secrets": {
         "pattern": r'(print|log|logger)\s*\([^)]*\b(password|token|secret|api_key|credential)\b',
         "severity": "block",
         "message": "Logging sensitive data",
         "suggestion": "Never log credentials",
-        "exclusions": ["scratch/", ".md"]
+        "exclusions": [".claude/scratch/", ".md"]
     },
     "hardcoded_creds": {
         "pattern": r'(password|secret|api_key)\s*=\s*["\'][^"\']{8,}["\']',
         "severity": "block",
         "message": "Hardcoded credentials detected",
         "suggestion": "Use environment variables or secrets manager",
-        "exclusions": ["scratch/", "test_", ".md", ".example"]
+        "exclusions": [".claude/scratch/", "test_", ".md", ".example"]
     },
     "pickle_loads": {
         "pattern": r"pickle\.loads?\s*\(",
         "severity": "block",
         "message": "pickle.load is unsafe with untrusted data",
         "suggestion": "Use JSON or validate source",
-        "exclusions": ["scratch/", "test_"]
+        "exclusions": [".claude/scratch/", "test_"]
     },
     "yaml_unsafe": {
         "pattern": r"yaml\.(load|unsafe_load)\s*\([^)]*\)",
         "severity": "block",
         "message": "yaml.load without Loader is unsafe",
         "suggestion": "Use yaml.safe_load()",
-        "exclusions": ["scratch/"]
+        "exclusions": [".claude/scratch/"]
     },
 }
 

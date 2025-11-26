@@ -5,7 +5,7 @@ Ops Awareness Hook v3: Remind Claude to use existing ops scripts.
 Hook Type: UserPromptSubmit
 Latency Target: <20ms (no API calls, pure pattern matching)
 
-Problem: Claude often reinvents the wheel instead of using scripts/ops/*.py
+Problem: Claude often reinvents the wheel instead of using .claude/ops/*.py
 Solution: Pattern match user prompts against ops script capabilities
 """
 
@@ -117,7 +117,7 @@ def find_relevant_scripts(user_prompt: str) -> list:
             if re.search(trigger, prompt_lower):
                 matches.append({
                     "script": script,
-                    "command": f"python3 scripts/ops/{script}.py",
+                    "command": f"python3 .claude/ops/{script}.py",
                     "description": config["description"]
                 })
                 break  # One match per script is enough

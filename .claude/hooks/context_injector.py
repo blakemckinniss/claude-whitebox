@@ -91,7 +91,7 @@ def detect_ops_suggestion(prompt: str, state) -> dict | None:
             if re.search(pattern, prompt_lower):
                 return {
                     "script": script,
-                    "command": f"python3 scripts/ops/{script}.py",
+                    "command": f"python3 .claude/ops/{script}.py",
                     "reason": f"Prompt matches '{pattern}' pattern",
                 }
 

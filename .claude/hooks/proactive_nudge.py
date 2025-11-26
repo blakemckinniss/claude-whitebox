@@ -22,8 +22,7 @@ import json
 from pathlib import Path
 
 from session_state import (
-    load_state, save_state,
-    get_turns_since_op,
+    load_state, get_turns_since_op,
 )
 
 

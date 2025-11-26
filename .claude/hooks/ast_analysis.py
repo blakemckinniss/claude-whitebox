@@ -21,7 +21,7 @@ Usage:
 """
 
 import ast
-from typing import List, Dict, Optional, Set, Tuple
+from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -156,7 +156,7 @@ class SecurityAnalyzer(ast.NodeVisitor):
                 self.violations.append(Violation(
                     category='security',
                     severity=severity,
-                    name=f'aliased_dangerous_call',
+                    name='aliased_dangerous_call',
                     message=f'{msg} (via alias {func_name})',
                     line=node.lineno,
                     col=node.col_offset,

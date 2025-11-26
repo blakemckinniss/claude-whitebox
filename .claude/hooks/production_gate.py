@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Production Gate Hook v4: PreToolUse hook enforcing audit+void before scripts/ops writes.
+Production Gate Hook v4: PreToolUse hook enforcing audit+void before .claude/ops writes.
 
 Hook Type: PreToolUse (matcher: Write)
 Latency Target: <100ms (runs external scripts)
@@ -33,8 +33,8 @@ except ImportError:
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
 PROTECTED_PATHS = [
-    "scripts/ops/",
-    "scripts/lib/",
+    ".claude/ops/",
+    ".claude/lib/",
 ]
 
 # State file to track what's been audited/voided this session
@@ -84,7 +84,7 @@ def run_audit(file_path: str) -> tuple[bool, str]:
     """Run audit.py on file. Returns (passed, message)."""
     try:
         result = subprocess.run(
-            ["python3", str(PROJECT_ROOT / "scripts/ops/audit.py"), file_path],
+            ["python3", str(PROJECT_ROOT / ".claude/ops/audit.py"), file_path],
             capture_output=True,
             text=True,
             timeout=30,
@@ -167,7 +167,6 @@ def run_void(file_path: str) -> tuple[bool, str]:
     Uses AST for semantic detection (return None, always-true validators).
     Falls back to regex for TODO/FIXME comments.
     """
-    import re
 
     try:
         with open(file_path, "r") as f:

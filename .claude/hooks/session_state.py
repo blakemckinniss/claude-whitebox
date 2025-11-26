@@ -37,7 +37,7 @@ from dataclasses import dataclass, field, asdict
 HOOK_DIR = Path(__file__).resolve().parent
 MEMORY_DIR = HOOK_DIR.parent / "memory"
 STATE_FILE = MEMORY_DIR / "session_state_v3.json"
-OPS_DIR = Path(__file__).resolve().parent.parent.parent / "scripts" / "ops"
+OPS_DIR = Path(__file__).resolve().parent.parent.parent / ".claude" / "ops"
 
 # =============================================================================
 # DOMAIN DETECTION
@@ -484,12 +484,12 @@ def detect_gaps(state: SessionState, context: dict = None) -> list[Gap]:
         file_seen = was_file_read(state, filepath) or filepath in state.files_edited
         if filepath and not file_seen:
             # Exceptions:
-            # 1. New files in scratch/
+            # 1. New files in .claude/scratch/
             # 2. File doesn't exist (new file creation)
             # 3. Explicitly marked as new_file
             # 4. For Edit: old_string exists in file (implicit proof we have context)
             file_exists = Path(filepath).exists() if filepath else False
-            is_scratch = "scratch/" in filepath
+            is_scratch = ".claude/scratch/" in filepath
 
             # Fallback: if old_string matches file content, state tracking failed but we have context
             has_implicit_context = False
@@ -602,7 +602,7 @@ def get_relevant_ops_script(state: SessionState, action: str) -> Optional[dict]:
                 if trigger in action_lower:
                     return {
                         "script": script,
-                        "command": f"python3 scripts/ops/{script}.py",
+                        "command": f"python3 .claude/ops/{script}.py",
                     }
 
     return None

@@ -22,7 +22,7 @@ from pathlib import Path
 # Import the state machine
 from session_state import (
     load_state, save_state, reset_state,
-    STATE_FILE, MEMORY_DIR,
+    MEMORY_DIR,
     _discover_ops_scripts,
 )
 
@@ -197,10 +197,9 @@ def initialize_session() -> dict:
 def main():
     """SessionStart hook entry point."""
     try:
-        # SessionStart receives minimal input
-        input_data = json.load(sys.stdin)
+        json.load(sys.stdin)  # Consume stdin
     except (json.JSONDecodeError, ValueError):
-        input_data = {}
+        pass
 
     # Load state BEFORE initialize (to capture previous session's context)
     previous_state = load_state()

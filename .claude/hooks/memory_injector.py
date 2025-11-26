@@ -17,17 +17,12 @@ When you think about "WebSocket", the heartbeat lesson should appear.
 
 import sys
 import json
-import os
 import re
 from pathlib import Path
 
 # Import synapse core for spark integration
 from synapse_core import (
     run_spark,
-    ScoredAssociation,
-    score_association,
-    estimate_tokens,
-    budget_associations,
     MAX_ASSOCIATIONS,
     MAX_MEMORIES,
 )
@@ -239,7 +234,7 @@ def format_memory_context(
 
     # Lessons (most important)
     if lessons:
-        lesson_lines = "\n".join(f"   * {l[:100]}" for l in lessons)
+        lesson_lines = "\n".join(f"   * {lesson[:100]}" for lesson in lessons)
         parts.append(f"RELEVANT LESSONS:\n{lesson_lines}")
 
     # Active scope/DoD

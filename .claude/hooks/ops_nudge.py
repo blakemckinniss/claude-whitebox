@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ops Tool Nudge Hook: Suggest appropriate scripts/ops/ tools based on prompt patterns.
+Ops Tool Nudge Hook: Suggest appropriate .claude/ops/ tools based on prompt patterns.
 
 Hook Type: UserPromptSubmit
 Latency Target: <20ms (pattern matching only)
@@ -27,7 +27,7 @@ TOOL_TRIGGERS = {
             r"\b(fastapi|pydantic|langchain|anthropic|openai)\b.*\b(docs?|how)\b",
             r"what('s| is)\s+the\s+(syntax|api|way)\s+to",
         ],
-        "command": "python3 scripts/ops/research.py \"<query>\"",
+        "command": "python3 .claude/ops/research.py \"<query>\"",
         "reason": "Live web search for current documentation",
     },
     "firecrawl": {
@@ -37,7 +37,7 @@ TOOL_TRIGGERS = {
             r"crawl\s+(the\s+)?(docs?|site|pages?)",
             r"(fetch|grab|pull)\s+(the\s+)?(html|content|page)\s+from",
         ],
-        "command": "python3 scripts/ops/firecrawl.py scrape <URL>",
+        "command": "python3 .claude/ops/firecrawl.py scrape <URL>",
         "reason": "Deep web scraping with clean markdown output",
     },
     "probe": {
@@ -48,7 +48,7 @@ TOOL_TRIGGERS = {
             r"what\s+can\s+I\s+(call|do)\s+(on|with)",
             r"\.(methods|attrs|attributes)\b",
         ],
-        "command": "python3 scripts/ops/probe.py \"<object_path>\"",
+        "command": "python3 .claude/ops/probe.py \"<object_path>\"",
         "reason": "Runtime introspection - see actual API before coding",
     },
     "xray": {
@@ -58,7 +58,7 @@ TOOL_TRIGGERS = {
             r"(structure|anatomy|layout)\s+of\s+(the\s+)?(code|file|module)",
             r"ast\s+(analysis|search|parse)",
         ],
-        "command": "python3 scripts/ops/xray.py --type <class|function> --name <Name>",
+        "command": "python3 .claude/ops/xray.py --type <class|function> --name <Name>",
         "reason": "AST-based structural code search",
     },
     "docs": {
@@ -66,7 +66,7 @@ TOOL_TRIGGERS = {
             r"(generate|create|write)\s+(docs?|documentation)",
             r"docstring\s+(for|format)",
         ],
-        "command": "python3 scripts/ops/docs.py <file>",
+        "command": "python3 .claude/ops/docs.py <file>",
         "reason": "Generate documentation from code",
     },
 
@@ -81,7 +81,7 @@ TOOL_TRIGGERS = {
             r"is\s+it\s+(overkill|over-?engineer)",
             r"(yagni|premature)\s+",
         ],
-        "command": "python3 scripts/ops/oracle.py --persona judge \"<question>\"",
+        "command": "python3 .claude/ops/oracle.py --persona judge \"<question>\"",
         "reason": "ROI/value assessment - prevents over-engineering",
     },
     "oracle_critic": {
@@ -92,7 +92,7 @@ TOOL_TRIGGERS = {
             r"devil'?s?\s+advocate",
             r"(attack|break)\s+(this|the)\s+(design|code|plan)",
         ],
-        "command": "python3 scripts/ops/oracle.py --persona critic \"<proposal>\"",
+        "command": "python3 .claude/ops/oracle.py --persona critic \"<proposal>\"",
         "reason": "Adversarial review - finds blind spots",
     },
     "oracle_skeptic": {
@@ -102,7 +102,7 @@ TOOL_TRIGGERS = {
             r"(dangerous|risky)\s+to",
             r"(edge|corner)\s+cases?",
         ],
-        "command": "python3 scripts/ops/oracle.py --persona skeptic \"<proposal>\"",
+        "command": "python3 .claude/ops/oracle.py --persona skeptic \"<proposal>\"",
         "reason": "Risk analysis - identifies failure modes",
     },
     "think": {
@@ -113,7 +113,7 @@ TOOL_TRIGGERS = {
             r"(debug|troubleshoot|diagnose)\s+(this|the|a)",
             r"i('m| am)\s+(stuck|confused|lost)",
         ],
-        "command": "python3 scripts/ops/think.py \"<problem>\"",
+        "command": "python3 .claude/ops/think.py \"<problem>\"",
         "reason": "Structured problem decomposition",
     },
     "council": {
@@ -123,7 +123,7 @@ TOOL_TRIGGERS = {
             r"(multiple|different)\s+(perspectives?|viewpoints?|opinions?)",
             r"(pros\s+and\s+cons|trade-?offs?)",
         ],
-        "command": "python3 scripts/ops/council.py \"<proposal>\"",
+        "command": "python3 .claude/ops/council.py \"<proposal>\"",
         "reason": "Multi-perspective analysis (Judge+Critic+Skeptic)",
     },
 
@@ -136,7 +136,7 @@ TOOL_TRIGGERS = {
             r"(code\s+)?(quality|smell|issue)s?\s+(check|review)",
             r"(safe|secure)\s+to\s+(deploy|ship|commit)",
         ],
-        "command": "python3 scripts/ops/audit.py <file>",
+        "command": "python3 .claude/ops/audit.py <file>",
         "reason": "Security and code quality audit",
     },
     "void": {
@@ -146,7 +146,7 @@ TOOL_TRIGGERS = {
             r"(complete|finish|done)\s*\?",
             r"anything\s+(missing|left|incomplete)",
         ],
-        "command": "python3 scripts/ops/void.py <file>",
+        "command": "python3 .claude/ops/void.py <file>",
         "reason": "Completeness check - finds stubs and gaps",
     },
     "verify": {
@@ -155,7 +155,7 @@ TOOL_TRIGGERS = {
             r"(does|is)\s+(the\s+)?(file|port|service)\s+(exist|open|running)",
             r"(assertion|sanity)\s+check",
         ],
-        "command": "python3 scripts/ops/verify.py <check_type> <target>",
+        "command": "python3 .claude/ops/verify.py <check_type> <target>",
         "reason": "Reality verification (file_exists, grep_text, port_open)",
     },
     "drift_check": {
@@ -164,7 +164,7 @@ TOOL_TRIGGERS = {
             r"(code\s+)?style\s+(guide|standard)",
             r"(lint|format)\s+(check|issues?)",
         ],
-        "command": "python3 scripts/ops/drift_check.py",
+        "command": "python3 .claude/ops/drift_check.py",
         "reason": "Style consistency and drift detection",
     },
 
@@ -178,7 +178,7 @@ TOOL_TRIGGERS = {
             r"(note|record)\s+(for|to)\s+(future|later|myself)",
             r"don'?t\s+forget",
         ],
-        "command": "python3 scripts/ops/remember.py add lessons \"<text>\"",
+        "command": "python3 .claude/ops/remember.py add lessons \"<text>\"",
         "reason": "Persist lessons/decisions across sessions",
     },
     "spark": {
@@ -188,7 +188,7 @@ TOOL_TRIGGERS = {
             r"(remind|refresh)\s+(me|my\s+memory)",
             r"(related|similar)\s+(to|issue|problem)\s+before",
         ],
-        "command": "python3 scripts/ops/spark.py \"<topic>\"",
+        "command": "python3 .claude/ops/spark.py \"<topic>\"",
         "reason": "Retrieve associative memories",
     },
     "scope": {
@@ -197,7 +197,7 @@ TOOL_TRIGGERS = {
             r"(task|feature)\s+(complete|done|finished)\s*\?",
             r"(checkpoint|rollback|save\s+point)",
         ],
-        "command": "python3 scripts/ops/scope.py init \"<task>\"",
+        "command": "python3 .claude/ops/scope.py init \"<task>\"",
         "reason": "Definition of Done tracking with checkpoints",
     },
     "evidence": {
@@ -205,7 +205,7 @@ TOOL_TRIGGERS = {
             r"(evidence|proof|verification)\s+(log|trail|history)",
             r"(show|list)\s+(what\s+)?(verified|checked|confirmed)",
         ],
-        "command": "python3 scripts/ops/evidence.py review",
+        "command": "python3 .claude/ops/evidence.py review",
         "reason": "Evidence ledger - review gathered proof",
     },
 
@@ -218,7 +218,7 @@ TOOL_TRIGGERS = {
             r"(multiple|many)\s+(files?|outputs?)\s+at\s+once",
             r"(fan-?out|distribute)\s+(the\s+)?(work|task)",
         ],
-        "command": "python3 scripts/ops/swarm.py --mode <mode> \"<task>\"",
+        "command": "python3 .claude/ops/swarm.py --mode <mode> \"<task>\"",
         "reason": "Parallel agent dispatch for bulk operations",
     },
     "playwright": {
@@ -228,7 +228,7 @@ TOOL_TRIGGERS = {
             r"(click|fill|submit)\s+(the\s+)?(form|button|input)",
             r"(screenshot|capture)\s+(the\s+)?(page|screen)",
         ],
-        "command": "python3 scripts/ops/playwright.py <action>",
+        "command": "python3 .claude/ops/playwright.py <action>",
         "reason": "Browser automation for web interaction",
     },
     "groq": {
@@ -236,7 +236,7 @@ TOOL_TRIGGERS = {
             r"(fast|quick|instant)\s+(llm|model|inference)",
             r"groq\s+(api|model)",
         ],
-        "command": "python3 scripts/ops/groq.py \"<prompt>\"",
+        "command": "python3 .claude/ops/groq.py \"<prompt>\"",
         "reason": "Fast LLM inference via Groq",
     },
 
@@ -249,7 +249,7 @@ TOOL_TRIGGERS = {
             r"(clean|tidy|maintenance)\s+(up|check)",
             r"(ready\s+to\s+)?(commit|push)",
         ],
-        "command": "python3 scripts/ops/upkeep.py",
+        "command": "python3 .claude/ops/upkeep.py",
         "reason": "Pre-commit checks and project maintenance",
     },
     "confidence": {
@@ -258,7 +258,7 @@ TOOL_TRIGGERS = {
             r"(epistemolog|tier)\s+(check|status)",
             r"how\s+(confident|certain|sure)",
         ],
-        "command": "python3 scripts/ops/confidence.py status",
+        "command": "python3 .claude/ops/confidence.py status",
         "reason": "Epistemological confidence tracking",
     },
     "inventory": {
@@ -267,7 +267,7 @@ TOOL_TRIGGERS = {
             r"what('s| is)\s+(installed|available)\s+on\s+(this|the)\s+(system|machine)",
             r"(system|tool)\s+inventory",
         ],
-        "command": "python3 scripts/ops/inventory.py",
+        "command": "python3 .claude/ops/inventory.py",
         "reason": "Scan available system tools and binaries",
     },
 }

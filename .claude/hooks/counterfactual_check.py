@@ -29,9 +29,9 @@ import json
 import time
 from pathlib import Path
 
-# Add scripts/ops to path for groq.py import
+# Add .claude/ops to path for groq.py import
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "scripts" / "ops"))
+sys.path.insert(0, str(PROJECT_ROOT / ".claude" / "ops"))
 
 from groq import call_groq_api, GroqAPIError  # noqa: E402
 
@@ -50,7 +50,7 @@ COOLDOWN = 90
 LAST_CHECK_FILE = MEMORY_DIR / "counterfactual_last.json"
 
 # Skip low-risk paths
-SKIP_PATHS = ("scratch/", ".claude/memory/", "node_modules/", "__pycache__", ".git/")
+SKIP_PATHS = (".claude/scratch/", ".claude/memory/", "node_modules/", "__pycache__", ".git/")
 
 # Only trigger on substantial changes
 MIN_CHANGE_SIZE = 100  # characters

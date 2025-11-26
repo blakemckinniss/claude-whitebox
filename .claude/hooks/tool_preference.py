@@ -11,7 +11,6 @@ Solution: Intercept and suggest alternatives with clear reasoning
 
 import sys
 import json
-import re
 
 # =============================================================================
 # TOOL REDIRECTS
@@ -21,13 +20,13 @@ TOOL_PREFERENCES = {
     "WebFetch": {
         "better_tool": "firecrawl.py",
         "reason": "Firecrawl extracts cleaner markdown, handles JS-rendered content",
-        "command": "python3 scripts/ops/firecrawl.py scrape <URL>",
+        "command": "python3 .claude/ops/firecrawl.py scrape <URL>",
         "exceptions": ["github.com/raw", "api.", "json"],  # Allow direct API calls
     },
     "WebSearch": {
         "better_tool": "research.py",
         "reason": "Tavily provides summarized, relevant results with less noise",
-        "command": "python3 scripts/ops/research.py \"<query>\"",
+        "command": "python3 .claude/ops/research.py \"<query>\"",
         "exceptions": [],
     },
 }

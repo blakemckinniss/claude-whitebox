@@ -15,7 +15,6 @@ Writes to lessons.md without manual intervention.
 
 import sys
 import json
-import os
 import re
 from pathlib import Path
 from datetime import datetime
@@ -113,7 +112,7 @@ def should_capture(state: dict, lesson: str) -> bool:
     normalized = lesson.lower().strip()
 
     # Check if already written
-    if normalized in [l.lower() for l in state.get("lessons_written", [])]:
+    if normalized in [line.lower() for line in state.get("lessons_written", [])]:
         return False
 
     # Check recent captures (avoid spam)

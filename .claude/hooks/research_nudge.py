@@ -146,7 +146,7 @@ def main():
     if needs_search:
         suggestions.append(
             f"🌐 WEB SEARCH: {search_reason}\n"
-            f"   Run: python3 scripts/ops/research.py \"<query>\""
+            f"   Run: python3 .claude/ops/research.py \"<query>\""
         )
 
     # Check for oracle need
@@ -154,7 +154,7 @@ def main():
     if needs_ext:
         suggestions.append(
             f"🔮 ORACLE CONSULTATION: {oracle_reason}\n"
-            f"   Run: python3 scripts/ops/oracle.py --persona {persona} \"<question>\""
+            f"   Run: python3 .claude/ops/oracle.py --persona {persona} \"<question>\""
         )
 
     if suggestions:

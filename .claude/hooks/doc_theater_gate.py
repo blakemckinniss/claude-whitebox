@@ -46,6 +46,8 @@ ALLOWED_MD_PATHS = [
     r'/CLAUDE\.md$',                    # Constitution
     r'\.claude/commands/.*\.md$',       # Slash commands
     r'\.claude/memory/.*\.md$',         # Persistent memory
+    r'\.claude/agents/.*\.md$',         # Subagent definitions
+    r'\.claude/skills/.*\.md$',         # Skill definitions
     r'projects/.*/.*\.md$',             # Project-specific docs (user owns these)
 ]
 

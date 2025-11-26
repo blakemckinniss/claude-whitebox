@@ -165,7 +165,7 @@ def main():
     for lib, api_hint in unprobed[:2]:  # Max 2
         suggestions.append(
             f"   • `{lib}` ({api_hint})\n"
-            f"     → python3 scripts/ops/probe.py \"{lib}.<object>\""
+            f"     → python3 .claude/ops/probe.py \"{lib}.<object>\""
         )
 
     output = {

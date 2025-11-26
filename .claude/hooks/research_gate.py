@@ -23,13 +23,11 @@ Different from existing hooks:
 
 import sys
 import json
-import re
 from pathlib import Path
 
 # Import shared state
 from session_state import (
-    load_state, save_state,
-    RESEARCH_REQUIRED_LIBS, extract_libraries_from_code
+    load_state, RESEARCH_REQUIRED_LIBS, extract_libraries_from_code
 )
 
 # =============================================================================
@@ -94,7 +92,7 @@ def main():
             sys.exit(0)
 
     # Skip scratch files (prototyping zone)
-    if "scratch/" in filepath:
+    if ".claude/scratch/" in filepath:
         print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
         sys.exit(0)
 
@@ -140,11 +138,11 @@ def main():
                 f"Unverified libraries: {libs_str}\n\n"
                 f"**REQUIRED before writing this code:**\n"
                 f"```bash\n"
-                f"python3 scripts/ops/research.py \"{unresearched[0]} API 2024\"\n"
+                f"python3 .claude/ops/research.py \"{unresearched[0]} API 2024\"\n"
                 f"```\n"
                 f"OR\n"
                 f"```bash\n"
-                f"python3 scripts/ops/probe.py \"{unresearched[0]}.<object>\"\n"
+                f"python3 .claude/ops/probe.py \"{unresearched[0]}.<object>\"\n"
                 f"```\n\n"
                 f"**Bypass:** Say \"VERIFIED\" if you've manually confirmed the API.\n"
                 f"**Why:** APIs change. Training data may be stale. Verify first."

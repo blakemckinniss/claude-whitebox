@@ -18,7 +18,6 @@ Behavior:
 
 import sys
 import json
-from pathlib import Path
 
 # Import state machine
 from session_state import (

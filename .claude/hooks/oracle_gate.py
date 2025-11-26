@@ -22,9 +22,8 @@ Different from existing hooks:
 
 import sys
 import json
-from pathlib import Path
 
-from session_state import load_state, save_state, get_turns_since_op
+from session_state import load_state, get_turns_since_op
 
 # =============================================================================
 # CONFIG
@@ -91,11 +90,11 @@ def main():
                     "The Three-Strike Rule requires external consultation before attempt #3.\n\n"
                     "**Recommended:**\n"
                     "```bash\n"
-                    "python3 scripts/ops/oracle.py --persona skeptic \"Why is this failing?\"\n"
+                    "python3 .claude/ops/oracle.py --persona skeptic \"Why is this failing?\"\n"
                     "```\n"
                     "OR\n"
                     "```bash\n"
-                    "python3 scripts/ops/think.py \"Decompose: <the problem>\"\n"
+                    "python3 .claude/ops/think.py \"Decompose: <the problem>\"\n"
                     "```\n\n"
                     "Fresh perspective often reveals blind spots."
                 ),
@@ -115,11 +114,11 @@ def main():
                     f"**{failures} consecutive failures** without oracle/think consultation.\n\n"
                     f"**REQUIRED before continuing:**\n"
                     f"```bash\n"
-                    f"python3 scripts/ops/oracle.py --persona skeptic \"Why does X keep failing?\"\n"
+                    f"python3 .claude/ops/oracle.py --persona skeptic \"Why does X keep failing?\"\n"
                     f"```\n"
                     f"OR\n"
                     f"```bash\n"
-                    f"python3 scripts/ops/think.py \"Debug: <summarize the failures>\"\n"
+                    f"python3 .claude/ops/think.py \"Debug: <summarize the failures>\"\n"
                     f"```\n\n"
                     f"**Why:** Repeated failure = wrong mental model. Get external input.\n"
                     f"**Bypass:** Run oracle/think, or user says \"SUDO CONTINUE\"."
