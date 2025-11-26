@@ -483,11 +483,24 @@ def detect_gaps(state: SessionState, context: dict = None) -> list[Gap]:
             # 1. New files in scratch/
             # 2. File doesn't exist (new file creation)
             # 3. Explicitly marked as new_file
+            # 4. For Edit: old_string exists in file (implicit proof we have context)
             file_exists = Path(filepath).exists() if filepath else False
             is_scratch = "scratch/" in filepath
+
+            # Fallback: if old_string matches file content, state tracking failed but we have context
+            has_implicit_context = False
+            if tool_name == "Edit" and file_exists:
+                old_string = tool_input.get("old_string", "")
+                if old_string and len(old_string) > 20:  # Non-trivial match
+                    try:
+                        with open(filepath, 'r') as f:
+                            content = f.read()
+                        has_implicit_context = old_string in content
+                    except (IOError, OSError, UnicodeDecodeError):
+                        pass
             is_new_file = tool_input.get("new_file", False)
 
-            if file_exists and not is_scratch and not is_new_file:
+            if file_exists and not is_scratch and not is_new_file and not has_implicit_context:
                 gaps.append(Gap(
                     type="edit_without_read",
                     message=f"Editing `{Path(filepath).name}` without reading it first",
@@ -949,8 +962,18 @@ def extract_function_names(code: str) -> list[str]:
     for pattern, _ in FUNCTION_PATTERNS:
         matches = re.findall(pattern, code, re.MULTILINE)
         functions.extend(matches)
-    # Dedupe and filter out common non-function matches
-    skip = {'if', 'for', 'while', 'switch', 'catch', 'with', 'return'}
+    # Dedupe and filter out common non-function matches and entry points
+    # Entry points (main, __init__, etc.) don't need caller verification
+    skip = {
+        # Control flow (false positives from regex)
+        'if', 'for', 'while', 'switch', 'catch', 'with', 'return',
+        # Standard entry points (no external callers to check)
+        'main', '__init__', '__main__', 'setup', 'teardown',
+        # Test patterns
+        'test', 'setUp', 'tearDown',
+        # Common dunder methods
+        '__str__', '__repr__', '__eq__', '__hash__',
+    }
     return list(set(f for f in functions if f not in skip and len(f) > 1))
 
 

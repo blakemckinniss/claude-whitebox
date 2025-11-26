@@ -1,83 +1,96 @@
+# =============================================================================
 # Python
+# =============================================================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 build/
-develop-eggs/
 dist/
-downloads/
 eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
 *.egg
 
 # Virtual environments
 venv/
+.venv/
 ENV/
 env/
 
-# IDE
+# Type checking / Linting / Testing
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+
+# =============================================================================
+# IDE / OS
+# =============================================================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
 Thumbs.db
-desktop.ini
 
-# Backups
+# =============================================================================
+# Artifacts
+# =============================================================================
 *.backup
 *.bak
 *.old
 *.tmp
-
-# Logs
 *.log
-
-# Node
 node_modules/
 
-# Secrets
+# =============================================================================
+# Secrets (NEVER commit)
+# =============================================================================
 .env
 .env.*
 *.secret
+credentials.json
+secrets/
 
+# =============================================================================
 # Project-specific
+# =============================================================================
+# Scratch is disposable prototyping space
 scratch/*
 !scratch/.gitkeep
+
+# Projects directory for user workspaces
 projects/
 
-# Claude ephemeral files - session state (NOT persistent knowledge)
-# Ignore all JSON/JSONL in memory EXCEPT whitelisted knowledge files
+# =============================================================================
+# Claude Code - Session State (ephemeral, per-session)
+# =============================================================================
+# JSON state files (transient)
 .claude/memory/*.json
+# Exception: synapses are accumulated knowledge
+!.claude/memory/synapses.json
+!.claude/memory/synapses_v2.json
+
+# Logs and locks
 .claude/memory/*.jsonl
 .claude/memory/*.lock
 .claude/memory/*.txt
-# Whitelist: accumulated knowledge (tracked)
-!.claude/memory/lessons.md
-!.claude/memory/decisions.md
-!.claude/memory/anti_patterns.md
-!.claude/memory/active_context.md
-!.claude/memory/synapses.json
-!.claude/memory/synapses_v2.json
-# Directories
+
+# Generated dashboards (regenerated on demand)
+.claude/memory/upkeep_log.md
+.claude/memory/performance_dashboard.md
+
+# Session artifact directories
 .claude/memory/session_digests/
 .claude/memory/context_audit/
 .claude/memory/deliberations/
-# Other ephemeral
-.claude/memory/upkeep_log.md
-.claude/memory/performance_dashboard.md
+
+# Settings snapshots
 .claude/settings.v1.json
+
+# Test artifacts
 .claude/tests/
