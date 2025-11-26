@@ -10,6 +10,16 @@
         ]
       }
     ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 stop_cleanup.py"
+          }
+        ]
+      }
+    ],
     "SessionEnd": [
       {
         "hooks": [
@@ -23,6 +33,10 @@
     "UserPromptSubmit": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 prompt_disclaimer.py"
+          },
           {
             "type": "command",
             "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 context_injector.py"
@@ -50,6 +64,10 @@
           {
             "type": "command",
             "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 intention_tracker.py"
+          },
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 proactive_nudge.py"
           }
         ]
       }
@@ -117,6 +135,14 @@
           {
             "type": "command",
             "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 oracle_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 script_nudge.py"
+          },
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 doc_theater_gate.py"
           }
         ]
       }

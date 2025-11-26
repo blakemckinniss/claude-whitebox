@@ -21,7 +21,7 @@ import json
 
 from session_state import (
     load_state, save_state,
-    check_integration_blindness, clear_integration_grep
+    check_integration_blindness,
 )
 
 
@@ -58,18 +58,12 @@ def main():
     ]
     expired = old_count - len(state.pending_integration_greps)
 
-    # If Grep, clear matching pending items BEFORE checking should_block
-    # This ensures the check sees the cleared state
-    if tool_name == "Grep":
-        pattern = tool_input.get("pattern", "")
-        if pattern:
-            clear_integration_grep(state, pattern)
-
-    # Save state if anything changed (expiry or grep clear)
-    if expired > 0 or tool_name == "Grep":
+    # Save state if expiries happened
+    if expired > 0:
         save_state(state)
 
-    # Check for integration blindness (now sees cleared state)
+    # Check for integration blindness
+    # NOTE: Clearing happens in state_updater.py (PostToolUse) to avoid race with other PreToolUse hooks
     should_block, message = check_integration_blindness(state, tool_name, tool_input)
 
     if should_block:

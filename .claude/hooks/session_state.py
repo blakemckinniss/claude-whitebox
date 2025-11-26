@@ -192,6 +192,10 @@ class SessionState:
     # Integration Blindness Prevention (v3.3)
     pending_integration_greps: list = field(default_factory=list)  # [{function, file, turn}]
 
+    # Nudge Tracking (v3.4) - prevents repetitive warnings, enables escalation
+    # Format: {nudge_type: {last_turn, times_shown, times_ignored, last_content_hash}}
+    nudge_history: dict = field(default_factory=dict)
+
 # =============================================================================
 # STATE MANAGEMENT
 # =============================================================================
@@ -1012,23 +1016,27 @@ def check_integration_blindness(state: SessionState, tool_name: str, tool_input:
     """Check if there are pending integration greps that should block.
 
     Returns: (should_block, message)
+
+    NOTE: Clearing of pending greps happens in state_updater.py (PostToolUse)
+    to avoid race conditions with other PreToolUse hooks.
     """
     pending = get_pending_integration_greps(state)
     if not pending:
         return False, ""
 
-    # If this is a Grep that matches a pending function, clear it
-    if tool_name == "Grep":
-        pattern = tool_input.get("pattern", "")
-        for p in pending:
-            if p["function"] in pattern or pattern in p["function"]:
-                clear_integration_grep(state, pattern)
-                return False, ""
-
-    # For non-Grep tools (except diagnostic), check if we should block
+    # Diagnostic tools are always allowed (needed to investigate/clear)
     diagnostic_tools = {"Read", "Grep", "Glob", "Bash", "BashOutput", "TodoWrite"}
     if tool_name in diagnostic_tools:
         return False, ""
+
+    # Non-code files are allowed - integration blindness only matters for code
+    # Editing .md, .json, .txt, .yaml etc. doesn't affect function callers
+    if tool_name in {"Edit", "Write"}:
+        file_path = tool_input.get("file_path", "")
+        non_code_extensions = {".md", ".json", ".txt", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".csv"}
+        from pathlib import Path
+        if Path(file_path).suffix.lower() in non_code_extensions:
+            return False, ""
 
     # Block with message about pending greps
     func_list = ", ".join(f"`{p['function']}`" for p in pending[:3])
@@ -1038,3 +1046,101 @@ def check_integration_blindness(state: SessionState, tool_name: str, tool_input:
         f"REQUIRED: Run `grep -r \"function_name\"` to find callers before continuing.\n"
         f"Pattern: After function edit, grep is MANDATORY."
     )
+
+
+# =============================================================================
+# NUDGE TRACKING (v3.4) - Anti-Amnesia System
+# =============================================================================
+
+# Nudge categories with default cooldowns (turns before re-showing)
+NUDGE_COOLDOWNS = {
+    "goal_drift": 8,           # Goal anchor warnings
+    "library_research": 5,     # Unresearched library warnings
+    "multiple_edits": 10,      # "Edited X times without tests"
+    "unresolved_error": 3,     # Pending errors
+    "sunk_cost": 5,            # "3 failures on same approach"
+    "batch_opportunity": 4,    # "Could batch these reads"
+    "iteration_loop": 3,       # "4+ same tool calls"
+    "stub_warning": 10,        # New file has stubs
+    "default": 5,              # Fallback cooldown
+}
+
+# Escalation thresholds
+ESCALATION_THRESHOLD = 3  # After 3 ignored nudges, escalate severity
+
+
+def _content_hash(content: str) -> int:
+    """Simple hash of content for dedup (first 100 chars)."""
+    return hash(content[:100])
+
+
+def should_nudge(state: SessionState, nudge_type: str, content: str = "") -> tuple[bool, str]:
+    """Check if a nudge should be shown based on history.
+
+    Returns: (should_show, severity)
+        severity: "normal", "escalate", or "suppress"
+    """
+    history = state.nudge_history.get(nudge_type, {})
+    cooldown = NUDGE_COOLDOWNS.get(nudge_type, NUDGE_COOLDOWNS["default"])
+
+    last_turn = history.get("last_turn", -999)
+    turns_since = state.turn_count - last_turn
+
+    # Check cooldown
+    if turns_since < cooldown:
+        # Same content within cooldown? Suppress
+        if content and history.get("last_content_hash") == _content_hash(content):
+            return False, "suppress"
+        # Different content? Allow (new situation)
+        if content and history.get("last_content_hash") != _content_hash(content):
+            return True, "normal"
+        return False, "suppress"
+
+    # Check for escalation (ignored multiple times)
+    times_ignored = history.get("times_ignored", 0)
+    if times_ignored >= ESCALATION_THRESHOLD:
+        return True, "escalate"
+
+    return True, "normal"
+
+
+def record_nudge(state: SessionState, nudge_type: str, content: str = ""):
+    """Record that a nudge was shown."""
+    if nudge_type not in state.nudge_history:
+        state.nudge_history[nudge_type] = {}
+
+    history = state.nudge_history[nudge_type]
+    history["last_turn"] = state.turn_count
+    history["times_shown"] = history.get("times_shown", 0) + 1
+    if content:
+        history["last_content_hash"] = _content_hash(content)
+
+
+def mark_nudge_ignored(state: SessionState, nudge_type: str):
+    """Mark that a nudge was likely ignored (no action taken).
+
+    Call this when detecting that Claude didn't act on a previous nudge.
+    """
+    if nudge_type not in state.nudge_history:
+        state.nudge_history[nudge_type] = {}
+
+    state.nudge_history[nudge_type]["times_ignored"] = \
+        state.nudge_history[nudge_type].get("times_ignored", 0) + 1
+
+
+def clear_nudge(state: SessionState, nudge_type: str):
+    """Clear nudge history (when the issue is resolved)."""
+    if nudge_type in state.nudge_history:
+        del state.nudge_history[nudge_type]
+
+
+def get_nudge_stats(state: SessionState) -> dict:
+    """Get summary of nudge history for debugging."""
+    return {
+        nudge_type: {
+            "shown": h.get("times_shown", 0),
+            "ignored": h.get("times_ignored", 0),
+            "last_turn": h.get("last_turn", -1),
+        }
+        for nudge_type, h in state.nudge_history.items()
+    }

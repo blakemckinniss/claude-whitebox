@@ -21,17 +21,18 @@ import json
 from pathlib import Path
 
 # Import state machine
-from session_state import load_state, save_state, set_goal, check_goal_drift
+from session_state import (
+    load_state, save_state, set_goal, check_goal_drift,
+    should_nudge, record_nudge,  # v3.4: Nudge tracking
+)
 
 
 def output_hook_result(context: str = ""):
     """Output hook result."""
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": context
-        }
-    }))
+    result = {"hookSpecificOutput": {"hookEventName": "UserPromptSubmit"}}
+    if context:
+        result["hookSpecificOutput"]["additionalContext"] = context
+    print(json.dumps(result))
 
 
 def main():
@@ -60,13 +61,20 @@ def main():
     # Check for drift (use prompt as current activity indicator)
     is_drifting, drift_message = check_goal_drift(state, prompt)
 
-    save_state(state)
-
     if is_drifting:
-        output_hook_result(f"\n{drift_message}\n")
-    else:
-        output_hook_result()
+        # v3.4: Check nudge history before showing
+        show, severity = should_nudge(state, "goal_drift", drift_message)
+        if show:
+            record_nudge(state, "goal_drift", drift_message)
+            # Escalate if repeatedly ignored
+            if severity == "escalate":
+                drift_message = f"🚨 **REPEATED DRIFT WARNING** (ignored {state.nudge_history.get('goal_drift', {}).get('times_ignored', 0)}x)\n{drift_message}"
+            save_state(state)
+            output_hook_result(f"\n{drift_message}\n")
+            sys.exit(0)
 
+    save_state(state)
+    output_hook_result()
     sys.exit(0)
 
 

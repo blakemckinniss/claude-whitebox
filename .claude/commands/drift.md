@@ -4,4 +4,4 @@ argument-hint:
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/drift_check.py`
+!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/drift_check.py`

@@ -4,4 +4,4 @@ argument-hint: [init|check|status|checkpoint|rollback] [args...]
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/scope.py $ARGUMENTS`
+!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/scope.py $ARGUMENTS`

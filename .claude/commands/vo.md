@@ -16,7 +16,7 @@ Run void.py completeness check combined with Oracle gap analysis.
 
 2. **Run Void Hunter:**
    ```bash
-   python3 scripts/ops/void.py <target>
+   python3 $CLAUDE_PROJECT_DIR/scripts/ops/void.py <target>
    ```
    This detects:
    - Stubs (TODO, FIXME, pass, ..., NotImplementedError)
@@ -27,7 +27,7 @@ Run void.py completeness check combined with Oracle gap analysis.
 
 3. **Oracle Deep Analysis** (if void finds issues):
    ```bash
-   python3 scripts/ops/oracle.py --persona critic "Analyze these completeness gaps: <void_output>"
+   python3 $CLAUDE_PROJECT_DIR/scripts/ops/oracle.py --persona critic "Analyze these completeness gaps: <void_output>"
    ```
 
 4. **Output Format:**

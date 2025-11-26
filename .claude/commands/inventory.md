@@ -4,4 +4,4 @@ argument-hint: [--compact]
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/inventory.py $ARGUMENTS`
+!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/inventory.py $ARGUMENTS`

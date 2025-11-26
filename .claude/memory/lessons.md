@@ -204,45 +204,12 @@ Post-edit validation is critical: py_compile only checks SYNTAX, not imports. Fo
 
 **Lesson:** NEVER assume JSON schema. Read the actual file first. Handle both expected AND legacy formats gracefully.
 
-### 2025-11-26 02:00
-- [unresearched_libs] Used without research: session, session_state, Path, dead, previous
-- [2025-11-26] [auto] Missing module: foobar (context: python test.py)
+### 2025-11-26: Config values ≠ actual behavior
+**Problem:** Saw `timeout: 15` in prompt hook config → assumed latency ≈ 15s → removed the hook as "too slow."
 
-### 2025-11-26 02:19
-- [file_complexity] Edited settings.json 5x - review for API quirks or complexity
-- [file_complexity] Edited research_nudge.py 3x - review for API quirks or complexity
-- [file_complexity] Edited production_gate.py 4x - review for API quirks or complexity
-- [unresearched_libs] Used without research: runtime, text, error, Path, a, ,
-        ],
-        , errors, name, oracle, web, , , prompt, lessons, code
-- [domain_focus] Session focused on data (75% confidence)
+**Root Cause:** Timeout is a MAXIMUM, not expected latency. Actual Haiku call is <1s. I invented a number, then built confident reasoning on that false foundation.
 
-### 2025-11-26 02:27
-- [file_complexity] Edited settings.json 5x - review for API quirks or complexity
-- [file_complexity] Edited research_nudge.py 3x - review for API quirks or complexity
-- [file_complexity] Edited session_state.py 4x - review for API quirks or complexity
-- [file_complexity] Edited production_gate.py 4x - review for API quirks or complexity
-- [file_complexity] Edited memory_injector.py 3x - review for API quirks or complexity
-- [unresearched_libs] Used without research: synapse_core, name, List, lessons, session_state, code, oracle, Dict, , , error, web, spark, files, errors, Enum, pollutes, prompt, dataclass, transcript, Path, runtime, a, flawed, text, enum, ,
-        ],
-        
+**Lesson:** NEVER use config values (timeouts, limits, thresholds) as proxies for actual performance. Config = constraint, not measurement. Measure or ask - don't guess.
 
-### 2025-11-26 02:32
-- [file_complexity] Edited settings.json 7x - review for API quirks or complexity
-- [file_complexity] Edited research_nudge.py 3x - review for API quirks or complexity
-- [file_complexity] Edited session_state.py 6x - review for API quirks or complexity
-- [file_complexity] Edited production_gate.py 4x - review for API quirks or complexity
-- [file_complexity] Edited memory_injector.py 3x - review for API quirks or complexity
-- [unresearched_libs] Used without research: a, goal, Enum, name, code, Path, session_state, dataclass, synapse_core, spark, prompt, error, transcript, web, enum, errors, ,
-        ],
-        , flawed, load_state, runtime, pollutes, Dict, lessons, text, , , files, oracle, List, original
-
-### 2025-11-26 02:37
-- [unresearched_libs] Used without research: urllib, Path
-
-### 2025-11-26 03:04
-- [domain_focus] Session focused on infrastructure (100% confidence)
-
-### 2025-11-26 12:30
-- [file_complexity] Edited CLAUDE.md 5x - review for API quirks or complexity
-- [unresearched_libs] Used without research: Path, previous, this, concurrent, session_state
+### 2025-11-26 13:28
+- [abandoned_stubs] ⚠️ ABANDONED WORK: script_nudge.py, stop_cleanup.py contain stubs/TODOs

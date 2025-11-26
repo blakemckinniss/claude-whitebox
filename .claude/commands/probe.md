@@ -4,4 +4,4 @@ argument-hint: [object_path]
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/probe.py "$ARGUMENTS"`
+!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/probe.py "$ARGUMENTS"`

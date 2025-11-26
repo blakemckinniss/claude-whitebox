@@ -24,6 +24,7 @@ from session_state import (
     detect_gaps, surface_gap, Gap,
     track_tool_usage, track_ops_command,
     get_turns_since_op, is_iteration_detected,
+    should_nudge, record_nudge,  # v3.4: Nudge tracking
 )
 
 # Import synapse core
@@ -123,10 +124,28 @@ def check_iteration_loop(state) -> Directive | None:
     if not is_iteration_detected(state):
         return None
 
+    message = "**REDIRECT.** 4+ similar tool calls detected. Write script to `scratch/`."
+
+    # v3.4: Check nudge history
+    show, severity = should_nudge(state, "iteration_loop", message)
+    if not show:
+        return None
+
+    record_nudge(state, "iteration_loop", message)
+
+    # Escalate if repeatedly ignored
+    if severity == "escalate":
+        return Directive(
+            strength=DirectiveStrength.BLOCK,  # Escalate to block!
+            category="trajectory",
+            message="🚨 **ITERATION LOOP BLOCKED** (ignored 3x). MUST write to `scratch/` now.",
+            time_saved="~15 min"
+        )
+
     return Directive(
         strength=DirectiveStrength.WARN,
         category="trajectory",
-        message="**REDIRECT.** 4+ similar tool calls detected. Write script to `scratch/`.",
+        message=message,
         time_saved="~15 min"
     )
 

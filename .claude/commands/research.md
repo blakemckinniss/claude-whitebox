@@ -4,4 +4,4 @@ argument-hint: [query]
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/research.py "$ARGUMENTS"`
+!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/research.py "$ARGUMENTS"`

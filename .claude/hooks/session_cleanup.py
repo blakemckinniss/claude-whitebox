@@ -43,52 +43,79 @@ LESSON_EDIT_THRESHOLD = 3
 # PATTERN EXTRACTION
 # =============================================================================
 
+def check_abandoned_creations(state) -> list[dict]:
+    """Check for files created this session that may have stubs/TODOs."""
+    warnings = []
+
+    if not state.files_created:
+        return warnings
+
+    # Patterns indicating incomplete work
+    STUB_PATTERNS = [
+        b'TODO',
+        b'FIXME',
+        b'NotImplementedError',
+        b'pass  #',
+        b'raise NotImplementedError',
+        b'...',  # Python ellipsis stub
+        b'stub',
+        b'STUB',
+    ]
+
+    for filepath in state.files_created:
+        path = Path(filepath)
+        if not path.exists():
+            continue
+
+        # Skip non-code files
+        if path.suffix not in {'.py', '.js', '.ts', '.rs', '.go', '.java'}:
+            continue
+
+        try:
+            content = path.read_bytes()
+            found_stubs = []
+            for pattern in STUB_PATTERNS:
+                if pattern in content:
+                    found_stubs.append(pattern.decode())
+
+            if found_stubs:
+                warnings.append({
+                    "file": filepath,
+                    "name": path.name,
+                    "stubs": found_stubs[:3],  # Limit to 3
+                })
+        except (OSError, PermissionError):
+            pass
+
+    return warnings
+
+
 def extract_lessons(state) -> list[dict]:
-    """Extract lessons from session patterns."""
+    """Extract lessons from session patterns.
+
+    NOTE: Only extract HIGH-VALUE lessons worth persisting to lessons.md.
+    Telemetry/stats go to session_log.jsonl, not lessons.md.
+
+    Removed (low value, polluted lessons.md):
+    - file_complexity: "Edited X 5x" - noise, not actionable
+    - unresearched_libs: Lists stdlib modules - garbage
+    - domain_focus: "Session focused on X" - trivia
+    - recurring_error: Rarely actionable without context
+
+    Keep only:
+    - abandoned_stubs: Actual incomplete work needing attention
+    """
     lessons = []
 
-    # Lesson: Files edited multiple times (might indicate API complexity)
-    for filepath, count in state.edit_counts.items():
-        if count >= LESSON_EDIT_THRESHOLD:
-            filename = Path(filepath).name
-            lessons.append({
-                "type": "file_complexity",
-                "file": filename,
-                "edits": count,
-                "insight": f"Edited {filename} {count}x - review for API quirks or complexity",
-            })
-
-    # Lesson: Libraries used without research (potential knowledge gap)
-    unresearched = set(state.libraries_used) - set(state.libraries_researched)
-    if unresearched:
+    # LESSON: Files created with stubs (abandoned work warning)
+    # This is actionable - user should know about incomplete work
+    abandoned = check_abandoned_creations(state)
+    if abandoned:
+        files = [a["name"] for a in abandoned]
         lessons.append({
-            "type": "unresearched_libs",
-            "libraries": list(unresearched),
-            "insight": f"Used without research: {', '.join(unresearched)}",
-        })
-
-    # Lesson: Recurring errors
-    error_types = {}
-    for error in state.errors_recent:
-        etype = error.get("type", "unknown")
-        error_types[etype] = error_types.get(etype, 0) + 1
-
-    for etype, count in error_types.items():
-        if count >= 2:
-            lessons.append({
-                "type": "recurring_error",
-                "error_type": etype,
-                "count": count,
-                "insight": f"Recurring error: {etype} ({count}x)",
-            })
-
-    # Lesson: Domain detected
-    if state.domain != "unknown" and state.domain_confidence > 0.5:
-        lessons.append({
-            "type": "domain_focus",
-            "domain": state.domain,
-            "confidence": state.domain_confidence,
-            "insight": f"Session focused on {state.domain} ({state.domain_confidence:.0%} confidence)",
+            "type": "abandoned_stubs",
+            "files": files,
+            "insight": f"⚠️ ABANDONED WORK: {', '.join(files)} contain stubs/TODOs",
         })
 
     return lessons

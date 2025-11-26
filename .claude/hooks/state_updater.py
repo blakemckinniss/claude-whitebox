@@ -24,7 +24,7 @@ from session_state import (
     resolve_error, add_domain_signal, extract_libraries_from_code,
     track_failure, reset_failures,  # v3.1: Sunk cost tracking
     track_batch_tool, clear_pending_file, clear_pending_search,  # v3.2: Batch enforcement
-    extract_function_names, add_pending_integration_grep,  # v3.3: Integration blindness
+    extract_function_names, add_pending_integration_grep, clear_integration_grep,  # v3.3: Integration blindness
 )
 
 # =============================================================================
@@ -69,15 +69,35 @@ def process_edit(state, tool_input, result):
                     add_pending_integration_grep(state, func, filepath)
 
 
-def process_write(state, tool_input, result):
-    """Process Write tool result."""
+def detect_stubs_in_content(content: str) -> list[str]:
+    """Detect stub patterns in code content."""
+    STUB_PATTERNS = [
+        ('TODO', 'TODO'),
+        ('FIXME', 'FIXME'),
+        ('NotImplementedError', 'NotImplementedError'),
+        ('raise NotImplementedError', 'NotImplementedError'),
+        ('pass  #', 'stub pass'),
+        ('...  #', 'ellipsis stub'),
+    ]
+    found = []
+    for pattern, label in STUB_PATTERNS:
+        if pattern in content:
+            found.append(label)
+    return list(set(found))[:3]
+
+
+def process_write(state, tool_input, result) -> str | None:
+    """Process Write tool result. Returns warning message if stubs detected."""
     filepath = tool_input.get("file_path", "")
+    warning = None
+
     if filepath:
         # Check if file existed before (would have been read)
-        if filepath in state.files_read:
-            track_file_edit(state, filepath)
-        else:
+        is_new_file = filepath not in state.files_read
+        if is_new_file:
             track_file_create(state, filepath)
+        else:
+            track_file_edit(state, filepath)
 
         # Extract libraries
         content = tool_input.get("content", "")
@@ -85,6 +105,16 @@ def process_write(state, tool_input, result):
             libs = extract_libraries_from_code(content)
             for lib in libs:
                 track_library_used(state, lib)
+
+            # Detect stubs in NEW files only (flag for memory)
+            if is_new_file:
+                stubs = detect_stubs_in_content(content)
+                if stubs:
+                    from pathlib import Path
+                    fname = Path(filepath).name
+                    warning = f"⚠️ STUB DETECTED in new file `{fname}`: {', '.join(stubs)}\n   Remember to complete before session ends!"
+
+    return warning
 
 
 def process_bash(state, tool_input, result):
@@ -195,24 +225,36 @@ def main():
         filepath = tool_input.get("file_path", "")
         if filepath:
             clear_pending_file(state, filepath)
-    elif tool_name in ("Grep", "Glob"):
+    elif tool_name == "Grep":
+        pattern = tool_input.get("pattern", "")
+        if pattern:
+            clear_pending_search(state, pattern)
+            clear_integration_grep(state, pattern)  # v3.3: Clear integration blindness
+    elif tool_name == "Glob":
         pattern = tool_input.get("pattern", "")
         if pattern:
             clear_pending_search(state, pattern)
 
     # Process tool-specific updates
     processor = PROCESSORS.get(tool_name)
+    warning_message = None
     if processor:
         try:
-            processor(state, tool_input, result)
+            result_val = processor(state, tool_input, result)
+            # process_write returns a warning string if stubs detected
+            if isinstance(result_val, str):
+                warning_message = result_val
         except Exception:
             pass  # Silent failure - don't break the hook
 
     # Save state
     save_state(state)
 
-    # Silent output (state updated in background)
-    print(json.dumps({}))
+    # Output warning if stubs detected in new file
+    if warning_message:
+        print(json.dumps({"additionalContext": warning_message}))
+    else:
+        print(json.dumps({}))
     sys.exit(0)
 
 

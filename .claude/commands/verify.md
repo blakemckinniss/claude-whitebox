@@ -4,4 +4,4 @@ argument-hint: [check_type] [target] [expected?]
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/verify.py $ARGUMENTS`
+!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/verify.py $ARGUMENTS`

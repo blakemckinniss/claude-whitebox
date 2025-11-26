@@ -21,6 +21,7 @@ ALLOWED_PREFIXES = (
     "scratch/",
     "scripts/",
     ".claude/",
+    ".vscode/",  # IDE configuration - must be at root
 )
 
 # Files that ARE allowed at root (existing config files)

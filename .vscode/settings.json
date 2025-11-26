@@ -1,0 +1,29 @@
+{
+    // Python analysis - Pylance
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.indexing": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.extraPaths": ["scripts/lib"],
+
+    // Testing - pytest
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [".claude/tests"],
+
+    // Exclude disposable/generated paths from analysis
+    "python.analysis.exclude": [
+        "scratch/**",
+        ".claude/session/**"
+    ],
+
+    // File exclusions from explorer
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    },
+
+    // Search exclusions
+    "search.exclude": {
+        "scratch/**": true,
+        ".claude/session/**": true
+    }
+}

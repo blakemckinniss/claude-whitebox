@@ -4,4 +4,4 @@ argument-hint: [question]
 allowed-tools: Bash
 ---
 
-!`python3 scripts/ops/oracle.py "$ARGUMENTS"`
+!`python3 $CLAUDE_PROJECT_DIR/scripts/ops/oracle.py "$ARGUMENTS"`
