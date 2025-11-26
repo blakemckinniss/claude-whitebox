@@ -1,4 +1,7 @@
 {
+    // Python interpreter - use project venv
+    "python.defaultInterpreterPath": ".claude/.venv/bin/python",
+
     // Python analysis - Pylance
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.indexing": true,

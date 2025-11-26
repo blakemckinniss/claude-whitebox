@@ -1,4 +1,8 @@
 {
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/statusline.js"
+  },
   "hooks": {
     "SessionStart": [
       {
@@ -120,6 +124,10 @@
           {
             "type": "command",
             "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python root_pollution_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/.venv/bin/python recursion_guard.py"
           },
           {
             "type": "command",
