@@ -51,18 +51,66 @@ EXEMPT_PATTERNS = [
 ]
 
 
+def extract_command_core(command: str) -> str:
+    """Extract the core command, stripping heredocs and string literals.
+
+    This prevents false positives from commit messages like:
+    git commit -m "Added mypy cache to gitignore"
+    """
+    # For git commit with -m, only check up to the message
+    if "git commit" in command.lower():
+        # Find -m and stop there (message content is irrelevant)
+        parts = command.split()
+        core_parts = []
+        skip_next = False
+        for part in parts:
+            if skip_next:
+                skip_next = False
+                continue
+            if part == "-m":
+                skip_next = True  # Skip the message argument
+                core_parts.append(part)
+                continue
+            if part.startswith("-m"):
+                continue  # Skip -m"message" style
+            core_parts.append(part)
+        return " ".join(core_parts)
+
+    # For heredocs, only check the command before the heredoc
+    if "<<" in command:
+        return command.split("<<")[0]
+
+    # For commands with quoted strings, be conservative - check the whole thing
+    # but fast commands like git are generally safe
+    # Note: python3 -c is fast; slowness comes from pytest/npm directly invoked
+    fast_commands = [
+        "git ", "cd ", "ls ", "cat ", "echo ", "mkdir ", "rm ", "mv ", "cp ",
+        "python3 -c", "python -c", "grep ", "head ", "tail ", "wc ", "sort ",
+        "touch ", "chmod ", "chown ", "ln ", "pwd", "which ", "type ", "file ",
+    ]
+    if any(command.lower().startswith(fc) for fc in fast_commands):
+        return ""  # Skip check entirely for fast commands
+
+    return command
+
+
 def is_slow_command(command: str) -> bool:
     """Check if command matches slow patterns."""
-    command_lower = command.lower()
+    # Extract core command to avoid false positives from string content
+    core = extract_command_core(command)
+    if not core:
+        return False
+
+    core_lower = core.lower()
 
     # Check exemptions first
     for exempt in EXEMPT_PATTERNS:
-        if exempt in command_lower:
+        if exempt in core_lower:
             return False
 
     # Check slow patterns
     for pattern in SLOW_PATTERNS:
-        if pattern in command_lower:
+        if pattern in core_lower:
             return True
 
     return False
