@@ -6,6 +6,7 @@ import sys
 import os
 import json
 import requests
+import subprocess
 
 # Add scripts/lib to path
 _script_path = os.path.abspath(__file__)
@@ -24,6 +25,54 @@ from core import setup_script, finalize, logger, handle_debug
 
 # Punch list file location
 PUNCH_LIST_FILE = os.path.join(_project_root, ".claude", "memory", "punch_list.json")
+
+
+def git_create_checkpoint(message: str) -> str | None:
+    """Create a git checkpoint (stash or commit) and return identifier."""
+    try:
+        # Check for uncommitted changes
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True, text=True, cwd=_project_root
+        )
+        has_changes = bool(result.stdout.strip())
+
+        if has_changes:
+            # Create a WIP commit for checkpoint
+            subprocess.run(["git", "add", "-A"], cwd=_project_root, check=True)
+            subprocess.run(
+                ["git", "commit", "-m", f"WIP: {message} [scope checkpoint]"],
+                cwd=_project_root, check=True
+            )
+
+        # Get current commit hash
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True, text=True, cwd=_project_root, check=True
+        )
+        return result.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        logger.warning(f"Git checkpoint failed: {e}")
+        return None
+
+
+def git_rollback_to(commit_hash: str) -> bool:
+    """Rollback to a specific commit."""
+    try:
+        # Soft reset to checkpoint (keeps changes staged)
+        subprocess.run(
+            ["git", "reset", "--soft", commit_hash],
+            cwd=_project_root, check=True
+        )
+        # Then hard reset to actually revert files
+        subprocess.run(
+            ["git", "reset", "--hard", commit_hash],
+            cwd=_project_root, check=True
+        )
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Git rollback failed: {e}")
+        return False
 
 
 def load_punch_list():
@@ -156,11 +205,17 @@ def action_init(description, model):
         logger.error("Failed to generate checklist")
         return False
 
-    # Create punch list structure
+    # Create git checkpoint before starting work
+    checkpoint = git_create_checkpoint(f"Before: {description[:50]}")
+    if checkpoint:
+        logger.info(f"📍 Created checkpoint: {checkpoint[:8]}")
+
+    # Create punch list structure with checkpoint stack
     punch_list = {
         "description": description,
         "items": [{"text": item, "done": False} for item in items_list],
         "percent": 0,
+        "checkpoints": [{"hash": checkpoint, "message": "Initial", "percent": 0}] if checkpoint else [],
     }
 
     # Save to disk
@@ -273,6 +328,99 @@ def action_status():
     return True
 
 
+def action_checkpoint(message: str):
+    """Create a manual checkpoint at current progress."""
+    punch_list = load_punch_list()
+    if not punch_list:
+        logger.error("No punch list exists. Run 'scope.py init' first.")
+        return False
+
+    # Create git checkpoint
+    checkpoint = git_create_checkpoint(message)
+    if not checkpoint:
+        logger.error("Failed to create git checkpoint")
+        return False
+
+    # Add to checkpoints stack
+    if "checkpoints" not in punch_list:
+        punch_list["checkpoints"] = []
+
+    punch_list["checkpoints"].append({
+        "hash": checkpoint,
+        "message": message,
+        "percent": punch_list["percent"],
+    })
+
+    if not save_punch_list(punch_list):
+        return False
+
+    print(f"\n📍 Checkpoint created: {checkpoint[:8]}")
+    print(f"   Message: {message}")
+    print(f"   Progress: {punch_list['percent']}%")
+    print(f"   Total checkpoints: {len(punch_list['checkpoints'])}\n")
+
+    return True
+
+
+def action_rollback(force: bool = False):
+    """Rollback to the most recent checkpoint."""
+    punch_list = load_punch_list()
+    if not punch_list:
+        logger.error("No punch list exists. Nothing to rollback.")
+        return False
+
+    # Support both old format (single checkpoint) and new format (stack)
+    checkpoints = punch_list.get("checkpoints", [])
+    if not checkpoints and punch_list.get("checkpoint"):
+        # Legacy format - convert
+        checkpoints = [{"hash": punch_list["checkpoint"], "message": "Initial", "percent": 0}]
+
+    if not checkpoints:
+        logger.error("No checkpoints exist for this task. Cannot rollback.")
+        return False
+
+    # Get most recent checkpoint
+    latest = checkpoints[-1]
+    checkpoint = latest["hash"]
+
+    # Confirm unless forced
+    if not force:
+        print("\n⚠️  ROLLBACK WARNING")
+        print(f"Task: {punch_list['description']}")
+        print(f"Checkpoint: {checkpoint[:8]} ({latest['message']})")
+        print(f"Rolling back from {punch_list['percent']}% to {latest['percent']}%")
+        if len(checkpoints) > 1:
+            print(f"({len(checkpoints) - 1} older checkpoint(s) will remain)")
+        else:
+            print("(This is the initial checkpoint - punch list will be cleared)")
+        print()
+        user_input = input("Type 'rollback' to confirm: ")
+        if user_input.lower() != "rollback":
+            logger.info("Rollback cancelled")
+            return False
+
+    # Perform rollback
+    logger.info(f"Rolling back to checkpoint {checkpoint[:8]}...")
+    if git_rollback_to(checkpoint):
+        if len(checkpoints) > 1:
+            # Pop the checkpoint we rolled back to and keep older ones
+            punch_list["checkpoints"] = checkpoints[:-1]
+            punch_list["percent"] = latest["percent"]
+            save_punch_list(punch_list)
+            print(f"\n✅ Rolled back to checkpoint {checkpoint[:8]}")
+            print(f"Progress reset to {latest['percent']}%")
+            print(f"Remaining checkpoints: {len(checkpoints) - 1}\n")
+        else:
+            # Initial checkpoint - clear everything
+            os.remove(PUNCH_LIST_FILE)
+            print(f"\n✅ Rolled back to initial checkpoint {checkpoint[:8]}")
+            print("Punch list cleared. You can start fresh with 'scope init'.\n")
+        return True
+    else:
+        logger.error("Rollback failed. Check git status manually.")
+        return False
+
+
 def main():
     parser = setup_script(
         "The Project Manager: Manages the Definition of Done (DoD) for the current task."
@@ -280,7 +428,7 @@ def main():
 
     # Custom arguments
     parser.add_argument(
-        "action", choices=["init", "check", "status"], help="Action to perform"
+        "action", choices=["init", "check", "status", "checkpoint", "rollback"], help="Action to perform"
     )
     parser.add_argument(
         "value",
@@ -291,6 +439,11 @@ def main():
         "--model",
         default="google/gemini-3-pro-preview",
         help="OpenRouter model for checklist generation (default: gemini-2.0-flash-thinking)",
+    )
+    parser.add_argument(
+        "--force", "-f",
+        action="store_true",
+        help="Force rollback without confirmation",
     )
 
     args = parser.parse_args()
@@ -324,6 +477,16 @@ def main():
 
         elif args.action == "status":
             success = action_status()
+
+        elif args.action == "checkpoint":
+            if not args.value:
+                logger.error("'checkpoint' action requires a message")
+                logger.error('Usage: scope.py checkpoint "Phase 1 complete"')
+                finalize(success=False)
+            success = action_checkpoint(args.value)
+
+        elif args.action == "rollback":
+            success = action_rollback(force=args.force)
 
         finalize(success=success)
 

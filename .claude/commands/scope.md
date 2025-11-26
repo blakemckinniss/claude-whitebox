@@ -1,6 +1,6 @@
 ---
-description: 🏁 The Finish Line - Manage Definition of Done (init, check, status)
-argument-hint: [init|check|status] [args...]
+description: 🏁 The Finish Line - Manage DoD with checkpoints (init, check, status, checkpoint, rollback)
+argument-hint: [init|check|status|checkpoint|rollback] [args...]
 allowed-tools: Bash
 ---
 

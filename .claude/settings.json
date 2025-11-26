@@ -1,188 +1,21 @@
 {
   "hooks": {
-    "PreToolUse": [
+    "SessionStart": [
       {
-        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/synapse_fire.py"
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__.*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/block_mcp.py"
-          }
-        ]
-      },
-      {
-        "matcher": "(Read|Write|Edit|MultiEdit)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/file_operation_gate.py"
-          }
-        ]
-      },
-      {
-        "matcher": "(Write|Edit|MultiEdit|Bash|Task)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/tier_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_prerequisite_gate.py"
-          }
-        ]
-      },
-      {
-        "matcher": "(Write|Edit|MultiEdit|Bash)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/root_pollution_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_flat_enforcer.py"
-          }
-        ]
-      },
-      {
-        "matcher": "(Write|Edit|MultiEdit)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/epistemic_humility_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/sudo_debt_enforcer.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/assumption_firewall.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/constitutional_guard.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_reasoning_rigor.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/hack_around_gate.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/hook_documentation_enforcer.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/block_main_write.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pre_write_audit.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/risk_gate.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pre_delegation.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/force_playwright.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_parallel_bash.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_playwright_setup.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Task",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_sequential_agents.py"
-          }
-        ]
-      },
-      {
-        "matcher": "(Bash|Write|Edit|MultiEdit)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/trigger_skeptic.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 session_init.py"
           }
         ]
       }
     ],
-    "SessionStart": [
+    "SessionEnd": [
       {
-        "matcher": "startup",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/system_stats.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/test_hooks_background.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/session_init.py"
-          },
-          {
-            "type": "command",
-            "command": "cat $CLAUDE_PROJECT_DIR/.claude/hooks/manifesto.txt"
-          },
-          {
-            "type": "command",
-            "command": "touch $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md && echo '\\n\ud83e\udde0 LOADING PROJECT MEMORY...' && cat $CLAUDE_PROJECT_DIR/.claude/memory/active_context.md && echo '\\n--- RECENT LESSONS ---' && tail -n 10 $CLAUDE_PROJECT_DIR/.claude/memory/lessons.md"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_analyzer.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/report_hook_issues.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 session_cleanup.py"
           }
         ]
       }
@@ -192,103 +25,98 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/confidence_init.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 context_injector.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/introspector.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 ops_awareness.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/synapse_fire.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 project_context.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/absurdity_detector.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 ops_nudge.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_context_hook.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 memory_injector.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pre_advice.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 goal_anchor.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_low_confidence.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 intention_tracker.py"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 counterfactual_check.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_confidence_penalty.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 gap_detector.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_gaslight.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 tool_preference.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/anti_delegation.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 production_gate.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/intervention.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 probe_gate.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/anti_sycophant.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 sunk_cost_detector.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/enforce_workflow.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 assumption_ledger.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/check_knowledge.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 background_enforcer.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/intent_classifier.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 root_pollution_gate.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_suggester.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 loop_detector.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/prerequisite_checker.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 error_suppression_gate.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/best_practice_enforcer.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 integration_gate.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/ecosystem_mapper.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 epistemic_boundary.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/meta_cognition_performance.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 research_gate.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/batching_analyzer.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_prompt_analyzer.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/sanity_check.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/protocol_enforcer.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/sudo_accountability.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 oracle_gate.py"
           }
         ]
       }
@@ -299,148 +127,23 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/synapse_fire.py"
-          }
-        ]
-      },
-      {
-        "matcher": "(Edit|Write)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/post_edit_validator.py"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_logical_fallacy.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 state_updater.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_tool_failure.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 scratch_enforcer.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_test_failure.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 auto_learn.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_researcher.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 velocity_tracker.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/command_tracker.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/evidence_tracker.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_confidence_reward.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/post_tool_command_suggester.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_detour.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_reward.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_failure_auto_learn.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_success_auto_learn.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/hook_performance_monitor.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/detect_batch.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/performance_telemetry_collector.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/batching_telemetry.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/background_telemetry.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/scratch_enforcer.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_guardian.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_documentarian.py"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/pattern_detector.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/token_tracker.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_remember.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_void.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/debt_tracker.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/session_digest.py"
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/scripts/ops/upkeep.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/auto_janitor.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/session_cleanup.py"
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && python3 info_gain_tracker.py"
           }
         ]
       }

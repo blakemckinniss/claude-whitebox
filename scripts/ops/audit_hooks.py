@@ -457,8 +457,19 @@ class HookAuditor:
             (r'input_data\.get\(["\'"]prompt["\'"]', "input_data.get('prompt')"),
         ]
 
+        # Check if prompt access is properly guarded by lifecycle check
+        # Pattern: if lifecycle == "UserPromptSubmit": ... prompt ...
+        has_lifecycle_guard = bool(re.search(
+            r'if\s+lifecycle\s*==\s*["\']UserPromptSubmit["\']\s*:.*?\.get\(["\']prompt["\']',
+            content,
+            re.DOTALL
+        ))
+
         for pattern, desc in bad_patterns:
             if re.search(pattern, content):
+                # Skip if prompt access is guarded by lifecycle check (multi-event hooks)
+                if has_lifecycle_guard:
+                    continue
                 issues.append(f"Incorrect prompt access: {desc}")
                 self.add_issue(
                     "ERROR", "PRETOOL_PROMPT_ACCESS",
