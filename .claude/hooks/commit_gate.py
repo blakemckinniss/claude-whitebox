@@ -54,14 +54,15 @@ def main():
     # Check if upkeep was run this session
     state = load_state()
 
-    # Check session state for upkeep run
-    upkeep_run = getattr(state, 'upkeep_run', False)
+    # Check ops_turns for upkeep (tracked by state_updater via track_ops_command)
+    upkeep_turn = state.ops_turns.get('upkeep', -1)
+    upkeep_ran_this_session = upkeep_turn >= 0
 
-    # Also check commands_run for upkeep invocation
-    commands = getattr(state, 'commands_run', [])
-    upkeep_in_commands = any('upkeep' in str(cmd).lower() for cmd in commands[-20:])
+    # Also check commands_succeeded for upkeep invocation (fallback)
+    commands = getattr(state, 'commands_succeeded', [])
+    upkeep_in_commands = any('upkeep' in str(cmd.get('command', '')).lower() for cmd in commands[-20:])
 
-    if upkeep_run or upkeep_in_commands:
+    if upkeep_ran_this_session or upkeep_in_commands:
         sys.exit(0)
 
     # BLOCK - no upkeep detected
