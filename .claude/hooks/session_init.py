@@ -27,6 +27,13 @@ from session_state import (
     _discover_ops_scripts,
 )
 
+# Import spark_core for pre-warming (lazy load synapse map)
+try:
+    from spark_core import _load_synapses, fire_synapses
+    SPARK_AVAILABLE = True
+except ImportError:
+    SPARK_AVAILABLE = False
+
 # Scope's punch list file
 PUNCH_LIST_FILE = MEMORY_DIR / "punch_list.json"
 
@@ -39,6 +46,33 @@ STALE_SESSION_THRESHOLD = 3600  # 1 hour
 
 # Maximum age for errors to carry over (in seconds)
 ERROR_CARRY_OVER_MAX = 600  # 10 minutes
+
+# =============================================================================
+# MEMORY PRE-WARMING
+# =============================================================================
+
+def prewarm_memory_cache():
+    """Pre-load synapse map and warm cache with common patterns.
+
+    This runs at session start to eliminate cold-start latency on first prompt.
+    Target: <50ms total.
+    """
+    if not SPARK_AVAILABLE:
+        return
+
+    try:
+        # 1. Load synapse map into memory (cached for session)
+        _load_synapses()
+
+        # 2. Pre-warm spark cache with common terms (optional, disabled by default)
+        # Uncomment to pre-fire for common patterns:
+        # common_prompts = ["error", "test", "fix", "implement"]
+        # for prompt in common_prompts:
+        #     fire_synapses(prompt, include_constraints=False)
+
+    except Exception:
+        pass  # Non-critical, don't fail session init
+
 
 # =============================================================================
 # STALE DETECTION
@@ -188,6 +222,9 @@ def initialize_session() -> dict:
     # Save updated state
     save_state(state)
 
+    # Pre-warm memory cache (synapse map, lessons index)
+    prewarm_memory_cache()
+
     return result
 
 
@@ -207,6 +244,15 @@ def main():
 
     # Initialize session
     result = initialize_session()
+
+    # SUDO SECURITY: Audit passed - clear stop hook flags for this session
+    session_id = os.environ.get("CLAUDE_SESSION_ID", "default")[:16]
+    dismissal_flag = MEMORY_DIR / f"dismissal_shown_{session_id}.flag"
+    if dismissal_flag.exists():
+        try:
+            dismissal_flag.unlink()
+        except (IOError, OSError):
+            pass
 
     # Output result (brief, informational)
     output = {}

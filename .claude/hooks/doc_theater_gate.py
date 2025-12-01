@@ -18,10 +18,13 @@ Allows:
 Philosophy: Standalone docs rot; inline docs get read.
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re
 from pathlib import Path
+
+from synapse_core import check_sudo_in_transcript, log_block, format_block_acknowledgment
 
 # Patterns that indicate documentation theater
 DOC_THEATER_PATTERNS = [
@@ -81,6 +84,12 @@ def main():
 
     tool_name = event.get("tool_name", "")
     tool_input = event.get("tool_input", {})
+    transcript_path = event.get("transcript_path", "")
+
+    # Check for SUDO bypass in transcript
+    if check_sudo_in_transcript(transcript_path):
+        print(json.dumps({}))
+        sys.exit(0)
 
     # Only check Write tool
     if tool_name != "Write":
@@ -92,23 +101,25 @@ def main():
     is_theater, reason = is_doc_theater(file_path)
 
     if is_theater:
+        block_reason = (
+            f"🎭 DOCUMENTATION THEATER BLOCKED\n"
+            f"File: {Path(file_path).name}\n"
+            f"Reason: {reason}\n\n"
+            f"Principle 19: Never create standalone docs you wouldn't read.\n"
+            f"Put documentation INLINE (docstrings, comments at point-of-use).\n\n"
+            f"Allowed .md locations:\n"
+            f"  • CLAUDE.md (constitution)\n"
+            f"  • .claude/commands/*.md (slash commands)\n"
+            f"  • .claude/memory/*.md (persistent memory)\n"
+            f"  • projects/*/*.md (user-owned)\n\n"
+            f"User can override with SUDO if truly needed."
+        )
+        log_block("doc_theater_gate", block_reason, tool_name, tool_input)
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
-                "permissionDecisionReason": (
-                    f"🎭 DOCUMENTATION THEATER BLOCKED\n"
-                    f"File: {Path(file_path).name}\n"
-                    f"Reason: {reason}\n\n"
-                    f"Principle 19: Never create standalone docs you wouldn't read.\n"
-                    f"Put documentation INLINE (docstrings, comments at point-of-use).\n\n"
-                    f"Allowed .md locations:\n"
-                    f"  • CLAUDE.md (constitution)\n"
-                    f"  • .claude/commands/*.md (slash commands)\n"
-                    f"  • .claude/memory/*.md (persistent memory)\n"
-                    f"  • projects/*/*.md (user-owned)\n\n"
-                    f"User can override with SUDO if truly needed."
-                )
+                "permissionDecisionReason": block_reason + format_block_acknowledgment("doc_theater_gate")
             }
         }
         print(json.dumps(output))

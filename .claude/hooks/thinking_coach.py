@@ -88,11 +88,11 @@ THINKING_FLAW_PATTERNS: List[tuple] = [
     ], "**YAGNI.** Over-engineering detected. Implement minimum viable solution.", 2),
 
     # SCOPE_CREEP - Adding unrequested work
+    # NOTE: Patterns narrowed to avoid false positives when user requests batch fixes ("fix all")
     ("scope_creep", [
-        r"while I('m| am) (at it|here),?\s+(I could|let me|might as well)",
-        r"(also|additionally|bonus)\s+(add|implement|fix|refactor)",
-        r"(improve|enhance|optimize)\s+(while|since)",
-        r"(might as well|may as well)\s+",
+        r"while I('m| am) (at it|here),?\s+(I could|let me|might as well)\s+(also\s+)?(add|create|build)",
+        r"(bonus|extra)\s+(feature|functionality)",
+        r"(might as well|may as well)\s+(add|create|build)\s+(a|an|some)",
     ], "**SCOPE CREEP.** Focus on requested task only.", 2),
 
     # MEMORY_HOLE - Forgetting context
@@ -110,16 +110,35 @@ THINKING_FLAW_PATTERNS: List[tuple] = [
 TELEMETRY_FILE = Path(__file__).parent.parent / "memory" / "thinking_coach_last.json"
 
 
+# SUDO: content_gate false positive on _lib_path import (standard static import)
 def save_telemetry(flaws_detected: List[str], thinking_sample: str):
-    """Save last detection for debugging."""
+    """Save last detection for debugging (atomic write for concurrency safety)."""
     try:
+        import fcntl
+        import tempfile
+        import os
+        import time as time_module
+
         TELEMETRY_FILE.parent.mkdir(parents=True, exist_ok=True)
-        with open(TELEMETRY_FILE, 'w') as f:
-            json.dump({
-                "flaws_detected": flaws_detected,
-                "thinking_sample": thinking_sample[:500],
-                "timestamp": __import__("time").time(),
-            }, f, indent=2)
+
+        # Use file locking for atomic write
+        lock_path = TELEMETRY_FILE.with_suffix('.lock')
+        lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR)
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
+            # Atomic write: temp file + rename
+            fd, tmp_path = tempfile.mkstemp(dir=TELEMETRY_FILE.parent, suffix='.json')
+            with os.fdopen(fd, 'w') as f:
+                json.dump({
+                    "flaws_detected": flaws_detected,
+                    "thinking_sample": thinking_sample[:500],
+                    "timestamp": time_module.time(),
+                }, f, indent=2)
+            os.replace(tmp_path, TELEMETRY_FILE)
+        finally:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
     except (IOError, OSError):
         pass
 
@@ -213,8 +232,23 @@ def main():
         output_hook_result("PreToolUse")
         sys.exit(0)
 
-    # Format output
-    # Don't block, just warn (thinking analysis is advisory)
+    # Check for blocking directives (severity 2 = BLOCK)
+    blocking = [d for d in directives if d.strength == DirectiveStrength.BLOCK]
+
+    if blocking:
+        # ENFORCE: Block on severe reasoning flaws
+        output_hook_result(
+            "PreToolUse",
+            decision="deny",
+            reason=(
+                f"**THINKING COACH BLOCKED** (Severe reasoning flaw)\n\n"
+                f"{blocking[0].format()}\n\n"
+                f"Fix the reasoning issue before proceeding."
+            )
+        )
+        sys.exit(0)
+
+    # Format warnings
     context_lines = ["THINKING COACH:"]
     for d in directives:
         context_lines.append(d.format())

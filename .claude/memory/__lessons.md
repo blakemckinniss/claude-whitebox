@@ -214,3 +214,6 @@ Post-edit validation is critical: py_compile only checks SYNTAX, not imports. Fo
 ### 2025-11-26 13:28
 - [abandoned_stubs] ⚠️ ABANDONED WORK: script_nudge.py, stop_cleanup.py contain stubs/TODOs
 
+
+### 2025-11-28 16:16
+- [abandoned_stubs] ⚠️ ABANDONED WORK: subagent_stop.py, deferral_gate.py contain stubs/TODOs

@@ -1,10 +1,10 @@
 ---
-description: 🕳️ Void Oracle - Runs void.py + oracle analysis on changes
+description: 🔍 Gap Oracle - Runs gaps.py + oracle analysis on changes
 argument-hint: [file_or_dir]
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
-Run void.py completeness check combined with Oracle gap analysis.
+Run gaps.py completeness check combined with Oracle gap analysis.
 
 **Input:** $ARGUMENTS
 
@@ -14,9 +14,9 @@ Run void.py completeness check combined with Oracle gap analysis.
    - If argument provided: use that file/directory
    - Otherwise: detect recent changes via `git diff --name-only HEAD~1` or `git status`
 
-2. **Run Void Hunter:**
+2. **Run Gap Hunter:**
    ```bash
-   python3 $CLAUDE_PROJECT_DIR/.claude/ops/void.py <target>
+   python3 $CLAUDE_PROJECT_DIR/.claude/ops/gaps.py <target>
    ```
    This detects:
    - Stubs (TODO, FIXME, pass, ..., NotImplementedError)
@@ -25,20 +25,20 @@ Run void.py completeness check combined with Oracle gap analysis.
    - Config hardcoding
    - Silent operations
 
-3. **Oracle Deep Analysis** (if void finds issues):
+3. **Oracle Deep Analysis** (if gaps finds issues):
    ```bash
-   python3 $CLAUDE_PROJECT_DIR/.claude/ops/oracle.py --persona critic "Analyze these completeness gaps: <void_output>"
+   python3 $CLAUDE_PROJECT_DIR/.claude/ops/oracle.py --persona critic "Analyze these completeness gaps: <gaps_output>"
    ```
 
 4. **Output Format:**
    ```
-   ## 🕳️ Void Oracle Report
+   ## 🔍 Gap Oracle Report
 
    ### Phase 1: Stub Hunt
-   [void.py output - stubs found]
+   [gaps.py output - stubs found]
 
    ### Phase 2: Gap Analysis
-   [void.py output - logical gaps]
+   [gaps.py output - logical gaps]
 
    ### Phase 3: Oracle Verdict
    [oracle analysis of most critical gaps]
@@ -50,7 +50,7 @@ Run void.py completeness check combined with Oracle gap analysis.
    ```
 
 **Rules:**
-- Run void.py first (fast, local)
+- Run gaps.py first (fast, local)
 - Only invoke oracle if gaps found (saves API credits)
 - Prioritize action items by risk level
 - Focus on ecosystem completeness, not style

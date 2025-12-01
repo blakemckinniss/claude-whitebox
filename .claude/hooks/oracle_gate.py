@@ -25,6 +25,7 @@ import sys
 import json
 
 from session_state import load_state, get_turns_since_op
+from synapse_core import check_sudo_in_transcript
 
 # =============================================================================
 # CONFIG
@@ -47,6 +48,12 @@ def main():
 
     tool_name = input_data.get("tool_name", "")
     tool_input = input_data.get("tool_input", {})
+    transcript_path = input_data.get("transcript_path", "")
+
+    # Check for SUDO bypass in transcript
+    if check_sudo_in_transcript(transcript_path):
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
+        sys.exit(0)
 
     # Only check action tools (not diagnostic)
     action_tools = {"Edit", "Write", "Bash"}

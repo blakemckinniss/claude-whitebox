@@ -82,7 +82,7 @@ def detect_rereading(state) -> tuple[bool, str]:
     return False, ""
 
 
-def detect_check_own_work(state) -> tuple[bool, str]:
+def detect_check_own_work(state, current_read_file: str = "") -> tuple[bool, str]:
     """Detect editing then immediately reading same file.
 
     Returns: (is_checking, message)
@@ -90,14 +90,20 @@ def detect_check_own_work(state) -> tuple[bool, str]:
     if len(state.last_5_tools) < 3:
         return False, ""
 
-    # Find Edit/Write followed by Read
+    # Must be Edit/Write followed by Read
+    if not (state.last_5_tools[-1] == "Read" and state.last_5_tools[-2] in ("Edit", "Write")):
+        return False, ""
+
+    # Get the file that was just read (from parameter or last in list)
+    current_file = current_read_file or (state.files_read[-1] if state.files_read else "")
+    if not current_file:
+        return False, ""
+
+    # Check if this specific file was recently edited (not just any overlap)
     files_edited_recently = set(state.files_edited[-3:]) if state.files_edited else set()
-    files_read_recently = set(state.files_read[-3:]) if state.files_read else set()
 
-    overlap = files_edited_recently & files_read_recently
-
-    if overlap and state.last_5_tools[-1] == "Read" and state.last_5_tools[-2] in ("Edit", "Write"):
-        name = list(overlap)[0].split("/")[-1]
+    if current_file in files_edited_recently:
+        name = current_file.split("/")[-1]
         return True, f"🔄 SELF-CHECK: Edited then re-read `{name}`.\n💡 Trust your edit or verify with a test, not re-reading."
 
     return False, ""

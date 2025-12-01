@@ -20,6 +20,8 @@ import json
 import subprocess
 from pathlib import Path
 
+from synapse_core import log_block, format_block_acknowledgment
+
 # Try to import AST stub analyzer
 try:
     from ast_analysis import StubAnalyzer
@@ -236,11 +238,13 @@ def main():
     # Run audit
     audit_passed, audit_msg = run_audit(file_path)
     if not audit_passed:
+        reason = f"🛑 AUDIT FAILED: {audit_msg}\nFix issues before writing to production."
+        log_block("production_gate", reason, tool_name, tool_input)
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
-                "permissionDecisionReason": f"🛑 AUDIT FAILED: {audit_msg}\nFix issues before writing to production.",
+                "permissionDecisionReason": reason + format_block_acknowledgment("production_gate"),
             }
         }
         print(json.dumps(output))
@@ -249,11 +253,13 @@ def main():
     # Run void
     void_passed, void_msg = run_void(file_path)
     if not void_passed:
+        reason = f"🛑 VOID FAILED: {void_msg}\nComplete all TODOs/stubs before writing to production."
+        log_block("production_gate", reason, tool_name, tool_input)
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
-                "permissionDecisionReason": f"🛑 VOID FAILED: {void_msg}\nComplete all TODOs/stubs before writing to production.",
+                "permissionDecisionReason": reason + format_block_acknowledgment("production_gate"),
             }
         }
         print(json.dumps(output))

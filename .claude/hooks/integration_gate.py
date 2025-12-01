@@ -5,15 +5,15 @@ Integration Gate: PreToolUse hook enforcing grep after function edits.
 Hook Type: PreToolUse
 Latency Target: <10ms
 
-Enforces CLAUDE.md Hard Block #14:
-"Integration Blindness (Atomic Bundle): Function edit = Edit + grep.
-After ANY function signature change, IMMEDIATELY run grep for that function."
+Enforces CLAUDE.md Hard Block #6:
+"Integration Blindness: After function signature edit -> IMMEDIATELY grep for callers."
 
 Behavior:
 - Checks if there are pending integration greps (set by state_updater after Edit)
-- Blocks non-diagnostic tools until grep is run for edited functions
+- Blocks write tools until grep is run for edited functions
 - Allows: Read, Grep, Glob, Bash (for investigation)
-- Blocks: Edit, Write, Task (continuation without verification)
+- Allows: Task agents that are read-only (scout, digest, parallel, Explore, chore)
+- Blocks: Edit, Write, Task (general-purpose that might edit)
 """
 
 import _lib_path  # noqa: F401
@@ -24,14 +24,19 @@ from session_state import (
     load_state, save_state,
     check_integration_blindness,
 )
+from synapse_core import log_block, format_block_acknowledgment
 
 
-def output_result(decision: str = "approve", reason: str = "", context: str = ""):
-    """Output hook result."""
+def output_result(decision: str = "approve", reason: str = "", context: str = "",
+                  tool_name: str = "", tool_input: dict = None):
+    """Output hook result. Logs blocks for Stop hook reflection."""
     result = {"hookSpecificOutput": {"hookEventName": "PreToolUse"}}
     if decision == "block":
         result["hookSpecificOutput"]["permissionDecision"] = "deny"
-        result["hookSpecificOutput"]["permissionDecisionReason"] = reason
+        # Log block for Stop hook to catch
+        log_block("integration_gate", reason, tool_name, tool_input)
+        # Add acknowledgment prompt
+        result["hookSpecificOutput"]["permissionDecisionReason"] = reason + format_block_acknowledgment("integration_gate")
     elif context:
         result["hookSpecificOutput"]["additionalContext"] = context
     print(json.dumps(result))
@@ -68,7 +73,7 @@ def main():
     should_block, message = check_integration_blindness(state, tool_name, tool_input)
 
     if should_block:
-        output_result(decision="block", reason=message)
+        output_result(decision="block", reason=message, tool_name=tool_name, tool_input=tool_input)
     else:
         output_result()
 

@@ -59,7 +59,9 @@ class SecurityAnalyzer(ast.NodeVisitor):
         'eval': ('critical', 'Code injection via eval()', 'Use ast.literal_eval() for safe parsing'),
         'exec': ('critical', 'Code injection via exec()', 'Avoid dynamic code execution'),
         'compile': ('block', 'Dynamic code compilation', 'Ensure input is trusted'),
-        '__import__': ('block', 'Dynamic import', 'Use importlib with validation'),
+        # Note: __import__() function calls only - regular 'import x' statements are safe
+        # AST visit_Call only triggers on function calls, not import statements
+        '__import__': ('block', 'Dynamic __import__() call', 'Use importlib with validation'),
     }
 
     # Dangerous attribute access patterns

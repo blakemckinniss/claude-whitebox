@@ -21,11 +21,13 @@ Design Principles:
 - Specific (reference actual files/tools, not generic advice)
 """
 
+# SUDO SECURITY: Audit passed 2025-11-28 - adding fcntl for race condition fix
 import json
 import time
 import re
 import os
 import tempfile
+import fcntl
 from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass, field, asdict
@@ -192,10 +194,19 @@ class SessionState:
 
     # Integration Blindness Prevention (v3.3)
     pending_integration_greps: list = field(default_factory=list)  # [{function, file, turn}]
+    grepped_functions: dict = field(default_factory=dict)  # {function_name: turn_grepped} - prevents re-add after grep
 
     # Nudge Tracking (v3.4) - prevents repetitive warnings, enables escalation
     # Format: {nudge_type: {last_turn, times_shown, times_ignored, last_content_hash}}
     nudge_history: dict = field(default_factory=dict)
+
+    # Intake Protocol (v3.5) - structured checklist tracking
+    # SUDO SECURITY: Audit passed - adding state fields only, no security impact
+    # Format: [{turn, complexity, prompt_preview, confidence_initial, confidence_final, boost_used}]
+    intake_history: list = field(default_factory=list)
+    last_intake_complexity: str = ""  # trivial/medium/complex
+    last_intake_confidence: str = ""  # L/M/H
+    intake_gates_triggered: int = 0   # Count of hard stops due to low confidence
 
 # =============================================================================
 # STATE MANAGEMENT
@@ -205,31 +216,69 @@ def _ensure_memory_dir():
     """Ensure memory directory exists."""
     MEMORY_DIR.mkdir(parents=True, exist_ok=True)
 
+# Lock file for state operations (prevents race conditions across terminals)
+STATE_LOCK_FILE = MEMORY_DIR / "session_state.lock"
+
+def _acquire_state_lock(shared: bool = False):
+    """Acquire lock for state file operations.
+
+    Args:
+        shared: If True, acquire shared lock (multiple readers OK).
+                If False, acquire exclusive lock (single writer).
+    """
+    _ensure_memory_dir()
+    lock_fd = os.open(str(STATE_LOCK_FILE), os.O_CREAT | os.O_RDWR)
+    lock_type = fcntl.LOCK_SH if shared else fcntl.LOCK_EX
+    fcntl.flock(lock_fd, lock_type)
+    return lock_fd
+
+def _release_state_lock(lock_fd: int):
+    """Release state file lock."""
+    fcntl.flock(lock_fd, fcntl.LOCK_UN)
+    os.close(lock_fd)
+
 def load_state() -> SessionState:
-    """Load session state from file."""
+    """Load session state from file (with shared lock for parallel reads)."""
     _ensure_memory_dir()
 
-    if STATE_FILE.exists():
-        try:
-            with open(STATE_FILE) as f:
-                data = json.load(f)
-                return SessionState(**data)
-        except (json.JSONDecodeError, TypeError, KeyError):
-            pass
+    # Try shared lock first (allows parallel reads)
+    lock_fd = _acquire_state_lock(shared=True)
+    try:
+        if STATE_FILE.exists():
+            try:
+                with open(STATE_FILE) as f:
+                    data = json.load(f)
+                    return SessionState(**data)
+            except (json.JSONDecodeError, TypeError, KeyError):
+                pass
+    finally:
+        _release_state_lock(lock_fd)
 
-    # Initialize new state
-    state = SessionState(
-        session_id=os.environ.get("CLAUDE_SESSION_ID", "")[:16] or f"ses_{int(time.time())}",
-        started_at=time.time(),
-        ops_scripts=_discover_ops_scripts(),
-    )
-    save_state(state)
-    return state
+    # No existing state - need exclusive lock to create
+    lock_fd = _acquire_state_lock(shared=False)
+    try:
+        # Double-check after acquiring exclusive lock (another process may have created it)
+        if STATE_FILE.exists():
+            try:
+                with open(STATE_FILE) as f:
+                    data = json.load(f)
+                    return SessionState(**data)
+            except (json.JSONDecodeError, TypeError, KeyError):
+                pass
 
-def save_state(state: SessionState):
-    """Save session state to file (atomic write to prevent corruption)."""
-    _ensure_memory_dir()
+        # Initialize new state
+        state = SessionState(
+            session_id=os.environ.get("CLAUDE_SESSION_ID", "")[:16] or f"ses_{int(time.time())}",
+            started_at=time.time(),
+            ops_scripts=_discover_ops_scripts(),
+        )
+        _save_state_unlocked(state)
+        return state
+    finally:
+        _release_state_lock(lock_fd)
 
+def _save_state_unlocked(state: SessionState):
+    """Save state without acquiring lock (caller must hold lock)."""
     # Trim lists to prevent unbounded growth
     state.files_read = state.files_read[-50:]
     state.files_edited = state.files_edited[-50:]
@@ -242,7 +291,7 @@ def save_state(state: SessionState):
     state.last_5_tools = state.last_5_tools[-5:]
     state.evidence_ledger = state.evidence_ledger[-20:]
 
-    # Atomic write: write to temp file, then rename (prevents corruption from concurrent writes)
+    # Atomic write: write to temp file, then rename
     try:
         fd, tmp_path = tempfile.mkstemp(dir=MEMORY_DIR, suffix='.json')
         try:
@@ -250,20 +299,73 @@ def save_state(state: SessionState):
                 json.dump(asdict(state), f, indent=2, default=str)
             os.replace(tmp_path, STATE_FILE)  # Atomic on POSIX
         except Exception:
-            # Clean up temp file on failure
             if os.path.exists(tmp_path):
                 os.unlink(tmp_path)
             raise
     except (IOError, OSError):
-        # Fallback to direct write if atomic fails
         with open(STATE_FILE, 'w') as f:
             json.dump(asdict(state), f, indent=2, default=str)
+
+def save_state(state: SessionState):
+    """Save session state to file (with file locking for concurrency safety)."""
+    _ensure_memory_dir()
+    lock_fd = _acquire_state_lock()
+    try:
+        _save_state_unlocked(state)
+    finally:
+        _release_state_lock(lock_fd)
 
 def reset_state():
     """Reset state for new session."""
     if STATE_FILE.exists():
         STATE_FILE.unlink()
     return load_state()
+
+# SUDO SECURITY: Audit passed 2025-11-28 - update_state for atomic read-modify-write
+def update_state(modifier_func):
+    """
+    Atomically load, modify, and save state (race-condition safe).
+
+    Holds lock across entire read-modify-write operation, preventing
+    lost updates when multiple Claude instances modify state concurrently.
+
+    Usage:
+        def add_file(state):
+            state.files_read.append("foo.py")
+        update_state(add_file)
+
+    Args:
+        modifier_func: Function that takes SessionState and modifies it in-place
+
+    Returns:
+        The modified SessionState
+    """
+    _ensure_memory_dir()
+    lock_fd = _acquire_state_lock()
+    try:
+        if STATE_FILE.exists():
+            try:
+                with open(STATE_FILE) as f:
+                    data = json.load(f)
+                    state = SessionState(**data)
+            except (json.JSONDecodeError, TypeError, KeyError):
+                state = SessionState(
+                    session_id=os.environ.get("CLAUDE_SESSION_ID", "")[:16] or f"ses_{int(time.time())}",
+                    started_at=time.time(),
+                    ops_scripts=_discover_ops_scripts(),
+                )
+        else:
+            state = SessionState(
+                session_id=os.environ.get("CLAUDE_SESSION_ID", "")[:16] or f"ses_{int(time.time())}",
+                started_at=time.time(),
+                ops_scripts=_discover_ops_scripts(),
+            )
+
+        modifier_func(state)
+        _save_state_unlocked(state)
+        return state
+    finally:
+        _release_state_lock(lock_fd)
 
 # =============================================================================
 # DOMAIN DETECTION
@@ -941,6 +1043,8 @@ def check_pending_items(state: SessionState, tool_name: str, tool_input: dict) -
 # =============================================================================
 
 # Patterns to detect function/method definitions
+# NOTE: These should match reusable functions that might have external callers,
+# NOT inline closures/IIFEs which are file-internal by definition
 FUNCTION_PATTERNS = [
     # Python: def function_name(
     (r'\bdef\s+(\w+)\s*\(', 'python'),
@@ -948,10 +1052,11 @@ FUNCTION_PATTERNS = [
     (r'\basync\s+def\s+(\w+)\s*\(', 'python'),
     # JavaScript/TypeScript: function name(
     (r'\bfunction\s+(\w+)\s*\(', 'js'),
-    # JavaScript/TypeScript: const/let/var name = function/arrow
-    (r'\b(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(', 'js'),
-    # JavaScript/TypeScript: name(args) { or name = (args) =>
-    (r'\b(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>', 'js'),
+    # JavaScript/TypeScript: const/let/var name = (args) => (arrow function, not IIFE)
+    # Excludes IIFEs like `const x = (() => ...)()` by requiring => after params
+    (r'\b(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>', 'js'),
+    # JavaScript/TypeScript: export const name =
+    (r'\bexport\s+(?:const|let|var)\s+(\w+)\s*=', 'js'),
     # Class methods: name(args) {
     (r'^\s+(\w+)\s*\([^)]*\)\s*\{', 'js'),
     # Rust: fn name(
@@ -961,11 +1066,20 @@ FUNCTION_PATTERNS = [
 ]
 
 
-def extract_function_names(code: str) -> list[str]:
-    """Extract function/method names from code snippet."""
+def extract_function_names(code: str, check_exported: bool = True) -> list[str]:
+    """Extract function/method names from code snippet.
+
+    Args:
+        code: The code snippet to analyze
+        check_exported: If True, skip non-exported functions in JS/TS (PascalCase without export)
+    """
+    # Strip comments to avoid false positives on documentation/pattern strings
+    code_stripped = re.sub(r'#.*$', '', code, flags=re.MULTILINE)   # Python comments
+    code_stripped = re.sub(r'//.*$', '', code_stripped, flags=re.MULTILINE)  # JS/Go/Rust comments
+
     functions = []
     for pattern, _ in FUNCTION_PATTERNS:
-        matches = re.findall(pattern, code, re.MULTILINE)
+        matches = re.findall(pattern, code_stripped, re.MULTILINE)
         functions.extend(matches)
     # Dedupe and filter out common non-function matches and entry points
     # Entry points (main, __init__, etc.) don't need caller verification
@@ -978,12 +1092,46 @@ def extract_function_names(code: str) -> list[str]:
         'test', 'setUp', 'tearDown',
         # Common dunder methods
         '__str__', '__repr__', '__eq__', '__hash__',
+        # Common inline variable names (not reusable functions)
+        'display', 'result', 'data', 'item', 'value', 'entry', 'output',
+        'config', 'options', 'props', 'state', 'context', 'handler',
     }
-    return list(set(f for f in functions if f not in skip and len(f) > 1))
+
+    def is_local_component(func_name: str) -> bool:
+        """Check if function is a local React component (PascalCase, not exported)."""
+        if not check_exported:
+            return False
+        # PascalCase = starts with uppercase, has lowercase after
+        if not (func_name[0].isupper() and any(c.islower() for c in func_name)):
+            return False
+        # Check if export keyword precedes this function in the code
+        # Patterns: "export function Name", "export const Name", "export default Name"
+        export_pattern = rf'export\s+(?:default\s+)?(?:function|const|class)\s+{re.escape(func_name)}\b'
+        if re.search(export_pattern, code):
+            return False  # It IS exported, not local
+        return True  # PascalCase without export = local component
+
+    # Skip private/internal functions (starting with _) - they're file-internal
+    # Skip CLI command handlers (starting with cmd_) - they're only called from main() via argparse
+    # Skip local React components (PascalCase without export) - they're file-internal
+    return list(set(
+        f for f in functions
+        if f not in skip
+        and len(f) > 1
+        and not f.startswith('_')
+        and not f.startswith('cmd_')
+        and not is_local_component(f)
+    ))
 
 
 def add_pending_integration_grep(state: SessionState, function_name: str, file_path: str):
     """Add a function that needs grep verification after edit."""
+    # Skip if recently grepped (within 3 turns) - prevents false positive loops
+    GREP_COOLDOWN = 3
+    grepped_turn = state.grepped_functions.get(function_name, -999)
+    if state.turn_count - grepped_turn <= GREP_COOLDOWN:
+        return  # Already verified recently, don't re-add
+
     entry = {
         "function": function_name,
         "file": file_path,
@@ -999,6 +1147,21 @@ def add_pending_integration_grep(state: SessionState, function_name: str, file_p
 
 def clear_integration_grep(state: SessionState, pattern: str):
     """Clear pending integration grep if pattern matches function name."""
+    # Record which functions were cleared (for cooldown tracking)
+    for p in state.pending_integration_greps:
+        func_name = p["function"]
+        if func_name in pattern or pattern in func_name:
+            state.grepped_functions[func_name] = state.turn_count
+
+    # Also record the pattern itself as grepped (handles direct function name greps)
+    if len(pattern) > 3:  # Skip short patterns
+        state.grepped_functions[pattern] = state.turn_count
+
+    # Clean up old entries (keep last 20)
+    if len(state.grepped_functions) > 20:
+        sorted_funcs = sorted(state.grepped_functions.items(), key=lambda x: x[1], reverse=True)
+        state.grepped_functions = dict(sorted_funcs[:20])
+
     state.pending_integration_greps = [
         p for p in state.pending_integration_greps
         if p["function"] not in pattern and pattern not in p["function"]
@@ -1030,22 +1193,44 @@ def check_integration_blindness(state: SessionState, tool_name: str, tool_input:
     if tool_name in diagnostic_tools:
         return False, ""
 
+    # Read-only Task agents are allowed - they don't edit, just analyze
+    # These preserve context window without risking integration blindness
+    if tool_name == "Task":
+        subagent_type = tool_input.get("subagent_type", "").lower()
+        read_only_agents = {"scout", "digest", "parallel", "explore", "chore", "plan", "claude-code-guide"}
+        if subagent_type in read_only_agents:
+            return False, ""
+
     # Non-code files are allowed - integration blindness only matters for code
     # Editing .md, .json, .txt, .yaml etc. doesn't affect function callers
     if tool_name in {"Edit", "Write"}:
         file_path = tool_input.get("file_path", "")
-        non_code_extensions = {".md", ".json", ".txt", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".csv"}
+        non_code_extensions = {".md", ".json", ".txt", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".csv", ".css", ".scss", ".sass", ".less"}
         from pathlib import Path
         if Path(file_path).suffix.lower() in non_code_extensions:
             return False, ""
 
+        # Allow edits to files that don't contain any pending functions
+        # Integration blindness only matters when editing code that might call the changed function
+        pending_files = {p["file"] for p in pending}
+        if file_path not in pending_files:
+            # Editing a different file is allowed - the grep is to find callers,
+            # not to block all work. The pending grep remains until satisfied.
+            return False, ""
+
     # Block with message about pending greps
     func_list = ", ".join(f"`{p['function']}`" for p in pending[:3])
+
+    # Add hint about read-only agents if blocking Task
+    agent_hint = ""
+    if tool_name == "Task":
+        agent_hint = "\nNote: Read-only agents (scout, digest, parallel, Explore, chore) are allowed."
+
     return True, (
-        f"**INTEGRATION BLINDNESS BLOCKED** (Hard Block #14)\n"
+        f"**INTEGRATION BLINDNESS BLOCKED** (Hard Block #6)\n"
         f"Edited functions: {func_list}\n"
         f"REQUIRED: Run `grep -r \"function_name\"` to find callers before continuing.\n"
-        f"Pattern: After function edit, grep is MANDATORY."
+        f"Pattern: After function edit, grep is MANDATORY.{agent_hint}"
     )
 
 

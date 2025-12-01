@@ -127,6 +127,17 @@ def process_bash(state, tool_input, result):
 
     track_command(state, command, success, output)
 
+    # v3.3.1: Track files read via cat/head/tail so gap_detector doesn't false-positive
+    if success:
+        read_cmds = ["cat ", "head ", "tail ", "less ", "more "]
+        if any(command.startswith(cmd) or f" {cmd}" in command for cmd in read_cmds):
+            # Extract file paths from command (simple heuristic)
+            parts = command.split()
+            for part in parts[1:]:  # Skip command name
+                if not part.startswith("-") and "/" in part or "." in part:
+                    # Looks like a file path
+                    track_file_read(state, part)
+
     # v3.1: Track failures for sunk cost detection
     approach_sig = f"Bash:{command.split()[0][:20]}" if command.split() else "Bash:unknown"
 
@@ -235,6 +246,34 @@ def main():
         pattern = tool_input.get("pattern", "")
         if pattern:
             clear_pending_search(state, pattern)
+    elif tool_name == "Bash":
+        # v3.3.1: Clear state when equivalent commands run via Bash
+        command = tool_input.get("command", "")
+
+        # Clear integration greps when grep/rg run via Bash
+        if "grep " in command or command.startswith("grep") or "rg " in command:
+            # Extract patterns from grep command - look for quoted or unquoted patterns
+            patterns = re.findall(r'grep[^\|]*?["\']([^"\']+)["\']', command)
+            patterns += re.findall(r"grep\s+(?:-\w+\s+)*(\w+)", command)
+            for pattern in patterns:
+                if len(pattern) > 3:  # Skip short patterns like -r, -n
+                    clear_integration_grep(state, pattern)
+                    clear_pending_search(state, pattern)
+
+        # Clear pending_files when cat/head/tail/less run via Bash
+        read_cmds = ["cat ", "head ", "tail ", "less ", "more "]
+        if any(cmd in command for cmd in read_cmds):
+            parts = command.split()
+            for part in parts:
+                if not part.startswith("-") and ("/" in part or "." in part):
+                    clear_pending_file(state, part)
+
+        # Clear pending_searches when find/fd run via Bash
+        if "find " in command or command.startswith("find") or "fd " in command:
+            # Extract patterns from find -name "pattern"
+            name_patterns = re.findall(r'-name\s+["\']?([^"\']+)["\']?', command)
+            for pattern in name_patterns:
+                clear_pending_search(state, pattern)
 
     # Process tool-specific updates
     processor = PROCESSORS.get(tool_name)

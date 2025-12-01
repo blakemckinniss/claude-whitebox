@@ -90,11 +90,14 @@ def extract_keywords(text: str, min_length: int = 4) -> list[str]:
 # =============================================================================
 
 def find_relevant_lessons(keywords: list[str], max_results: int = 3) -> list[str]:
-    """Find lessons matching any of the keywords."""
+    """Find lessons matching any of the keywords with early-exit optimization."""
     if not LESSONS_FILE.exists():
         return []
 
+    HIGH_SCORE_THRESHOLD = 3  # Score considered "high enough" to stop early
     matches = []
+    high_score_count = 0
+
     try:
         content = LESSONS_FILE.read_text()
         lines = content.split('\n')
@@ -109,7 +112,16 @@ def find_relevant_lessons(keywords: list[str], max_results: int = 3) -> list[str
             # Score by keyword matches
             score = sum(1 for k in keywords if k in line_lower)
             if score > 0:
+                # Boost block-reflection lessons (learned mistakes)
+                if '[block-reflection:' in line:
+                    score += 2
                 matches.append((score, line.strip()))
+
+                # Early exit: stop if we have enough high-scoring matches
+                if score >= HIGH_SCORE_THRESHOLD:
+                    high_score_count += 1
+                    if high_score_count >= max_results:
+                        break
 
         # Sort by score descending, take top N
         matches.sort(key=lambda x: -x[0])
@@ -120,27 +132,37 @@ def find_relevant_lessons(keywords: list[str], max_results: int = 3) -> list[str
 
 
 def find_relevant_decisions(keywords: list[str], max_results: int = 2) -> list[str]:
-    """Find recent decisions matching keywords."""
+    """Find recent decisions matching keywords with reverse iteration."""
     if not DECISIONS_FILE.exists():
         return []
 
+    TRUNCATE_LEN = 80  # Single truncation point (matches format output)
     matches = []
+
     try:
         content = DECISIONS_FILE.read_text()
-        # Split by decision entries (usually marked with dates or bullets)
-        entries = re.split(r'\n(?=[-*•]|\d{4}-)', content)
+        lines = content.split('\n')
 
-        for entry in entries[-20:]:  # Only recent 20
-            if not entry.strip():
+        # Reverse iterate to find recent entries fast
+        count = 0
+        for line in reversed(lines):
+            line = line.strip()
+            if not line or line.startswith('#'):
                 continue
 
-            entry_lower = entry.lower()
-            score = sum(1 for k in keywords if k in entry_lower)
+            # Only process bullet points or dated entries
+            if not (line.startswith(('-', '*', '•')) or re.match(r'\d{4}-', line)):
+                continue
+
+            count += 1
+            if count > 20:  # Only check last 20 entries
+                break
+
+            line_lower = line.lower()
+            score = sum(1 for k in keywords if k in line_lower)
             if score > 0:
-                # Clean up entry
-                clean = entry.strip()[:200]
-                if len(entry) > 200:
-                    clean += "..."
+                # Single truncation at retrieval
+                clean = line[:TRUNCATE_LEN] + ("..." if len(line) > TRUNCATE_LEN else "")
                 matches.append((score, clean))
 
         matches.sort(key=lambda x: -x[0])
@@ -245,9 +267,9 @@ def format_memory_context(
             scope_line += f"\n   Next: {scope['next']}"
         parts.append(scope_line)
 
-    # Decisions (only if highly relevant)
+    # Decisions (only if highly relevant) - already truncated at retrieval
     if decisions and len(decisions) > 0:
-        dec_lines = "\n".join(f"   * {d[:80]}" for d in decisions[:1])
+        dec_lines = "\n".join(f"   * {d}" for d in decisions[:1])
         parts.append(f"RELATED DECISION:\n{dec_lines}")
 
     # Confidence (brief)

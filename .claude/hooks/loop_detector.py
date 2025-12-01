@@ -9,9 +9,12 @@ Enforces CLAUDE.md Hard Block #6:
 "Bash loops on files are BANNED. Use parallel.py or swarm."
 """
 
+import _lib_path  # noqa: F401
 import sys
 import json
 import re
+
+from synapse_core import check_sudo_in_transcript, log_block, format_block_acknowledgment
 
 # Patterns that indicate bash loops
 LOOP_PATTERNS = [
@@ -27,15 +30,19 @@ LOOP_PATTERNS = [
 ALLOWED_PATTERNS = [
     r'for\s+\w+\s+in\s+\$\(',        # for x in $(command) - one-liner OK
     r'while\s+read.*<<<',             # while read <<< - single input OK
+    r'python[3]?\s+.*-c\s+["\']',    # python -c "..." - Python code, not bash loops
 ]
 
 
-def output_result(decision: str = "approve", reason: str = "", context: str = ""):
-    """Output hook result."""
+def output_result(decision: str = "approve", reason: str = "", context: str = "",
+                  tool_name: str = "", tool_input: dict = None):
+    """Output hook result. Logs blocks for Stop hook reflection."""
     result = {"hookSpecificOutput": {"hookEventName": "PreToolUse"}}
     if decision == "block":
         result["hookSpecificOutput"]["permissionDecision"] = "deny"
-        result["hookSpecificOutput"]["permissionDecisionReason"] = reason
+        log_block("loop_detector", reason, tool_name, tool_input)
+        # Add acknowledgment prompt
+        result["hookSpecificOutput"]["permissionDecisionReason"] = reason + format_block_acknowledgment("loop_detector")
     elif context:
         result["hookSpecificOutput"]["additionalContext"] = context
     print(json.dumps(result))
@@ -70,7 +77,13 @@ def main():
         sys.exit(0)
 
     tool_input = data.get("tool_input", {})
+    transcript_path = data.get("transcript_path", "")
     command = tool_input.get("command", "")
+
+    # Check for SUDO bypass in transcript
+    if check_sudo_in_transcript(transcript_path):
+        output_result()
+        sys.exit(0)
 
     if not command:
         output_result()
@@ -84,7 +97,9 @@ def main():
             reason=f"**BASH LOOP BLOCKED** (Hard Block #6)\n"
                    f"Detected: `{matched}`\n"
                    f"Use `parallel.py` or `swarm` instead of bash loops.\n"
-                   f"Bypass: Include 'SUDO LOOP' in command description."
+                   f"Bypass: Include 'SUDO LOOP' in command description.",
+            tool_name=tool_name,
+            tool_input=tool_input
         )
         sys.exit(0)
 

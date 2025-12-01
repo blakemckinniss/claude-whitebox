@@ -35,17 +35,37 @@ from session_state import (
 # CONFIG
 # =============================================================================
 
-# Additional fast-moving libs not in session_state
+# Stable libraries - never require research (APIs don't change)
+STABLE_LIBS = {
+    # Python stdlib
+    "os", "sys", "json", "re", "pathlib", "typing", "dataclasses",
+    "collections", "itertools", "functools", "contextlib", "abc",
+    "datetime", "time", "logging", "argparse", "subprocess", "shutil",
+    "tempfile", "io", "hashlib", "base64", "uuid", "enum", "copy",
+    # Stable third-party (mature, stable APIs)
+    "requests", "urllib3", "httpx",  # HTTP clients
+    "pytest", "unittest",  # Testing
+    "click", "typer",  # CLI
+    "pydantic",  # Data validation (v2 is stable now)
+    "sqlalchemy",  # ORM
+    "jinja2",  # Templating
+    "yaml", "toml",  # Config parsing
+    "dotenv",  # Env loading
+    "rich", "colorama",  # Terminal output
+}
+
+# Fast-moving libs that DO require research
 EXTRA_RESEARCH_LIBS = {
-    # LLM/AI
+    # LLM/AI (APIs change frequently)
     "litellm", "guidance", "outlines", "dspy", "instructor",
     "crewai", "autogen", "semantic-kernel",
-    # Data
+    "anthropic", "openai", "cohere", "replicate",
+    # Data (complex APIs)
     "modal", "ray", "dask", "vaex",
-    # Web frameworks
+    # Web frameworks (newer/changing)
     "litestar", "blacksheep", "robyn",
-    # Cloud
-    "pulumi", "cdktf",
+    # Cloud (version-sensitive)
+    "pulumi", "cdktf", "boto3", "google-cloud",
 }
 
 ALL_RESEARCH_LIBS = RESEARCH_REQUIRED_LIBS | EXTRA_RESEARCH_LIBS
@@ -53,6 +73,10 @@ ALL_RESEARCH_LIBS = RESEARCH_REQUIRED_LIBS | EXTRA_RESEARCH_LIBS
 def needs_research_check(lib: str, researched: list) -> bool:
     """Check if library needs research verification."""
     lib_lower = lib.lower()
+
+    # Stable libs never need research
+    if lib_lower in STABLE_LIBS:
+        return False
 
     # Already researched this session
     if lib_lower in [r.lower() for r in researched]:

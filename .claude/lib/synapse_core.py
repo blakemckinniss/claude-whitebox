@@ -241,39 +241,54 @@ def budget_associations(
 # SPARK INTEGRATION
 # =============================================================================
 
+# Spark result cache: keyword_hash -> (timestamp, result)
+_SPARK_CACHE: Dict[str, Tuple[float, Optional[Dict]]] = {}
+SPARK_CACHE_TTL = 300  # 5 minutes
+
+
+def _get_cache_key(text: str) -> str:
+    """Generate cache key from text (normalized keywords)."""
+    import hashlib
+    # Normalize: lowercase, sorted words, first 200 chars
+    words = sorted(set(text.lower().split()))[:20]
+    normalized = " ".join(words)
+    return hashlib.md5(normalized.encode()).hexdigest()[:16]
+
 
 def run_spark(text: str, timeout: float = 3.0) -> Optional[Dict]:
-    """Run spark.py for memory retrieval."""
+    """Run spark in-process for memory retrieval with caching.
+
+    v2: Uses spark_core.fire_synapses() directly instead of subprocess.
+    This eliminates 100-500ms subprocess spawn overhead.
+    """
+    import time as _time
+
     if not text or len(text.strip()) < 10:
         return None
 
+    # Check cache first
+    cache_key = _get_cache_key(text)
+    if cache_key in _SPARK_CACHE:
+        cached_time, cached_result = _SPARK_CACHE[cache_key]
+        if _time.time() - cached_time < SPARK_CACHE_TTL:
+            return cached_result
+
     try:
-        # Find project root
-        project_root = os.environ.get("CLAUDE_PROJECT_DIR")
-        if not project_root:
-            current = Path(__file__).resolve().parent
-            while current != current.parent:
-                if (current / ".claude" / "ops" / "spark.py").exists():
-                    project_root = str(current)
-                    break
-                current = current.parent
+        # Import spark_core for in-process execution (lazy import)
+        from spark_core import fire_synapses
 
-        if not project_root:
-            return None
+        # Fire synapses in-process (no subprocess overhead)
+        result = fire_synapses(text[:500], include_constraints=True)
 
-        result = subprocess.run(
-            ["python3", ".claude/ops/spark.py", text[:500], "--json"],
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            cwd=project_root
-        )
+        # Cache successful result
+        _SPARK_CACHE[cache_key] = (_time.time(), result)
+        return result
 
-        if result.returncode == 0:
-            return json.loads(result.stdout)
-    except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception):
+    except Exception:
         pass
 
+    # Cache failures too (avoid repeated errors)
+    _SPARK_CACHE[cache_key] = (_time.time(), None)
     return None
 
 
@@ -390,13 +405,156 @@ def extract_recent_text(transcript_path: str, max_chars: int = 8000) -> str:
 # =============================================================================
 
 
+def log_block(hook_name: str, reason: str, tool_name: str = "", tool_input: dict = None):
+    """Log a hook block for later reflection.
+
+    Blocks are logged to .claude/memory/block_log.jsonl with metadata
+    for post-session analysis.
+    """
+    import time
+    import os
+
+    log_file = Path(__file__).parent.parent / "memory" / "block_log.jsonl"
+
+    entry = {
+        "timestamp": time.time(),
+        "session_id": os.environ.get("CLAUDE_SESSION_ID", "unknown"),
+        "hook": hook_name,
+        "reason": reason[:500],  # Truncate long reasons
+        "tool_name": tool_name,
+        "tool_input_summary": str(tool_input)[:200] if tool_input else "",
+    }
+
+    try:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(log_file, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+    except (IOError, OSError):
+        pass  # Don't fail hook on logging error
+
+
+def format_block_acknowledgment(hook_name: str) -> str:
+    """Format the acknowledgment prompt to append to block messages.
+
+    Returns text asking Claude to acknowledge if block was valid or false positive.
+    """
+    return (
+        f"\n\n**ACKNOWLEDGE:** Was this block valid or a false positive?\n"
+        f"- If VALID: Say 'Block valid: [lesson learned]' (clears from Stop reflection)\n"
+        f"- If FALSE POSITIVE: Say 'False positive: [which hook needs fixing]' (requires investigation)"
+    )
+
+
+def clear_acknowledged_block(hook_name: str, session_id: str = None):
+    """Clear a specific hook's blocks after acknowledgment.
+
+    Called when Claude admits the block was valid (no need for Stop reflection).
+    """
+    import os
+
+    if session_id is None:
+        session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+
+    log_file = Path(__file__).parent.parent / "memory" / "block_log.jsonl"
+
+    if not log_file.exists():
+        return
+
+    try:
+        # Read all entries, filter out acknowledged hook for this session
+        remaining = []
+        with open(log_file) as f:
+            for line in f:
+                try:
+                    entry = json.loads(line.strip())
+                    # Keep if different session or different hook
+                    if entry.get("session_id") != session_id or entry.get("hook") != hook_name:
+                        remaining.append(line)
+                except json.JSONDecodeError:
+                    remaining.append(line)
+
+        with open(log_file, 'w') as f:
+            f.writelines(remaining)
+    except (IOError, OSError):
+        pass
+
+
+def get_session_blocks(session_id: str = None) -> list[dict]:
+    """Get all blocks for current or specified session."""
+    import os
+
+    if session_id is None:
+        session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+
+    log_file = Path(__file__).parent.parent / "memory" / "block_log.jsonl"
+    blocks = []
+
+    if not log_file.exists():
+        return blocks
+
+    try:
+        with open(log_file) as f:
+            for line in f:
+                try:
+                    entry = json.loads(line.strip())
+                    if entry.get("session_id") == session_id:
+                        blocks.append(entry)
+                except json.JSONDecodeError:
+                    continue
+    except (IOError, OSError):
+        pass
+
+    return blocks
+
+
+def clear_session_blocks(session_id: str = None):
+    """Clear blocks for current session after reflection is shown.
+
+    This prevents the stop hook from repeatedly demanding reflection
+    for the same blocks.
+    """
+    import os
+
+    if session_id is None:
+        session_id = os.environ.get("CLAUDE_SESSION_ID", "unknown")
+
+    log_file = Path(__file__).parent.parent / "memory" / "block_log.jsonl"
+
+    if not log_file.exists():
+        return
+
+    try:
+        # Read all entries, filter out current session
+        remaining = []
+        with open(log_file) as f:
+            for line in f:
+                try:
+                    entry = json.loads(line.strip())
+                    if entry.get("session_id") != session_id:
+                        remaining.append(line)
+                except json.JSONDecodeError:
+                    remaining.append(line)  # Keep malformed lines
+
+        # Write back filtered entries
+        with open(log_file, 'w') as f:
+            f.writelines(remaining)
+    except (IOError, OSError):
+        pass
+
+
 def output_hook_result(
     lifecycle: str,
     context: str = "",
     decision: Optional[str] = None,
-    reason: str = ""
+    reason: str = "",
+    hook_name: str = "",
+    tool_name: str = "",
+    tool_input: dict = None
 ):
-    """Output standardized hook result."""
+    """Output standardized hook result.
+
+    If decision is "deny", automatically logs the block for later reflection.
+    """
     result = {
         "hookSpecificOutput": {
             "hookEventName": lifecycle,
@@ -409,6 +567,22 @@ def output_hook_result(
     if decision:
         result["hookSpecificOutput"]["permissionDecision"] = decision
         if reason:
+            # Append acknowledgment prompt for blocks
+            if decision == "deny":
+                reason = reason + format_block_acknowledgment(hook_name or "hook")
             result["hookSpecificOutput"]["permissionDecisionReason"] = reason
+
+        # Auto-log blocks
+        if decision == "deny":
+            # Extract hook name from reason if not provided
+            effective_hook = hook_name
+            if not effective_hook and reason:
+                # Try to extract from reason like "**COMMIT BLOCKED**"
+                import re
+                match = re.search(r'\*\*(\w+(?:\s+\w+)?)\s+BLOCKED\*\*', reason)
+                if match:
+                    effective_hook = match.group(1).lower().replace(" ", "_") + "_gate"
+
+            log_block(effective_hook or "unknown", reason, tool_name, tool_input)
 
     print(json.dumps(result))

@@ -98,11 +98,27 @@ def check_cooldown() -> bool:
 
 
 def update_cooldown():
-    """Update cooldown timestamp."""
+    """Update cooldown timestamp (atomic write for concurrency safety)."""
     try:
+        import fcntl
+        import tempfile
+
         MEMORY_DIR.mkdir(parents=True, exist_ok=True)
-        with open(LAST_ANALYSIS_FILE, 'w') as f:
-            json.dump({"timestamp": time.time()}, f)
+
+        # Use file locking for atomic write
+        lock_path = LAST_ANALYSIS_FILE.with_suffix('.lock')
+        lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR)
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
+            # Atomic write: temp file + rename
+            fd, tmp_path = tempfile.mkstemp(dir=MEMORY_DIR, suffix='.json')
+            with os.fdopen(fd, 'w') as f:
+                json.dump({"timestamp": time.time()}, f)
+            os.replace(tmp_path, LAST_ANALYSIS_FILE)
+        finally:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
     except (IOError, OSError):
         pass
 

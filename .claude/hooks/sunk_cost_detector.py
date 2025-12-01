@@ -32,10 +32,12 @@ from session_state import (  # noqa: E402
     load_state, save_state,
     track_approach, check_sunk_cost, get_turns_since_op
 )
+from synapse_core import log_block, format_block_acknowledgment
 
 
-def output_hook_result(context: str = "", decision: str = "approve", reason: str = ""):
-    """Output hook result."""
+def output_hook_result(context: str = "", decision: str = "approve", reason: str = "",
+                       tool_name: str = "", tool_input: dict = None):
+    """Output hook result. Logs blocks for Stop hook reflection."""
     result = {
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
@@ -45,7 +47,9 @@ def output_hook_result(context: str = "", decision: str = "approve", reason: str
         result["hookSpecificOutput"]["additionalContext"] = context
     if decision == "block":
         result["hookSpecificOutput"]["permissionDecision"] = "deny"
-        result["hookSpecificOutput"]["permissionDecisionReason"] = reason
+        log_block("sunk_cost_detector", reason, tool_name, tool_input)
+        # Add acknowledgment prompt
+        result["hookSpecificOutput"]["permissionDecisionReason"] = reason + format_block_acknowledgment("sunk_cost_detector")
     print(json.dumps(result))
 
 
@@ -127,7 +131,9 @@ def main():
                 f"Consecutive failures: {state.consecutive_failures}\n"
                 f"Run `/think \"<problem>\"` before 3rd attempt.\n"
                 f"Last /think: {turns_since_think} turns ago"
-            )
+            ),
+            tool_name=tool_name,
+            tool_input=tool_input
         )
     elif is_trapped:
         output_hook_result(f"\n{nudge_message}\n")

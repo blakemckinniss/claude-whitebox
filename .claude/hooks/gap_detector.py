@@ -210,7 +210,10 @@ def main():
 
     tool_name = input_data.get("tool_name", "")
     tool_input = input_data.get("tool_input", {})
-    prompt = input_data.get("prompt", "")
+
+    # Note: PreToolUse does NOT receive 'prompt' - read from transcript if needed
+    # For now, use empty string (prompt-based checks rely on session state)
+    prompt = ""
 
     # Skip low-risk tools
     if tool_name in SKIP_TOOLS:
@@ -245,6 +248,18 @@ def main():
         and (state.approach_history or state.tool_counts or state.turn_count > 2)
     )
     if state_appears_corrupted and blocking_gaps:
+        # Log the corruption for debugging
+        import logging
+        logging.warning(
+            f"[gap_detector] STATE CORRUPTION: files_read empty but turn_count={state.turn_count}, "
+            f"tool_counts={len(state.tool_counts)}, approach_history={len(state.approach_history)}. "
+            f"Demoting {len(blocking_gaps)} blocks to warnings."
+        )
+        # Also add to output so Claude sees it
+        output_parts.append(
+            "⚠️ **STATE TRACKING ISSUE**: files_read is empty despite session activity. "
+            "Blocks demoted to warnings. Check .claude/memory/session_state_v3.json"
+        )
         # Demote to warning - state tracking is unreliable
         for gap in blocking_gaps:
             gap.severity = "warn"

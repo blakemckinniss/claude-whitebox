@@ -10,6 +10,14 @@ import json
 import os
 import re
 
+# Add lib to path for synapse_core import
+from pathlib import Path
+_lib_dir = str(Path(__file__).parent.parent / "lib")
+if _lib_dir not in sys.path:
+    sys.path.insert(0, _lib_dir)
+from synapse_core import log_block, format_block_acknowledgment
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -34,11 +42,14 @@ def main():
         project_dir = os.environ.get("CLAUDE_PROJECT_DIR", ".")
         venv_bin = f"{project_dir}/.claude/.venv/bin"
 
+        reason = f"Use venv: {venv_bin}/python or {venv_bin}/pip"
+        log_block("python_path_injector", reason, "Bash", tool_input)
+        reason_with_ack = reason + format_block_acknowledgment("python_path_injector")
         result = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
-                "permissionDecisionReason": f"Use venv: {venv_bin}/python or {venv_bin}/pip"
+                "permissionDecisionReason": reason_with_ack
             }
         }
         print(json.dumps(result))

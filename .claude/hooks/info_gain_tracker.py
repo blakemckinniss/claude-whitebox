@@ -133,6 +133,9 @@ def main():
 
     # Track read tools
     if tool_name in READ_TOOLS:
+        # Safe access - initialize if missing
+        if "reads_since_progress" not in state:
+            state["reads_since_progress"] = 0
         state["reads_since_progress"] += 1
 
         # Track files read in this "burst"
@@ -149,6 +152,9 @@ def main():
         if reads >= READS_BEFORE_WARN and time_since_warn > 60:
             output_context = format_stall_warning(state)
             state["last_stall_warn"] = time.time()
+            # Safe access - initialize if missing
+            if "total_stall_warnings" not in state:
+                state["total_stall_warnings"] = 0
             state["total_stall_warnings"] += 1
 
     # Track progress tools (reset counter)

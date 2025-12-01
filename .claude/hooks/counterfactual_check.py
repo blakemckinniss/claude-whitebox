@@ -45,9 +45,9 @@ TIMEOUT = 2  # Fast timeout (int for groq.py)
 
 MEMORY_DIR = PROJECT_ROOT / ".claude" / "memory"
 
-# Cooldown between checks (seconds) - don't spam
-COOLDOWN = 90
-LAST_CHECK_FILE = MEMORY_DIR / "counterfactual_last.json"
+# Cooldown per file (seconds) - don't spam same file
+COOLDOWN_PER_FILE = 300  # 5 minutes per file
+COOLDOWN_FILE = MEMORY_DIR / "counterfactual_cooldowns.json"
 
 # Skip low-risk paths
 SKIP_PATHS = (".claude/tmp/", ".claude/memory/", "node_modules/", "__pycache__", ".git/")
@@ -84,27 +84,64 @@ RULES:
 # HELPERS
 # =============================================================================
 
-def check_cooldown() -> bool:
-    """Return True if cooldown has passed."""
-    if not LAST_CHECK_FILE.exists():
+def check_cooldown(filepath: str) -> bool:
+    """Return True if cooldown has passed for this specific file."""
+    if not COOLDOWN_FILE.exists():
         return True
     try:
-        with open(LAST_CHECK_FILE) as f:
+        with open(COOLDOWN_FILE) as f:
             data = json.load(f)
-        last_time = data.get("timestamp", 0)
-        return (time.time() - last_time) > COOLDOWN
+        last_time = data.get(filepath, 0)
+        return (time.time() - last_time) > COOLDOWN_PER_FILE
     except (json.JSONDecodeError, IOError):
         return True
 
 
-def update_cooldown():
-    """Update cooldown timestamp."""
+def update_cooldown(filepath: str):
+    """Update cooldown timestamp for specific file (atomic write for concurrency safety)."""
     try:
+        import fcntl
+        import tempfile
+
         MEMORY_DIR.mkdir(parents=True, exist_ok=True)
-        with open(LAST_CHECK_FILE, 'w') as f:
-            json.dump({"timestamp": time.time()}, f)
-    except (IOError, OSError):
+
+        # Use file locking for atomic read-modify-write
+        lock_path = COOLDOWN_FILE.with_suffix('.lock')
+        lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR)
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
+            data = {}
+            if COOLDOWN_FILE.exists():
+                with open(COOLDOWN_FILE) as f:
+                    data = json.load(f)
+
+            # Prune old entries (> 1 hour old)
+            now = time.time()
+            data = {k: v for k, v in data.items() if now - v < 3600}
+            data[filepath] = now
+
+            # Atomic write: temp file + rename
+            fd, tmp_path = tempfile.mkstemp(dir=MEMORY_DIR, suffix='.json')
+            with os.fdopen(fd, 'w') as f:
+                json.dump(data, f)
+            os.replace(tmp_path, COOLDOWN_FILE)
+        finally:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
+    except (IOError, OSError, json.JSONDecodeError):
         pass
+
+
+def was_file_recently_read(filepath: str) -> bool:
+    """Check if file was read in this session (via session state)."""
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / ".claude" / "lib"))
+        from session_state import load_state
+        state = load_state()
+        return filepath in state.files_read
+    except Exception:
+        return False
 
 
 def should_skip(filepath: str) -> bool:
@@ -222,8 +259,13 @@ def main():
         print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
         sys.exit(0)
 
-    # Check cooldown
-    if not check_cooldown():
+    # Skip if file was already read this session (we understand it)
+    if was_file_recently_read(filepath):
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
+        sys.exit(0)
+
+    # Check per-file cooldown
+    if not check_cooldown(filepath):
         print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse"}}))
         sys.exit(0)
 
@@ -243,7 +285,7 @@ def main():
     if analysis:
         context = format_output(analysis)
         if context:
-            update_cooldown()
+            update_cooldown(filepath)
 
     output = {
         "hookSpecificOutput": {

@@ -62,11 +62,27 @@ def load_state() -> dict:
 
 
 def save_state(state: dict):
-    """Save state to memory file."""
+    """Save state to memory file (atomic write for concurrency safety)."""
+    import fcntl
+    import tempfile
+    import os
+
     MEMORY_FILE.parent.mkdir(parents=True, exist_ok=True)
     try:
-        with open(MEMORY_FILE, 'w') as f:
-            json.dump(state, f)
+        # Use file locking for atomic write
+        lock_path = MEMORY_FILE.with_suffix('.lock')
+        lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR)
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
+            # Atomic write: temp file + rename
+            fd, tmp_path = tempfile.mkstemp(dir=MEMORY_FILE.parent, suffix='.json')
+            with os.fdopen(fd, 'w') as f:
+                json.dump(state, f)
+            os.replace(tmp_path, MEMORY_FILE)
+        finally:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
     except IOError:
         pass
 

@@ -19,6 +19,13 @@ The result: Claude can continue working while tests/builds run.
 
 import sys
 import json
+from pathlib import Path
+
+# Add lib to path
+_lib_dir = str(Path(__file__).parent.parent / "lib")
+if _lib_dir not in sys.path:
+    sys.path.insert(0, _lib_dir)
+from synapse_core import log_block, format_block_acknowledgment
 
 # =============================================================================
 # SLOW COMMAND PATTERNS
@@ -117,8 +124,9 @@ def is_slow_command(command: str) -> bool:
 
 
 def output_hook_result(event_name: str, decision: str = "approve",
-                       reason: str = "", context: str = ""):
-    """Output standardized hook result."""
+                       reason: str = "", context: str = "",
+                       tool_name: str = "", tool_input: dict = None):
+    """Output standardized hook result. Logs blocks for Stop hook reflection."""
     result = {
         "hookSpecificOutput": {
             "hookEventName": event_name,
@@ -128,6 +136,9 @@ def output_hook_result(event_name: str, decision: str = "approve",
     if decision == "deny":
         result["decision"] = "block"
         result["reason"] = reason
+        log_block("background_enforcer", reason, tool_name, tool_input)
+        # Add acknowledgment prompt
+        reason = reason + format_block_acknowledgment("background_enforcer")
     elif context:
         result["hookSpecificOutput"]["additionalContext"] = context
 
@@ -171,7 +182,8 @@ def main():
             f"3. BashOutput(bash_id=<id>) to check results"
         )
 
-        output_hook_result("PreToolUse", decision="deny", reason=reason)
+        output_hook_result("PreToolUse", decision="deny", reason=reason,
+                           tool_name=tool_name, tool_input=tool_input)
         sys.exit(0)
 
     # Warn if command looks potentially slow but not in our list
