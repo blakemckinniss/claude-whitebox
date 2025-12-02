@@ -28,6 +28,17 @@ from session_state import (
     get_next_work_item, start_feature,
 )
 
+# Import project-aware state management
+try:
+    from project_detector import get_current_project, ProjectContext
+    from project_state import (
+        get_active_project_state, save_active_state, run_maintenance,
+        get_contextual_lessons, is_same_project,
+    )
+    PROJECT_AWARE = True
+except ImportError:
+    PROJECT_AWARE = False
+
 # Import spark_core for pre-warming (lazy load synapse map)
 try:
     from spark_core import _load_synapses, fire_synapses
@@ -38,7 +49,7 @@ except ImportError:
 # Scope's punch list file
 PUNCH_LIST_FILE = MEMORY_DIR / "punch_list.json"
 
-# Autonomous agent files
+# Autonomous agent files (legacy - now project-scoped)
 HANDOFF_FILE = MEMORY_DIR / "handoff.json"
 PROGRESS_FILE = MEMORY_DIR / "progress.json"
 
@@ -165,7 +176,7 @@ def load_work_queue() -> list:
         return []
 
 
-def build_onboarding_context(state, handoff: dict | None) -> str:
+def build_onboarding_context(state, handoff: dict | None, project_context=None) -> str:
     """Build the session onboarding protocol context.
 
     Implements the Anthropic pattern:
@@ -174,8 +185,27 @@ def build_onboarding_context(state, handoff: dict | None) -> str:
     3. Verify baseline before implementing
 
     For autonomous agents, this is AUTOMATIC - no human input needed.
+
+    NEW: Project-aware onboarding surfaces project context for fast switching.
     """
     parts = []
+
+    # === STEP 0: Project Context (for multi-project swiss army knife) ===
+    if project_context and PROJECT_AWARE:
+        proj_name = project_context.project_name
+        proj_type = project_context.project_type
+
+        if proj_type == "ephemeral":
+            parts.append(f"💬 **MODE**: Ephemeral (no project context)")
+        else:
+            lang = project_context.language or "unknown"
+            framework = project_context.framework
+            ctx_str = f"📁 **PROJECT**: {proj_name}"
+            if framework:
+                ctx_str += f" ({framework}/{lang})"
+            elif lang:
+                ctx_str += f" ({lang})"
+            parts.append(ctx_str)
 
     # === STEP 1: Previous Session Summary ===
     if handoff:
@@ -222,6 +252,17 @@ def build_onboarding_context(state, handoff: dict | None) -> str:
             commit = checkpoint.get("commit_hash", "")[:7]
             if commit:
                 parts.append(f"💾 **RECOVERY POINT**: {cp_id} (commit: {commit})")
+
+    # === STEP 4: Relevant Global Lessons (cross-project wisdom) ===
+    if PROJECT_AWARE and project_context and project_context.project_type != "ephemeral":
+        # Get lessons relevant to this project's language/framework
+        keywords = [project_context.language, project_context.framework, project_context.project_name]
+        keywords = [k for k in keywords if k]
+        if keywords:
+            lessons = get_contextual_lessons(keywords)
+            if lessons:
+                lesson_preview = lessons[0].get("content", "")[:50]
+                parts.append(f"💡 **WISDOM**: {lesson_preview}...")
 
     return "\n".join(parts) if parts else ""
 
@@ -358,6 +399,16 @@ def main():
     except (json.JSONDecodeError, ValueError):
         pass
 
+    # === PROJECT-AWARE INITIALIZATION ===
+    project_context = None
+    if PROJECT_AWARE:
+        try:
+            project_context = get_current_project()
+            # Run maintenance (cleanup stale projects, ephemeral state)
+            run_maintenance()
+        except Exception:
+            pass  # Fall back to legacy behavior
+
     # Load state BEFORE initialize (to capture previous session's context)
     previous_state = load_state()
 
@@ -379,6 +430,8 @@ def main():
     # === AUTONOMOUS AGENT: Session Onboarding Protocol ===
     # This implements the Anthropic pattern for agent session starts:
     # https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+    #
+    # ENHANCED: Project-aware onboarding for multi-project swiss army knife
 
     if result["action"] == "reset":
         # Fresh session - load state for onboarding context
@@ -386,14 +439,19 @@ def main():
         handoff = result.get("handoff")
 
         # Build onboarding context (auto-selects next work item)
-        onboarding = build_onboarding_context(state, handoff)
+        # Pass project_context for multi-project awareness
+        onboarding = build_onboarding_context(state, handoff, project_context)
 
         if onboarding:
             output["message"] = f"🚀 **SESSION START**\n{onboarding}"
             # Save state (may have started a feature)
             save_state(state)
         else:
-            output["message"] = f"🔄 {result['message']}"
+            # Even without handoff, show project context if available
+            if project_context and project_context.project_type != "ephemeral":
+                output["message"] = f"🚀 **SESSION START**\n📁 **PROJECT**: {project_context.project_name}"
+            else:
+                output["message"] = f"🔄 {result['message']}"
 
     elif result["action"] == "refresh":
         # Resuming within same session - surface context from previous state
