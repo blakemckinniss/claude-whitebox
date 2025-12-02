@@ -32,7 +32,7 @@ from session_state import (  # noqa: E402
     load_state, save_state,
     track_approach, check_sunk_cost, get_turns_since_op
 )
-from synapse_core import log_block, format_block_acknowledgment
+from synapse_core import log_block, format_block_acknowledgment, get_session_blocks
 
 
 def output_hook_result(context: str = "", decision: str = "approve", reason: str = "",
@@ -51,6 +51,38 @@ def output_hook_result(context: str = "", decision: str = "approve", reason: str
         # Add acknowledgment prompt
         result["hookSpecificOutput"]["permissionDecisionReason"] = reason + format_block_acknowledgment("sunk_cost_detector")
     print(json.dumps(result))
+
+
+def check_repeated_hook_blocks() -> tuple[bool, str]:
+    """Check if same hook has blocked 2+ times - suggest fixing the hook.
+
+    Returns: (should_nudge, nudge_message)
+    """
+    blocks = get_session_blocks()
+    if len(blocks) < 2:
+        return False, ""
+
+    # Count blocks by hook
+    hook_counts = {}
+    for block in blocks:
+        hook = block.get("hook", "unknown")
+        hook_counts[hook] = hook_counts.get(hook, 0) + 1
+
+    # Find hooks that blocked 2+ times
+    repeat_offenders = [(h, c) for h, c in hook_counts.items() if c >= 2]
+    if not repeat_offenders:
+        return False, ""
+
+    # Get the worst offender
+    worst_hook, count = max(repeat_offenders, key=lambda x: x[1])
+
+    # Build nudge - suggest fixing the hook directly
+    return True, (
+        f"🔧 **FIX THE BLOCKER**: `{worst_hook}` has blocked you {count}x.\n"
+        f"   This is a hook YOU can edit: `.claude/hooks/{worst_hook}.py`\n"
+        f"   → Fix the hook's false positive instead of retrying/asking user.\n"
+        f"   → Use Task agent if the hook blocks editing itself."
+    )
 
 
 def extract_approach_signature(tool_name: str, tool_input: dict) -> str:
@@ -113,6 +145,9 @@ def main():
     # Check sunk cost trap
     is_trapped, nudge_message = check_sunk_cost(state)
 
+    # Check for repeated hook blocks - nudge to fix the hook
+    has_repeat_blocks, block_nudge = check_repeated_hook_blocks()
+
     # THREE-STRIKE RULE (Hard Block #7):
     # After 3+ failures, BLOCK until /think runs
     turns_since_think = get_turns_since_op(state, "think")
@@ -135,6 +170,9 @@ def main():
             tool_name=tool_name,
             tool_input=tool_input
         )
+    elif has_repeat_blocks:
+        # Prioritize "fix the hook" nudge over general sunk cost
+        output_hook_result(f"\n{block_nudge}\n")
     elif is_trapped:
         output_hook_result(f"\n{nudge_message}\n")
     else:
