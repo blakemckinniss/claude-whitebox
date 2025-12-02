@@ -53,9 +53,10 @@ STUB_PATTERNS = [
 CODE_EXTENSIONS = {'.py', '.js', '.ts', '.tsx', '.rs', '.go', '.java'}
 
 # Patterns that indicate Claude is dismissing hook feedback
+# Must be specific to avoid matching bug descriptions like "falsely flagging"
 DISMISSAL_PATTERNS = [
-    (r"false positive", "false_positive"),
-    (r"warning is (a )?false", "false_positive"),
+    (r"(this|that|it)('s| is) a false positive", "false_positive"),
+    (r"the (warning|hook|gate) is (a )?false positive", "false_positive"),
     (r"hook (is )?(wrong|incorrect|mistaken)", "hook_dismissal"),
     (r"ignore (this|the) (warning|hook|gate)", "ignore_warning"),
     (r"(that|this) warning (is )?(incorrect|wrong)", "false_positive"),
