@@ -128,6 +128,24 @@ if __name__ == "__main__":
 MAIN
 
     echo -e "${GREEN}  ✓ Created project structure${NC}"
+
+    # Initialize beads if available
+    if command -v bd &>/dev/null; then
+        echo -e "  ${YELLOW}Initializing beads issue tracker...${NC}"
+        (cd "$project_dir" && bd init --quiet 2>/dev/null) || true
+        if [ -d "$project_dir/.beads" ]; then
+            echo -e "${GREEN}  ✓ Beads initialized${NC}"
+        fi
+    fi
+
+    # Generate repomix context if npx available
+    if command -v npx &>/dev/null; then
+        echo -e "  ${YELLOW}Generating repomix codebase context...${NC}"
+        (cd "$project_dir" && npx --yes repomix --style markdown --compress --output .repomix-context.md . 2>/dev/null) || true
+        if [ -f "$project_dir/.repomix-context.md" ]; then
+            echo -e "${GREEN}  ✓ Repomix context generated${NC}"
+        fi
+    fi
     echo ""
     echo -e "  ${CYAN}Project created at:${NC} $project_dir"
     echo -e "  ${CYAN}Next steps:${NC}"

@@ -12,6 +12,22 @@
             "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/hooks/py session_init.py"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/hooks/py repomix_generator.py"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/hooks/py beads_integration.py"
+          }
+        ]
       }
     ],
     "Stop": [
