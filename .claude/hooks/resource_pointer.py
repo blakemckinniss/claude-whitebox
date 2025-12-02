@@ -79,63 +79,73 @@ def extract_keywords(text: str) -> list[str]:
 # TOOL INDEX (static, fast)
 # =============================================================================
 
-# Tool -> (keywords, one-liner description)
-# Only include tools that aren't obvious from their names
+# Tool -> (keywords, description, example)
+# Examples improve accuracy 72% → 90% per Anthropic's advanced tool use research
 TOOL_INDEX = {
     "probe": (
         ["api", "signature", "method", "attribute", "inspect", "runtime", "class", "object"],
-        "runtime API inspection - see what methods/attrs exist",
+        "runtime API inspection",
+        "/probe httpx.Client",
     ),
     "research": (
         ["docs", "documentation", "library", "package", "how", "api", "external"],
         "web search for docs/libraries",
+        "/research 'fastapi middleware 2024'",
     ),
     "xray": (
         ["find", "class", "function", "structure", "ast", "definition", "where"],
-        "AST search - find classes/functions by name",
+        "AST search - find by name",
+        "/xray --type function --name handle_",
     ),
     "audit": (
         ["security", "vulnerability", "injection", "secrets", "unsafe"],
         "security audit for code",
+        "/audit src/api/auth.py",
     ),
     "void": (
         ["stub", "todo", "incomplete", "notimplemented", "missing", "placeholder"],
         "find incomplete/stub code",
+        "/void src/handlers/",
     ),
     "think": (
         ["complex", "decompose", "break", "analyze", "stuck", "approach"],
         "structured problem decomposition",
+        "/think 'how to handle concurrent writes'",
     ),
     "council": (
         ["decision", "tradeoff", "choice", "should", "approach", "design"],
         "multi-perspective analysis",
+        "/council 'REST vs GraphQL for this API'",
     ),
     "gaps": (
         ["missing", "incomplete", "coverage", "crud", "error", "handling"],
         "completeness check",
+        "/gaps src/models/",
     ),
     "spark": (
         ["remember", "previous", "lesson", "pattern", "protocol", "learned"],
         "associative memory recall",
+        "/spark websocket",
     ),
     "verify": (
         ["check", "exists", "confirm", "test", "validate", "ensure"],
         "verify file/command/state",
+        "/verify file_exists 'src/config.py'",
     ),
 }
 
 
-def match_tools(keywords: list[str]) -> list[tuple[str, str, int]]:
-    """Match keywords to tools. Returns [(tool, desc, score)]."""
+def match_tools(keywords: list[str]) -> list[tuple[str, str, str, int]]:
+    """Match keywords to tools. Returns [(tool, desc, example, score)]."""
     matches = []
     kw_set = set(keywords)
 
-    for tool, (tool_kws, desc) in TOOL_INDEX.items():
+    for tool, (tool_kws, desc, example) in TOOL_INDEX.items():
         score = len(kw_set & set(tool_kws))
         if score >= 1:
-            matches.append((tool, desc, score))
+            matches.append((tool, desc, example, score))
 
-    matches.sort(key=lambda x: -x[2])
+    matches.sort(key=lambda x: -x[3])
     return matches[:MAX_TOOL_POINTERS]
 
 
@@ -167,16 +177,23 @@ class FilePointer(NamedTuple):
 
 def get_file_index() -> dict:
     """Get or build file index. Cached for speed."""
+    import time
+
     # Try cache first
     if FILE_INDEX_CACHE.exists():
         try:
             cache = json.loads(FILE_INDEX_CACHE.read_text())
-            # Cache valid for 10 minutes
-            import time
-            if time.time() - cache.get("ts", 0) < 600:
-                return cache.get("index", {})
-        except (json.JSONDecodeError, KeyError):
-            pass
+            # Validate cache structure
+            if isinstance(cache, dict) and isinstance(cache.get("index"), dict):
+                # Cache valid for 10 minutes
+                if time.time() - cache.get("ts", 0) < 600:
+                    return cache["index"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            # Corrupted cache - delete and rebuild
+            try:
+                FILE_INDEX_CACHE.unlink()
+            except OSError:
+                pass
 
     # Build index (fast scan, no content reading)
     index = {}
@@ -195,11 +212,13 @@ def get_file_index() -> dict:
         except Exception:
             continue
 
-    # Cache it
+    # Cache it - track if write fails to avoid repeated attempts
     try:
-        import time
+        MEMORY_DIR.mkdir(parents=True, exist_ok=True)
         FILE_INDEX_CACHE.write_text(json.dumps({"ts": time.time(), "index": index}))
-    except Exception:
+    except (OSError, IOError):
+        # Write failed - still return index, just won't be cached
+        # On next call, we'll scan again but that's better than crashing
         pass
 
     return index
@@ -284,7 +303,7 @@ def match_lessons(keywords: list[str]) -> list[tuple[int, str, int]]:
 
 def format_pointers(
     files: list[FilePointer],
-    tools: list[tuple[str, str, int]],
+    tools: list[tuple[str, str, str, int]],
     lessons: list[tuple[int, str, int]],
 ) -> str:
     """Format pointers for injection. Budget: <100 tokens."""
@@ -312,10 +331,11 @@ def format_pointers(
         for fp in files:
             parts.append(f"  • {fp.path}")
 
-    # Tools
+    # Tools with examples (per Anthropic advanced tool use research)
     if tools:
-        for tool, desc, _ in tools:
+        for tool, desc, example, _ in tools:
             parts.append(f"  • /{tool} - {desc}")
+            parts.append(f"    eg: {example}")
 
     # Lessons (line pointers only)
     if lessons:
@@ -363,7 +383,7 @@ def main():
     # Only output if we found something meaningful
     total_score = (
         sum(f.score for f in files) +
-        sum(t[2] for t in tools) +
+        sum(t[3] for t in tools) +
         sum(l[2] for l in lessons)
     )
 
