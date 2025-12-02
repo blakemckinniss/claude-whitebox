@@ -64,6 +64,11 @@ def extract_command_core(command: str) -> str:
     This prevents false positives from commit messages like:
     git commit -m "Added mypy cache to gitignore"
     """
+    # For heredocs, strip everything after << FIRST (before other checks)
+    # This handles: git commit -m "$(cat <<'EOF'\nMake...\nEOF)"
+    if "<<" in command:
+        command = command.split("<<")[0]
+
     # For git commit with -m, only check up to the message
     if "git commit" in command.lower():
         # Find -m and stop there (message content is irrelevant)
@@ -82,10 +87,6 @@ def extract_command_core(command: str) -> str:
                 continue  # Skip -m"message" style
             core_parts.append(part)
         return " ".join(core_parts)
-
-    # For heredocs, only check the command before the heredoc
-    if "<<" in command:
-        return command.split("<<")[0]
 
     # For commands with quoted strings, be conservative - check the whole thing
     # but fast commands like git are generally safe
