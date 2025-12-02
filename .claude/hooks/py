@@ -1,0 +1,16 @@
+#!/bin/sh
+# Python environment detector - works in both local (venv) and web (system python) environments
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VENV_PYTHON="$SCRIPT_DIR/../.venv/bin/python"
+
+if [ -x "$VENV_PYTHON" ]; then
+    exec "$VENV_PYTHON" "$@"
+elif command -v python3 >/dev/null 2>&1; then
+    exec python3 "$@"
+elif command -v python >/dev/null 2>&1; then
+    exec python "$@"
+else
+    echo "ERROR: No Python interpreter found" >&2
+    exit 1
+fi

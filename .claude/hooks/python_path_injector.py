@@ -34,12 +34,20 @@ def main():
 
     command = tool_input.get("command", "")
 
+    project_dir = os.environ.get("CLAUDE_PROJECT_DIR", ".")
+    venv_python = f"{project_dir}/.claude/.venv/bin/python"
+
+    # Only enforce venv usage if venv actually exists (local dev)
+    # In web environment, venv won't exist and bare python3 is fine
+    if not os.path.exists(venv_python):
+        print(json.dumps({}))
+        sys.exit(0)
+
     # Pattern: bare python/pip at start or after shell operators
     bare_python = re.search(r'(^|&&|\|\||;|\|)\s*(python3?|pip3?)\s', command)
 
     # Allow if already using venv path
     if bare_python and ".venv/bin" not in command:
-        project_dir = os.environ.get("CLAUDE_PROJECT_DIR", ".")
         venv_bin = f"{project_dir}/.claude/.venv/bin"
 
         reason = f"Use venv: {venv_bin}/python or {venv_bin}/pip"
