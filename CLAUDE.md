@@ -121,9 +121,9 @@
 
 ## ⌨️ CLI Shortcuts
 
-**Python environment:** `.claude/.venv/bin/python`. If venv missing, run `.claude/setup.sh`.
+**Python environment:** `.claude/hooks/py` (auto-detects venv vs system python).
 
-**Tool invocation:** `.claude/.venv/bin/python .claude/ops/<tool>.py <args>`
+**Tool invocation:** `.claude/hooks/py .claude/ops/<tool>.py <args>`
 
 *All tools live in `.claude/ops/`. The Operational Tools table above has the signatures.*
 
