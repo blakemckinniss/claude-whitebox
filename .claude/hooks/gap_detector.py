@@ -46,7 +46,8 @@ from synapse_core import (
 SKIP_TOOLS = frozenset({"TodoWrite", "BashOutput", "KillShell"})
 
 # Tools where gaps result in BLOCK vs WARN
-BLOCK_ON_GAP = frozenset({"Edit", "Write"})
+# NOTE: Only Edit blocks - Write to new files can't require prior read
+BLOCK_ON_GAP = frozenset({"Edit"})
 
 # Claim patterns that require verify
 CLAIM_PATTERNS = [
@@ -241,6 +242,9 @@ def main():
     blocking_gaps = [g for g in gaps if g.severity == "block"]
     warning_gaps = [g for g in gaps if g.severity == "warn"]
 
+    # Collect all warnings (must be before state corruption check)
+    output_parts = []
+
     # SANITY CHECK: If state tracking appears corrupted, demote blocks to warnings
     # Signs of corruption: files_read empty but session has activity (approach_history, tool_counts)
     state_appears_corrupted = (
@@ -293,9 +297,6 @@ def main():
             reason=blocking_directives[0].format()
         )
         sys.exit(0)
-
-    # Collect all warnings
-    output_parts = []
 
     # Warning directives
     warning_directives = [d for d in directives if d.strength.value < DirectiveStrength.BLOCK.value]

@@ -5,7 +5,36 @@ Shared utilities for all scripts in the arsenal.
 """
 import argparse
 import logging
+import os
 import sys
+from pathlib import Path
+from functools import lru_cache
+
+
+@lru_cache(maxsize=1)
+def get_project_root() -> Path:
+    """Find project root by walking up to find .claude/lib/core.py.
+
+    This function is cached so repeated calls are fast.
+    Can be called from any script in the project.
+
+    Returns:
+        Path to project root directory
+
+    Raises:
+        RuntimeError if project root cannot be found
+    """
+    # Start from this file's location
+    current = Path(__file__).resolve().parent
+
+    # Walk up looking for .claude/lib/core.py marker
+    while current != current.parent:
+        marker = current / ".claude" / "lib" / "core.py"
+        if marker.exists():
+            return current  # This directory contains .claude/
+        current = current.parent
+
+    raise RuntimeError("Could not find project root with .claude/lib/core.py")
 
 # Standardized Logging
 logging.basicConfig(
