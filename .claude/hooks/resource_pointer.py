@@ -132,6 +132,11 @@ TOOL_INDEX = {
         "verify file/command/state",
         "/verify file_exists 'src/config.py'",
     ),
+    "orchestrate": (
+        ["batch", "aggregate", "many", "multiple", "all", "process", "scan", "summarize", "consolidate"],
+        "Claude API code_execution for batch tasks (37% token reduction)",
+        "/orchestrate 'Scan all *.py for security issues, return critical only'",
+    ),
 }
 
 

@@ -210,8 +210,21 @@ TOOL_TRIGGERS = {
     },
 
     # =========================================================================
-    # EXECUTION
+    # EXECUTION / ORCHESTRATION
     # =========================================================================
+    "orchestrate": {
+        "patterns": [
+            r"(process|analyze|scan)\s+(all|many|multiple|every)\s+files?",
+            r"(batch|bulk|aggregate)\s+(process|operation|task)",
+            r"(summarize|consolidate|combine)\s+(the\s+)?(results?|outputs?|findings?)",
+            r"(count|list|extract)\s+.+\s+(from|across)\s+(all|many|multiple)",
+            r"(reduce|minimize)\s+(context|tokens?|output)",
+            r"return\s+(only|just)\s+(the\s+)?(summary|important|critical)",
+            r"(3|three|several)\+?\s+(dependent\s+)?(operations?|steps?|tasks?)",
+        ],
+        "command": "python3 .claude/ops/orchestrate.py \"<task description>\"",
+        "reason": "Claude API code_execution - 37% token reduction for batch/aggregate tasks",
+    },
     "swarm": {
         "patterns": [
             r"(parallel|concurrent|batch)\s+(generation|tasks?|agents?)",
