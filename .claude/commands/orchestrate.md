@@ -15,5 +15,5 @@ Run Claude-powered programmatic tool orchestration.
 - "Search for API endpoints, count by HTTP method"
 
 ```bash
-.claude/.venv/bin/python .claude/ops/orchestrate.py "$ARGUMENTS"
+.claude/hooks/py .claude/ops/orchestrate.py "$ARGUMENTS"
 ```

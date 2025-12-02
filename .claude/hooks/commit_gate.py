@@ -76,7 +76,7 @@ def main():
             "**COMMIT BLOCKED** (Hard Block #4)\n\n"
             "MUST run `upkeep` before committing.\n\n"
             "```bash\n"
-            ".claude/.venv/bin/python .claude/ops/upkeep.py\n"
+            ".claude/hooks/py .claude/ops/upkeep.py\n"
             "```\n\n"
             "Bypass: Add 'SUDO COMMIT' to description if upkeep already ran."
         )

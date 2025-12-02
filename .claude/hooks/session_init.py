@@ -453,7 +453,6 @@ def main():
             pass  # Fall back to legacy behavior
         except Exception as e:
             # Unexpected errors: log for debugging but don't block
-            import sys
             print(f"Warning: project detection failed: {type(e).__name__}: {e}", file=sys.stderr)
 
     # Load state BEFORE initialize (to capture previous session's context)
