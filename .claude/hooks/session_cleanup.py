@@ -31,11 +31,8 @@ from session_state import (
 
 # Import project-aware state management
 try:
-    from project_detector import get_current_project, ProjectContext
-    from project_state import (
-        get_active_project_state, save_active_state, get_project_memory_dir,
-        add_global_lesson, promote_lesson_to_global,
-    )
+    from project_detector import get_current_project
+    from project_state import get_project_memory_dir
     PROJECT_AWARE = True
 except ImportError:
     PROJECT_AWARE = False

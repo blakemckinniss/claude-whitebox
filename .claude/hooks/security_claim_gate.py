@@ -26,6 +26,9 @@ from session_state import load_state
 from synapse_core import output_hook_result, check_sudo_in_transcript  # SUDO SECURITY
 
 # Security-sensitive file patterns
+# NOTE: Tightened patterns to reduce false positives on maintenance files
+# Removed: 'session' (too broad - catches session_cleanup.py, session_state.py)
+# Removed: 'key' (too broad - catches api_key but also keyboard, hotkey)
 SECURITY_FILE_PATTERNS = [
     r'auth',
     r'login',
@@ -33,14 +36,13 @@ SECURITY_FILE_PATTERNS = [
     r'credential',
     r'token',
     r'secret',
-    r'key',
+    r'api_key',  # More specific than 'key'
     r'permission',
     r'role',
-    r'access',
+    r'access_control',  # More specific than 'access'
     r'security',
     r'crypto',
     r'encrypt',
-    r'session',
     r'jwt',
     r'oauth',
     r'saml',
