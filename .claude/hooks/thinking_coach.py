@@ -154,7 +154,7 @@ def analyze_thinking_for_flaws(thinking_blocks: List[str]) -> List[Directive]:
         return []
 
     # Combine recent thinking blocks
-    combined = " ".join(thinking_blocks)[-4000:]
+    combined = " ".join(thinking_blocks[-2:])[-2000:]
     detected_directives = []
     seen_names = set()
     flaws_detected = []

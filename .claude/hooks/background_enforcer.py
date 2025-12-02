@@ -64,33 +64,8 @@ def extract_command_core(command: str) -> str:
     This prevents false positives from commit messages like:
     git commit -m "Added mypy cache to gitignore"
     """
-    # For heredocs, strip everything after << FIRST (before other checks)
-    # This handles: git commit -m "$(cat <<'EOF'\nMake...\nEOF)"
-    if "<<" in command:
-        command = command.split("<<")[0]
-
-    # For git commit with -m, only check up to the message
-    if "git commit" in command.lower():
-        # Find -m and stop there (message content is irrelevant)
-        parts = command.split()
-        core_parts = []
-        skip_next = False
-        for part in parts:
-            if skip_next:
-                skip_next = False
-                continue
-            if part == "-m":
-                skip_next = True  # Skip the message argument
-                core_parts.append(part)
-                continue
-            if part.startswith("-m"):
-                continue  # Skip -m"message" style
-            core_parts.append(part)
-        return " ".join(core_parts)
-
-    # For commands with quoted strings, be conservative - check the whole thing
-    # but fast commands like git are generally safe
-    # Note: python3 -c is fast; slowness comes from pytest/npm directly invoked
+    # Fast commands check FIRST - skip entirely regardless of arguments
+    # Git commands are never slow, commit message content is irrelevant
     fast_commands = [
         "git ", "cd ", "ls ", "cat ", "echo ", "mkdir ", "rm ", "mv ", "cp ",
         "python3 -c", "python -c", "grep ", "head ", "tail ", "wc ", "sort ",
@@ -98,6 +73,10 @@ def extract_command_core(command: str) -> str:
     ]
     if any(command.lower().startswith(fc) for fc in fast_commands):
         return ""  # Skip check entirely for fast commands
+
+    # For heredocs, strip everything after <<
+    if "<<" in command:
+        command = command.split("<<")[0]
 
     return command
 
