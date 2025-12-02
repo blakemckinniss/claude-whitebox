@@ -130,9 +130,14 @@ def call_api(task: str, model: str = DEFAULT_MODEL, max_tokens: int = 8192) -> s
     system = """You orchestrate tools via Python code. Return ONLY final consolidated results.
 Tools: read_file(path), list_files(pattern), search_content(pattern,path), run_safe_command(command,args)"""
 
+    # Format tools for API - code_execution needs name field
+    tools = [{"type": "code_execution_20250825", "name": "code_execution"}]
+    for t in TOOLS:
+        tools.append({"name": t["name"], "description": t["description"], "input_schema": t["input_schema"]})
+
     payload = {"model": model, "max_tokens": max_tokens, "system": system,
                "messages": [{"role": "user", "content": task}],
-               "tools": [{"type": "code_execution_20250825"}] + [{"type": "custom", **t} for t in TOOLS]}
+               "tools": tools}
 
     headers = {"Content-Type": "application/json", "x-api-key": get_api_key(),
                "anthropic-version": "2023-06-01", "anthropic-beta": BETA_FLAG}
@@ -167,8 +172,12 @@ def process_response(result: dict, headers: dict, model: str, max_tokens: int, s
     messages.append({"role": "assistant", "content": content_blocks})
     messages.append({"role": "user", "content": tool_results})
 
-    payload = {"model": model, "max_tokens": max_tokens, "system": system, "messages": messages,
-               "tools": [{"type": "code_execution_20250825"}] + [{"type": "custom", **t} for t in TOOLS]}
+    # Rebuild tools list (same format as initial call)
+    tools = [{"type": "code_execution_20250825", "name": "code_execution"}]
+    for t in TOOLS:
+        tools.append({"name": t["name"], "description": t["description"], "input_schema": t["input_schema"]})
+
+    payload = {"model": model, "max_tokens": max_tokens, "system": system, "messages": messages, "tools": tools}
 
     req = urllib.request.Request(API_URL, json.dumps(payload).encode(), headers, method='POST')
     with urllib.request.urlopen(req, timeout=120) as resp:
