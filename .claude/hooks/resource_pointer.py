@@ -167,16 +167,23 @@ class FilePointer(NamedTuple):
 
 def get_file_index() -> dict:
     """Get or build file index. Cached for speed."""
+    import time
+
     # Try cache first
     if FILE_INDEX_CACHE.exists():
         try:
             cache = json.loads(FILE_INDEX_CACHE.read_text())
-            # Cache valid for 10 minutes
-            import time
-            if time.time() - cache.get("ts", 0) < 600:
-                return cache.get("index", {})
-        except (json.JSONDecodeError, KeyError):
-            pass
+            # Validate cache structure
+            if isinstance(cache, dict) and isinstance(cache.get("index"), dict):
+                # Cache valid for 10 minutes
+                if time.time() - cache.get("ts", 0) < 600:
+                    return cache["index"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            # Corrupted cache - delete and rebuild
+            try:
+                FILE_INDEX_CACHE.unlink()
+            except OSError:
+                pass
 
     # Build index (fast scan, no content reading)
     index = {}
@@ -195,11 +202,13 @@ def get_file_index() -> dict:
         except Exception:
             continue
 
-    # Cache it
+    # Cache it - track if write fails to avoid repeated attempts
     try:
-        import time
+        MEMORY_DIR.mkdir(parents=True, exist_ok=True)
         FILE_INDEX_CACHE.write_text(json.dumps({"ts": time.time(), "index": index}))
-    except Exception:
+    except (OSError, IOError):
+        # Write failed - still return index, just won't be cached
+        # On next call, we'll scan again but that's better than crashing
         pass
 
     return index
