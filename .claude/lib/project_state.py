@@ -107,11 +107,16 @@ def save_global_memory(memory: GlobalMemory):
 
 def add_global_lesson(lesson: str, category: str = "general"):
     """Add a lesson to global memory (survives project switches)."""
+    import hashlib
     memory = load_global_memory()
 
-    # Check for duplicates (first 50 chars)
-    existing = {l.get("content", "")[:50] for l in memory.lessons}
-    if lesson[:50] in existing:
+    # Check for duplicates using content hash (more robust than prefix match)
+    lesson_hash = hashlib.sha256(lesson.encode()).hexdigest()[:16]
+    existing_hashes = {
+        hashlib.sha256(entry.get("content", "").encode()).hexdigest()[:16]
+        for entry in memory.lessons
+    }
+    if lesson_hash in existing_hashes:
         return
 
     memory.lessons.append({
@@ -141,7 +146,7 @@ def get_relevant_global_lessons(keywords: list[str], limit: int = 5) -> list[dic
 
     # Sort by score, return top N
     scored.sort(key=lambda x: x[0], reverse=True)
-    return [l for _, l in scored[:limit]]
+    return [lesson_entry for _, lesson_entry in scored[:limit]]
 
 
 # =============================================================================

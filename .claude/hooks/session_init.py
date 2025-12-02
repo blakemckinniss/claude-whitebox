@@ -174,12 +174,19 @@ def load_handoff_data(project_context=None) -> dict | None:
         with open(handoff_file) as f:
             data = json.load(f)
         # Check if handoff is stale (>24h old)
-        from datetime import datetime
+        from datetime import datetime, timezone
         prepared = data.get("prepared_at", "")
         if prepared:
             try:
+                # Parse ISO format, normalize to UTC for consistent comparison
                 prepared_dt = datetime.fromisoformat(prepared.replace("Z", "+00:00"))
-                age_hours = (datetime.now() - prepared_dt.replace(tzinfo=None)).total_seconds() / 3600
+                if prepared_dt.tzinfo is not None:
+                    # Convert to UTC then to naive for comparison
+                    prepared_dt = prepared_dt.astimezone(timezone.utc).replace(tzinfo=None)
+                    now = datetime.now(timezone.utc).replace(tzinfo=None)
+                else:
+                    now = datetime.now()
+                age_hours = (now - prepared_dt).total_seconds() / 3600
                 if age_hours > 24:
                     return None  # Stale handoff
             except (ValueError, TypeError):
@@ -441,8 +448,13 @@ def main():
             project_context = get_current_project()
             # Run maintenance (cleanup stale projects, ephemeral state)
             run_maintenance()
-        except Exception:
+        except (ImportError, FileNotFoundError, PermissionError):
+            # Expected errors: module not available, git not found, permission issues
             pass  # Fall back to legacy behavior
+        except Exception as e:
+            # Unexpected errors: log for debugging but don't block
+            import sys
+            print(f"Warning: project detection failed: {type(e).__name__}: {e}", file=sys.stderr)
 
     # Load state BEFORE initialize (to capture previous session's context)
     previous_state = load_state()

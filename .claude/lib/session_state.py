@@ -218,7 +218,8 @@ class SessionState:
     # Format: [{feature_id, description, status, files, commits, errors, started, completed}]
     progress_log: list = field(default_factory=list)
     current_feature: str = ""  # Active feature/task being worked on
-    current_feature_started: float = 0.0  # When current feature started
+    current_feature_started: float = 0.0  # When current feature started (timestamp)
+    current_feature_start_turn: int = 0  # Turn count when feature started (for turn counting)
     current_feature_files: list = field(default_factory=list)  # Files touched for current feature
 
     # Auto-discovered work items (from errors, TODOs, failing tests, gaps)
@@ -1368,7 +1369,6 @@ def start_feature(state: SessionState, description: str) -> str:
 
     Returns: feature_id for reference
     """
-    import hashlib
     feature_id = f"F{int(time.time())}"
 
     # Close any current feature first
@@ -1377,6 +1377,7 @@ def start_feature(state: SessionState, description: str) -> str:
 
     state.current_feature = description[:200]
     state.current_feature_started = time.time()
+    state.current_feature_start_turn = state.turn_count
     state.current_feature_files = []
 
     return feature_id
@@ -1400,7 +1401,8 @@ def complete_feature(state: SessionState, status: str = "completed"):
                       if e.get("timestamp", 0) > state.current_feature_started]),
         "started": state.current_feature_started,
         "completed": time.time(),
-        "turns": state.turn_count - (state.goal_set_turn or 0),
+        # Use feature start turn for accurate turn count (not goal_set_turn)
+        "turns": state.turn_count - state.current_feature_start_turn,
     }
     state.progress_log.append(entry)
     state.progress_log = state.progress_log[-20:]  # Keep last 20
@@ -1408,6 +1410,7 @@ def complete_feature(state: SessionState, status: str = "completed"):
     # Reset current feature
     state.current_feature = ""
     state.current_feature_started = 0.0
+    state.current_feature_start_turn = 0
     state.current_feature_files = []
 
 

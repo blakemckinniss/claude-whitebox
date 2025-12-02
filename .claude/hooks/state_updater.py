@@ -260,8 +260,13 @@ def process_bash(state, tool_input, result):
         # Create checkpoint
         create_checkpoint(state, commit_hash=commit_hash, notes=notes)
 
-        # If there's a current feature, consider it completed on commit
-        if state.current_feature:
+        # Only complete feature if commit message indicates completion
+        # Avoids fragmenting multi-commit features
+        completion_keywords = ['fix', 'complete', 'done', 'finish', 'implement', 'resolve', 'close']
+        msg_lower = notes.lower()
+        is_completion_commit = any(kw in msg_lower for kw in completion_keywords)
+
+        if state.current_feature and is_completion_commit:
             complete_feature(state, status="completed")
 
     # v3.1: Track failures for sunk cost detection

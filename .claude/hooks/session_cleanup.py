@@ -16,6 +16,9 @@ import _lib_path  # noqa: F401
 import sys
 import json
 import time
+import os
+import fcntl
+import tempfile
 from pathlib import Path
 from datetime import datetime
 
@@ -238,6 +241,34 @@ def log_session(state, lessons: list[dict]):
 # AUTONOMOUS AGENT: PROGRESS & HANDOFF PERSISTENCE
 # =============================================================================
 
+def _atomic_json_write(filepath: Path, data: dict):
+    """Write JSON atomically with file locking to prevent corruption.
+
+    Uses fcntl.flock for exclusive access and temp file + rename for atomicity.
+    """
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    lock_file = filepath.parent / f".{filepath.name}.lock"
+
+    # Acquire exclusive lock
+    lock_fd = os.open(str(lock_file), os.O_CREAT | os.O_RDWR)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
+        # Write to temp file first
+        fd, tmp_path = tempfile.mkstemp(dir=filepath.parent, suffix='.json')
+        try:
+            with os.fdopen(fd, 'w') as f:
+                json.dump(data, f, indent=2, default=str)
+            os.replace(tmp_path, filepath)  # Atomic on POSIX
+        except Exception:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+            raise
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
+
+
 def save_progress(state):
     """Save progress log to JSON file for cross-session persistence.
 
@@ -271,7 +302,7 @@ def save_progress(state):
     # Trim to last 50 entries
     existing = existing[-50:]
 
-    # Save
+    # Save atomically with locking
     progress_data = {
         "last_updated": datetime.now().isoformat(),
         "session_id": state.session_id,
@@ -279,8 +310,7 @@ def save_progress(state):
         "work_queue": [w for w in state.work_queue if w.get("status") == "pending"][:20],
     }
 
-    with open(progress_file, 'w') as f:
-        json.dump(progress_data, f, indent=2, default=str)
+    _atomic_json_write(progress_file, progress_data)
 
 
 def save_handoff(state):
@@ -298,7 +328,7 @@ def save_handoff(state):
     # Prepare handoff data
     handoff = prepare_handoff(state)
 
-    # Add session metadata
+    # Add session metadata and save atomically with locking
     handoff_data = {
         "prepared_at": datetime.now().isoformat(),
         "session_id": state.session_id,
@@ -312,8 +342,7 @@ def save_handoff(state):
         "last_checkpoint": state.checkpoints[-1] if state.checkpoints else None,
     }
 
-    with open(handoff_file, 'w') as f:
-        json.dump(handoff_data, f, indent=2, default=str)
+    _atomic_json_write(handoff_file, handoff_data)
 
 
 # =============================================================================

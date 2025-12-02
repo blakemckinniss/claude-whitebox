@@ -168,6 +168,26 @@ def main():
 
     # === v3.6: SCOPE EXPANSION CHECK (Anthropic pattern: one feature per session) ===
     # For autonomous agents, block scope expansion to prevent incomplete work
+
+    # SUDO SCOPE bypass - allows explicit scope override
+    if "SUDO SCOPE" in prompt.upper():
+        # User explicitly overriding scope - reset goal to new task
+        state.original_goal = ""
+        state.goal_keywords = []
+        state.goal_set_turn = 0
+        state.goal_project_id = ""
+        # Clear scope nudge history
+        if "scope_expansion" in state.nudge_history:
+            del state.nudge_history["scope_expansion"]
+        # Set new goal from this prompt (strip the SUDO SCOPE marker)
+        clean_prompt = re.sub(r'\bSUDO\s+SCOPE\b', '', prompt, flags=re.IGNORECASE).strip()
+        set_goal(state, clean_prompt)
+        start_feature(state, clean_prompt[:100])
+        state.goal_project_id = current_project_id
+        save_state(state)
+        output_hook_result()
+        sys.exit(0)
+
     is_expanding, expansion_reason = detect_scope_expansion(state, prompt)
 
     if is_expanding:
