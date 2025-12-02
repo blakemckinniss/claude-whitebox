@@ -396,7 +396,7 @@ def check_claude_md(dry_run):
 
 
 def log_maintenance(dry_run):
-    """Log maintenance timestamp."""
+    """Log maintenance timestamp and update session state."""
     log_file = os.path.join(_project_root, ".claude", "memory", "upkeep_log.md")
 
     if dry_run:
@@ -412,6 +412,16 @@ def log_maintenance(dry_run):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         with open(log_file, "a") as f:
             f.write(f"- {timestamp}\n")
+
+        # Update session state so gap_detector knows upkeep ran
+        # (Bash-invoked upkeep doesn't trigger hooks, so we update directly)
+        try:
+            from session_state import update_state
+            def mark_upkeep(state):
+                state.ops_turns["upkeep"] = state.turn_count
+            update_state(mark_upkeep)
+        except Exception:
+            pass  # Don't fail upkeep if state update fails
 
         return True
     except Exception:
