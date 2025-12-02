@@ -26,7 +26,93 @@ from session_state import (
     track_failure, reset_failures,  # v3.1: Sunk cost tracking
     track_batch_tool, clear_pending_file, clear_pending_search,  # v3.2: Batch enforcement
     extract_function_names, add_pending_integration_grep, clear_integration_grep,  # v3.3: Integration blindness
+    create_checkpoint, track_feature_file, complete_feature,  # v3.6: Autonomous agent patterns
+    add_work_item,  # v3.6: Auto-feature discovery
 )
+
+# =============================================================================
+# AUTO-FEATURE DISCOVERY (v3.6)
+# =============================================================================
+
+def extract_test_failures(output: str) -> list[dict]:
+    """Extract test failure information from pytest/jest/etc output.
+
+    Returns list of {test_name, file, description}
+    """
+    failures = []
+
+    # Pytest patterns
+    pytest_fail = re.findall(
+        r'FAILED\s+([\w./]+)::(\w+)',
+        output
+    )
+    for file, test in pytest_fail:
+        failures.append({
+            "test_name": test,
+            "file": file,
+            "description": f"Fix failing test: {test} in {file}",
+            "priority": 80,
+        })
+
+    # Jest patterns
+    jest_fail = re.findall(
+        r'FAIL\s+([\w./]+)\s*\n.*?✕\s+(.+?)(?:\n|$)',
+        output,
+        re.MULTILINE
+    )
+    for file, test in jest_fail:
+        failures.append({
+            "test_name": test,
+            "file": file,
+            "description": f"Fix failing test: {test} in {file}",
+            "priority": 80,
+        })
+
+    # Generic test failure patterns
+    generic_fail = re.findall(
+        r'(?:Error|FAIL|FAILED):\s*(.+?)(?:\n|$)',
+        output
+    )
+    for msg in generic_fail[:3]:  # Limit to 3
+        if msg not in [f.get("description", "") for f in failures]:
+            failures.append({
+                "test_name": "unknown",
+                "file": "unknown",
+                "description": f"Fix: {msg[:80]}",
+                "priority": 70,
+            })
+
+    return failures[:5]  # Limit to 5 failures
+
+
+def extract_todos_from_content(content: str, filepath: str) -> list[dict]:
+    """Extract TODO/FIXME items from code content.
+
+    Returns list of {description, file, priority}
+    """
+    todos = []
+
+    # Match TODO: or FIXME: with optional description
+    patterns = [
+        (r'#\s*TODO[:\s]+(.+?)(?:\n|$)', 'TODO'),
+        (r'//\s*TODO[:\s]+(.+?)(?:\n|$)', 'TODO'),
+        (r'#\s*FIXME[:\s]+(.+?)(?:\n|$)', 'FIXME'),
+        (r'//\s*FIXME[:\s]+(.+?)(?:\n|$)', 'FIXME'),
+    ]
+
+    for pattern, todo_type in patterns:
+        matches = re.findall(pattern, content, re.IGNORECASE)
+        for match in matches[:3]:  # Limit per pattern
+            from pathlib import Path
+            filename = Path(filepath).name if filepath else "unknown"
+            todos.append({
+                "description": f"{todo_type}: {match.strip()[:60]} ({filename})",
+                "file": filepath,
+                "priority": 60 if todo_type == "FIXME" else 50,
+            })
+
+    return todos[:5]  # Limit to 5 TODOs per file
+
 
 # =============================================================================
 # TOOL PROCESSORS
@@ -46,12 +132,28 @@ def process_read(state, tool_input, result):
             for lib in libs:
                 track_library_used(state, lib)
 
+        # v3.6: AUTO-FEATURE DISCOVERY from TODOs in code
+        # Only scan code files, not configs or data
+        if filepath.endswith(('.py', '.js', '.ts', '.tsx', '.rs', '.go', '.java')):
+            todos = extract_todos_from_content(content, filepath)
+            for todo in todos:
+                add_work_item(
+                    state,
+                    item_type="todo",
+                    source=filepath,
+                    description=todo.get("description", "TODO"),
+                    priority=todo.get("priority", 50),
+                )
+
 
 def process_edit(state, tool_input, result):
     """Process Edit tool result."""
     filepath = tool_input.get("file_path", "")
     if filepath:
         track_file_edit(state, filepath)
+
+        # v3.6: Track file as part of current feature work
+        track_feature_file(state, filepath)
 
         # Extract libraries from new code
         new_code = tool_input.get("new_string", "")
@@ -100,6 +202,9 @@ def process_write(state, tool_input, result) -> str | None:
         else:
             track_file_edit(state, filepath)
 
+        # v3.6: Track file as part of current feature work
+        track_feature_file(state, filepath)
+
         # Extract libraries
         content = tool_input.get("content", "")
         if content:
@@ -138,6 +243,27 @@ def process_bash(state, tool_input, result):
                     # Looks like a file path
                     track_file_read(state, part)
 
+    # v3.6: AUTONOMOUS CHECKPOINT CREATION after successful git commit
+    # This implements the Anthropic pattern for recovery points:
+    # https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+    if success and re.search(r'\bgit\s+commit\b', command, re.IGNORECASE):
+        # Extract commit hash from output (typically shown after commit)
+        commit_hash = ""
+        hash_match = re.search(r'\[[\w-]+\s+([a-f0-9]{7,})\]', output)
+        if hash_match:
+            commit_hash = hash_match.group(1)
+
+        # Extract commit message for checkpoint notes
+        msg_match = re.search(r'-m\s+["\']([^"\']+)["\']', command)
+        notes = msg_match.group(1)[:50] if msg_match else "commit"
+
+        # Create checkpoint
+        create_checkpoint(state, commit_hash=commit_hash, notes=notes)
+
+        # If there's a current feature, consider it completed on commit
+        if state.current_feature:
+            complete_feature(state, status="completed")
+
     # v3.1: Track failures for sunk cost detection
     approach_sig = f"Bash:{command.split()[0][:20]}" if command.split() else "Bash:unknown"
 
@@ -169,6 +295,19 @@ def process_bash(state, tool_input, result):
         for error in state.errors_unresolved[:]:
             if any(word in command.lower() for word in error.get("type", "").lower().split()):
                 resolve_error(state, error.get("type", ""))
+
+    # v3.6: AUTO-FEATURE DISCOVERY from test failures
+    # Extract failing tests and add them to work queue
+    if "pytest" in command or "npm test" in command or "jest" in command or "cargo test" in command:
+        failures = extract_test_failures(output)
+        for failure in failures:
+            add_work_item(
+                state,
+                item_type="test_failure",
+                source=failure.get("file", "tests"),
+                description=failure.get("description", "Fix test failure"),
+                priority=failure.get("priority", 80),
+            )
 
 
 def process_glob(state, tool_input, result):

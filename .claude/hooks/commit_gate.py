@@ -5,6 +5,10 @@ Commit Gate Hook: Block git commit without running upkeep first.
 Hook Type: PreToolUse (matcher: Bash)
 Enforces CLAUDE.md Hard Block #4: "No Commit without running upkeep first"
 
+Also implements AUTONOMOUS CHECKPOINT TRACKING:
+- Auto-creates checkpoints after successful commits
+- Enables recovery to known-good states
+
 Detects:
 - git commit (any form)
 - git push (warn if no recent commit verification)
@@ -17,7 +21,7 @@ import sys
 import json
 import re
 
-from session_state import load_state
+from session_state import load_state, save_state, create_checkpoint
 from synapse_core import output_hook_result, check_sudo_in_transcript
 
 

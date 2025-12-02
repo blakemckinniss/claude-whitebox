@@ -23,6 +23,7 @@ from datetime import datetime
 from session_state import (
     load_state, save_state, get_session_summary,
     MEMORY_DIR,
+    prepare_handoff, complete_feature, extract_work_from_errors,
 )
 
 # =============================================================================
@@ -32,6 +33,8 @@ from session_state import (
 SCRATCH_DIR = Path(__file__).resolve().parent.parent / "tmp"  # .claude/hooks -> .claude -> .claude/tmp
 LESSONS_FILE = MEMORY_DIR / "__lessons.md"
 SESSION_LOG_FILE = MEMORY_DIR / "session_log.jsonl"
+PROGRESS_FILE = MEMORY_DIR / "progress.json"  # Autonomous agent progress tracking
+HANDOFF_FILE = MEMORY_DIR / "handoff.json"  # Session handoff data
 
 # Files in .claude/tmp/ older than this get cleaned (in seconds)
 SCRATCH_CLEANUP_AGE = 86400  # 24 hours
@@ -197,6 +200,82 @@ def log_session(state, lessons: list[dict]):
 
 
 # =============================================================================
+# AUTONOMOUS AGENT: PROGRESS & HANDOFF PERSISTENCE
+# =============================================================================
+
+def save_progress(state):
+    """Save progress log to JSON file for cross-session persistence.
+
+    This implements the Anthropic "progress tracking" pattern:
+    https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+
+    Using JSON instead of Markdown because "the model is less likely to
+    inappropriately change or overwrite JSON files compared to Markdown files."
+    """
+    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Load existing progress
+    existing = []
+    if PROGRESS_FILE.exists():
+        try:
+            with open(PROGRESS_FILE) as f:
+                data = json.load(f)
+                existing = data.get("entries", [])
+        except (json.JSONDecodeError, KeyError):
+            pass
+
+    # Merge new progress (dedupe by feature_id)
+    existing_ids = {e.get("feature_id") for e in existing}
+    for entry in state.progress_log:
+        if entry.get("feature_id") not in existing_ids:
+            existing.append(entry)
+
+    # Trim to last 50 entries
+    existing = existing[-50:]
+
+    # Save
+    progress_data = {
+        "last_updated": datetime.now().isoformat(),
+        "session_id": state.session_id,
+        "entries": existing,
+        "work_queue": [w for w in state.work_queue if w.get("status") == "pending"][:20],
+    }
+
+    with open(PROGRESS_FILE, 'w') as f:
+        json.dump(progress_data, f, indent=2, default=str)
+
+
+def save_handoff(state):
+    """Save session handoff data for next session.
+
+    This is the key insight from Anthropic's agent harness:
+    "agents need a way to bridge the gap between coding sessions"
+    through structured artifacts.
+    """
+    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Prepare handoff data
+    handoff = prepare_handoff(state)
+
+    # Add session metadata
+    handoff_data = {
+        "prepared_at": datetime.now().isoformat(),
+        "session_id": state.session_id,
+        "summary": handoff["summary"],
+        "next_steps": handoff["next_steps"],
+        "blockers": handoff["blockers"],
+        # Include recent file context for onboarding
+        "recent_files": state.files_edited[-5:],
+        "recent_commits": [],  # Could be populated from git log
+        # Include checkpoint for recovery
+        "last_checkpoint": state.checkpoints[-1] if state.checkpoints else None,
+    }
+
+    with open(HANDOFF_FILE, 'w') as f:
+        json.dump(handoff_data, f, indent=2, default=str)
+
+
+# =============================================================================
 # MAIN
 # =============================================================================
 
@@ -210,11 +289,28 @@ def main():
     # Load current state
     state = load_state()
 
+    # === AUTONOMOUS AGENT: Finalize current work ===
+
+    # Complete any in-progress feature (mark as interrupted if session ending)
+    if state.current_feature:
+        complete_feature(state, "interrupted")
+
+    # Auto-extract work items from unresolved errors
+    extract_work_from_errors(state)
+
     # Extract lessons from session patterns
     lessons = extract_lessons(state)
 
     # Persist lessons to long-term memory
     persist_lessons(lessons)
+
+    # === AUTONOMOUS AGENT: Save progress & handoff ===
+
+    # Save progress log (JSON, survives sessions)
+    save_progress(state)
+
+    # Save handoff data for next session onboarding
+    save_handoff(state)
 
     # Clean up old scratch files
     cleaned_files = cleanup_scratch()

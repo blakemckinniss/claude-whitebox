@@ -208,6 +208,32 @@ class SessionState:
     last_intake_confidence: str = ""  # L/M/H
     intake_gates_triggered: int = 0   # Count of hard stops due to low confidence
 
+    # ==========================================================================
+    # AUTONOMOUS AGENT PATTERNS (v3.6) - Inspired by Anthropic's agent harness
+    # https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+    # ==========================================================================
+
+    # Progress Tracking - automatic capture of what was done
+    # Format: [{feature_id, description, status, files, commits, errors, started, completed}]
+    progress_log: list = field(default_factory=list)
+    current_feature: str = ""  # Active feature/task being worked on
+    current_feature_started: float = 0.0  # When current feature started
+    current_feature_files: list = field(default_factory=list)  # Files touched for current feature
+
+    # Auto-discovered work items (from errors, TODOs, failing tests, gaps)
+    # Format: [{id, type, source, description, priority, discovered_at, status}]
+    work_queue: list = field(default_factory=list)
+
+    # Checkpoint tracking for recovery
+    # Format: [{checkpoint_id, commit_hash, feature, timestamp, files_state}]
+    checkpoints: list = field(default_factory=list)
+    last_checkpoint_turn: int = 0
+
+    # Session handoff data (for context bridging across sessions)
+    handoff_summary: str = ""  # Auto-generated summary for next session
+    handoff_next_steps: list = field(default_factory=list)  # Prioritized next actions
+    handoff_blockers: list = field(default_factory=list)  # Known blockers/issues
+
 # =============================================================================
 # STATE MANAGEMENT
 # =============================================================================
@@ -1330,3 +1356,246 @@ def get_nudge_stats(state: SessionState) -> dict:
         }
         for nudge_type, h in state.nudge_history.items()
     }
+
+
+# =============================================================================
+# AUTONOMOUS AGENT PATTERNS (v3.6)
+# =============================================================================
+
+def start_feature(state: SessionState, description: str) -> str:
+    """Start tracking a new feature/task.
+
+    Returns: feature_id for reference
+    """
+    import hashlib
+    feature_id = f"F{int(time.time())}"
+
+    # Close any current feature first
+    if state.current_feature:
+        complete_feature(state, "interrupted")
+
+    state.current_feature = description[:200]
+    state.current_feature_started = time.time()
+    state.current_feature_files = []
+
+    return feature_id
+
+
+def complete_feature(state: SessionState, status: str = "completed"):
+    """Complete the current feature and log it.
+
+    Args:
+        status: "completed", "interrupted", "blocked", "abandoned"
+    """
+    if not state.current_feature:
+        return
+
+    entry = {
+        "feature_id": f"F{int(state.current_feature_started)}",
+        "description": state.current_feature,
+        "status": status,
+        "files": list(set(state.current_feature_files))[-10:],  # Dedupe, limit
+        "errors": len([e for e in state.errors_recent
+                      if e.get("timestamp", 0) > state.current_feature_started]),
+        "started": state.current_feature_started,
+        "completed": time.time(),
+        "turns": state.turn_count - (state.goal_set_turn or 0),
+    }
+    state.progress_log.append(entry)
+    state.progress_log = state.progress_log[-20:]  # Keep last 20
+
+    # Reset current feature
+    state.current_feature = ""
+    state.current_feature_started = 0.0
+    state.current_feature_files = []
+
+
+def track_feature_file(state: SessionState, filepath: str):
+    """Track a file as part of current feature work."""
+    if filepath and filepath not in state.current_feature_files:
+        state.current_feature_files.append(filepath)
+        state.current_feature_files = state.current_feature_files[-20:]
+
+
+def add_work_item(state: SessionState, item_type: str, source: str,
+                  description: str, priority: int = 50) -> str:
+    """Add an auto-discovered work item to the queue.
+
+    Args:
+        item_type: "error", "todo", "test_failure", "gap", "stub"
+        source: File or command that surfaced this
+        description: What needs to be done
+        priority: 0-100 (higher = more urgent)
+
+    Returns: work_item_id
+    """
+    item_id = f"W{int(time.time() * 1000) % 100000}"
+
+    # Check for duplicates (same type + similar description)
+    for existing in state.work_queue:
+        if existing.get("type") == item_type:
+            # Simple similarity: first 50 chars match
+            if existing.get("description", "")[:50] == description[:50]:
+                return existing.get("id", item_id)  # Return existing
+
+    item = {
+        "id": item_id,
+        "type": item_type,
+        "source": source[:100],
+        "description": description[:200],
+        "priority": priority,
+        "discovered_at": time.time(),
+        "status": "pending",
+    }
+    state.work_queue.append(item)
+    state.work_queue = state.work_queue[-30:]  # Limit queue size
+
+    return item_id
+
+
+def get_next_work_item(state: SessionState) -> Optional[dict]:
+    """Get the highest priority pending work item.
+
+    Priority factors:
+    1. Explicit priority score
+    2. Errors > test_failures > gaps > todos > stubs
+    3. Recency (newer items slightly higher)
+    """
+    pending = [w for w in state.work_queue if w.get("status") == "pending"]
+    if not pending:
+        return None
+
+    # Type priority multipliers
+    type_weights = {
+        "error": 1.5,
+        "test_failure": 1.3,
+        "gap": 1.1,
+        "todo": 1.0,
+        "stub": 0.8,
+    }
+
+    def score(item):
+        base = item.get("priority", 50)
+        type_mult = type_weights.get(item.get("type", ""), 1.0)
+        # Slight recency boost (newer = higher)
+        age = time.time() - item.get("discovered_at", 0)
+        recency = max(0, 1 - age / 86400)  # Decays over 24h
+        return base * type_mult + recency * 10
+
+    return max(pending, key=score)
+
+
+def complete_work_item(state: SessionState, item_id: str, status: str = "completed"):
+    """Mark a work item as complete or abandoned."""
+    for item in state.work_queue:
+        if item.get("id") == item_id:
+            item["status"] = status
+            item["completed_at"] = time.time()
+            return
+
+
+def create_checkpoint(state: SessionState, commit_hash: str = "", notes: str = ""):
+    """Record a checkpoint for recovery.
+
+    Call this after significant progress (successful tests, feature complete, etc.)
+    """
+    checkpoint = {
+        "checkpoint_id": f"CP{int(time.time())}",
+        "commit_hash": commit_hash,
+        "feature": state.current_feature,
+        "timestamp": time.time(),
+        "turn": state.turn_count,
+        "files_edited": list(state.files_edited[-10:]),
+        "notes": notes[:100],
+    }
+    state.checkpoints.append(checkpoint)
+    state.checkpoints = state.checkpoints[-10:]  # Keep last 10
+    state.last_checkpoint_turn = state.turn_count
+
+
+def get_last_checkpoint(state: SessionState) -> Optional[dict]:
+    """Get the most recent checkpoint."""
+    if state.checkpoints:
+        return state.checkpoints[-1]
+    return None
+
+
+def prepare_handoff(state: SessionState) -> dict:
+    """Prepare session handoff data for context bridging.
+
+    Call this at session end to preserve context for next session.
+    """
+    # Auto-generate summary
+    summary_parts = []
+
+    # What was accomplished
+    completed = [p for p in state.progress_log if p.get("status") == "completed"]
+    if completed:
+        recent = completed[-3:]
+        summary_parts.append(f"Completed: {', '.join(p['description'][:30] for p in recent)}")
+
+    # Current work
+    if state.current_feature:
+        summary_parts.append(f"In progress: {state.current_feature[:50]}")
+
+    # Errors encountered
+    if state.errors_unresolved:
+        summary_parts.append(f"Unresolved errors: {len(state.errors_unresolved)}")
+
+    state.handoff_summary = " | ".join(summary_parts) if summary_parts else "No significant progress"
+
+    # Next steps (from work queue)
+    next_items = sorted(
+        [w for w in state.work_queue if w.get("status") == "pending"],
+        key=lambda x: x.get("priority", 0),
+        reverse=True
+    )[:5]
+    state.handoff_next_steps = [
+        {"type": w["type"], "description": w["description"][:80]}
+        for w in next_items
+    ]
+
+    # Blockers
+    state.handoff_blockers = [
+        {"type": e.get("type", "error")[:30], "details": e.get("details", "")[:50]}
+        for e in state.errors_unresolved[:3]
+    ]
+
+    return {
+        "summary": state.handoff_summary,
+        "next_steps": state.handoff_next_steps,
+        "blockers": state.handoff_blockers,
+    }
+
+
+def extract_work_from_errors(state: SessionState):
+    """Auto-extract work items from recent errors.
+
+    Call periodically to populate work queue from error patterns.
+    """
+    for error in state.errors_unresolved:
+        error_type = error.get("type", "unknown")
+        details = error.get("details", "")
+
+        # Skip already-processed
+        existing_ids = {w.get("source") for w in state.work_queue}
+        error_key = f"error:{error_type[:20]}"
+        if error_key in existing_ids:
+            continue
+
+        # Determine priority based on error type
+        priority = 70  # Default high
+        if "syntax" in error_type.lower():
+            priority = 90
+        elif "import" in error_type.lower():
+            priority = 85
+        elif "test" in error_type.lower():
+            priority = 80
+
+        add_work_item(
+            state,
+            item_type="error",
+            source=error_key,
+            description=f"Fix: {error_type} - {details[:100]}",
+            priority=priority,
+        )

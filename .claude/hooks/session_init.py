@@ -25,6 +25,7 @@ from session_state import (
     load_state, save_state, reset_state,
     MEMORY_DIR,
     _discover_ops_scripts,
+    get_next_work_item, start_feature,
 )
 
 # Import spark_core for pre-warming (lazy load synapse map)
@@ -36,6 +37,10 @@ except ImportError:
 
 # Scope's punch list file
 PUNCH_LIST_FILE = MEMORY_DIR / "punch_list.json"
+
+# Autonomous agent files
+HANDOFF_FILE = MEMORY_DIR / "handoff.json"
+PROGRESS_FILE = MEMORY_DIR / "progress.json"
 
 # =============================================================================
 # CONFIGURATION
@@ -118,6 +123,110 @@ def prune_old_gaps(state):
 
 
 # =============================================================================
+# AUTONOMOUS AGENT: HANDOFF & ONBOARDING
+# =============================================================================
+
+def load_handoff_data() -> dict | None:
+    """Load handoff data from previous session.
+
+    This implements the Anthropic pattern of bridging context across sessions:
+    https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+    """
+    if not HANDOFF_FILE.exists():
+        return None
+    try:
+        with open(HANDOFF_FILE) as f:
+            data = json.load(f)
+        # Check if handoff is stale (>24h old)
+        from datetime import datetime
+        prepared = data.get("prepared_at", "")
+        if prepared:
+            try:
+                prepared_dt = datetime.fromisoformat(prepared.replace("Z", "+00:00"))
+                age_hours = (datetime.now() - prepared_dt.replace(tzinfo=None)).total_seconds() / 3600
+                if age_hours > 24:
+                    return None  # Stale handoff
+            except (ValueError, TypeError):
+                pass
+        return data
+    except (json.JSONDecodeError, KeyError):
+        return None
+
+
+def load_work_queue() -> list:
+    """Load pending work items from progress file."""
+    if not PROGRESS_FILE.exists():
+        return []
+    try:
+        with open(PROGRESS_FILE) as f:
+            data = json.load(f)
+        return data.get("work_queue", [])
+    except (json.JSONDecodeError, KeyError):
+        return []
+
+
+def build_onboarding_context(state, handoff: dict | None) -> str:
+    """Build the session onboarding protocol context.
+
+    Implements the Anthropic pattern:
+    1. Read progress files and git logs to understand recent work
+    2. Select the highest-priority incomplete feature
+    3. Verify baseline before implementing
+
+    For autonomous agents, this is AUTOMATIC - no human input needed.
+    """
+    parts = []
+
+    # === STEP 1: Previous Session Summary ===
+    if handoff:
+        summary = handoff.get("summary", "")
+        if summary:
+            parts.append(f"📋 **PREVIOUS SESSION**: {summary}")
+
+        # Blockers from previous session
+        blockers = handoff.get("blockers", [])
+        if blockers:
+            blocker_list = ", ".join(b.get("type", "unknown")[:20] for b in blockers[:2])
+            parts.append(f"🚧 **BLOCKERS**: {blocker_list}")
+
+        # Recent files (context continuity)
+        recent = handoff.get("recent_files", [])
+        if recent:
+            names = [Path(f).name for f in recent[:3]]
+            parts.append(f"📝 **RECENT FILES**: {', '.join(names)}")
+
+    # === STEP 2: Auto-Select Next Work Item ===
+    next_item = get_next_work_item(state)
+    if next_item:
+        item_type = next_item.get("type", "task")
+        desc = next_item.get("description", "")[:60]
+        priority = next_item.get("priority", 50)
+        parts.append(f"🎯 **NEXT PRIORITY** [{item_type}|P{priority}]: {desc}")
+
+        # Auto-start this feature for tracking
+        start_feature(state, desc)
+    else:
+        # Check handoff next_steps as fallback
+        if handoff:
+            next_steps = handoff.get("next_steps", [])
+            if next_steps:
+                step = next_steps[0]
+                desc = step.get("description", "")[:60]
+                parts.append(f"🎯 **SUGGESTED**: {desc}")
+
+    # === STEP 3: Recovery Point ===
+    if handoff:
+        checkpoint = handoff.get("last_checkpoint")
+        if checkpoint:
+            cp_id = checkpoint.get("checkpoint_id", "")
+            commit = checkpoint.get("commit_hash", "")[:7]
+            if commit:
+                parts.append(f"💾 **RECOVERY POINT**: {cp_id} (commit: {commit})")
+
+    return "\n".join(parts) if parts else ""
+
+
+# =============================================================================
 # CONTEXT GENERATION (for resume)
 # =============================================================================
 
@@ -183,6 +292,7 @@ def initialize_session() -> dict:
         "action": "none",
         "message": "",
         "session_id": "",
+        "handoff": None,  # For onboarding context
     }
 
     # Try to load existing state
@@ -196,6 +306,11 @@ def initialize_session() -> dict:
         state = reset_state()
         result["action"] = "reset"
         result["message"] = f"Fresh session (reason: {reason})"
+
+        # === AUTONOMOUS AGENT: Restore work queue from progress file ===
+        work_queue = load_work_queue()
+        if work_queue:
+            state.work_queue = work_queue
     else:
         # Refresh existing state
         state = existing_state
@@ -218,6 +333,10 @@ def initialize_session() -> dict:
         state.session_id = os.environ.get("CLAUDE_SESSION_ID", "")[:16] or f"ses_{int(time.time())}"
 
     result["session_id"] = state.session_id
+
+    # === AUTONOMOUS AGENT: Load handoff data ===
+    handoff = load_handoff_data()
+    result["handoff"] = handoff
 
     # Save updated state
     save_state(state)
@@ -254,14 +373,30 @@ def main():
         except (IOError, OSError):
             pass
 
-    # Output result (brief, informational)
+    # Output result
     output = {}
 
+    # === AUTONOMOUS AGENT: Session Onboarding Protocol ===
+    # This implements the Anthropic pattern for agent session starts:
+    # https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+
     if result["action"] == "reset":
-        # Fresh session - just note it
-        output["message"] = f"🔄 {result['message']}"
+        # Fresh session - load state for onboarding context
+        state = load_state()
+        handoff = result.get("handoff")
+
+        # Build onboarding context (auto-selects next work item)
+        onboarding = build_onboarding_context(state, handoff)
+
+        if onboarding:
+            output["message"] = f"🚀 **SESSION START**\n{onboarding}"
+            # Save state (may have started a feature)
+            save_state(state)
+        else:
+            output["message"] = f"🔄 {result['message']}"
+
     elif result["action"] == "refresh":
-        # Resuming - surface actionable context from previous state
+        # Resuming within same session - surface context from previous state
         context = build_resume_context(previous_state, result)
         if context:
             output["message"] = f"🔁 Resuming: {context}"
