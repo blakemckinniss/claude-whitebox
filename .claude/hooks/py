@@ -1,16 +1,26 @@
 #!/bin/sh
 # Python environment detector - works in both local (venv) and web (system python) environments
+# Priority: 1) Local venv  2) python3  3) python
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-VENV_PYTHON="$SCRIPT_DIR/../.venv/bin/python"
+set -e
 
-if [ -x "$VENV_PYTHON" ]; then
-    exec "$VENV_PYTHON" "$@"
-elif command -v python3 >/dev/null 2>&1; then
+# Resolve script directory (handles symlinks)
+SCRIPT_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd)" || SCRIPT_DIR=""
+
+# Check venv first (only if SCRIPT_DIR resolved)
+if [ -n "$SCRIPT_DIR" ]; then
+    VENV_PYTHON="$SCRIPT_DIR/../.venv/bin/python"
+    if [ -x "$VENV_PYTHON" ]; then
+        exec "$VENV_PYTHON" "$@"
+    fi
+fi
+
+# Fallback to system Python
+if command -v python3 >/dev/null 2>&1; then
     exec python3 "$@"
 elif command -v python >/dev/null 2>&1; then
     exec python "$@"
-else
-    echo "ERROR: No Python interpreter found" >&2
-    exit 1
 fi
+
+echo "ERROR: No Python interpreter found (checked: venv, python3, python)" >&2
+exit 1
