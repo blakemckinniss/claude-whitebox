@@ -5,6 +5,9 @@ Commit Gate Hook: Block git commit without running upkeep first.
 Hook Type: PreToolUse (matcher: Bash)
 Enforces CLAUDE.md Hard Block #4: "No Commit without running upkeep first"
 
+NOTE: Checkpoint tracking is handled in state_updater.py (PostToolUse),
+not here. This hook only gates/blocks commits.
+
 Detects:
 - git commit (any form)
 - git push (warn if no recent commit verification)
