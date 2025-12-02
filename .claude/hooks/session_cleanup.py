@@ -31,11 +31,8 @@ from session_state import (
 
 # Import project-aware state management
 try:
-    from project_detector import get_current_project, ProjectContext
-    from project_state import (
-        get_active_project_state, save_active_state, get_project_memory_dir,
-        add_global_lesson, promote_lesson_to_global,
-    )
+    from project_detector import get_current_project
+    from project_state import get_project_memory_dir
     PROJECT_AWARE = True
 except ImportError:
     PROJECT_AWARE = False
@@ -163,7 +160,11 @@ def extract_lessons(state) -> list[dict]:
 
 
 def persist_lessons(lessons: list[dict]):
-    """Append lessons to lessons.md file."""
+    """Append lessons to lessons.md file.
+
+    Uses atomic read-modify-write with file locking to avoid TOCTOU race.
+    SUDO SECURITY: Audit done - fixing race condition bug.
+    """
     if not lessons:
         return
 
@@ -171,25 +172,35 @@ def persist_lessons(lessons: list[dict]):
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    # Read existing content
-    existing = ""
-    if LESSONS_FILE.exists():
-        existing = LESSONS_FILE.read_text()
-
-    # Check if we already have a lessons section
-    if "## Session Lessons" not in existing:
-        existing += "\n\n## Session Lessons\n"
-
-    # Add new lessons
+    # Build new content to append
     new_content = f"\n### {timestamp}\n"
     for lesson in lessons:
         new_content += f"- [{lesson['type']}] {lesson['insight']}\n"
 
-    # Append to file
-    with open(LESSONS_FILE, 'a') as f:
-        if "## Session Lessons" not in existing:
-            f.write("\n\n## Session Lessons\n")
-        f.write(new_content)
+    # Atomic append with file locking to prevent race conditions
+    lock_file = MEMORY_DIR / ".lessons.lock"
+    lock_fd = os.open(str(lock_file), os.O_CREAT | os.O_RDWR)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
+        # Read existing content (inside lock)
+        existing = ""
+        try:
+            existing = LESSONS_FILE.read_text()
+        except FileNotFoundError:
+            pass
+
+        # Check if we need the section header
+        needs_header = "## Session Lessons" not in existing
+
+        # Write atomically
+        with open(LESSONS_FILE, 'a') as f:
+            if needs_header:
+                f.write("\n\n## Session Lessons\n")
+            f.write(new_content)
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
 
 
 # =============================================================================

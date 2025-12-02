@@ -31,25 +31,17 @@ Modes:
 import sys
 import os
 import glob as glob_module
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import Counter
 import re
 
-# Add .claude/lib to path
-_script_path = os.path.abspath(__file__)
-_script_dir = os.path.dirname(_script_path)
-_current = _script_dir
-while _current != '/':
-    if os.path.exists(os.path.join(_current, '.claude', 'lib', 'core.py')):
-        _project_root = _current
-        break
-    _current = os.path.dirname(_current)
-else:
-    raise RuntimeError("Could not find project root with .claude/lib/core.py")
-
-sys.path.insert(0, os.path.join(_project_root, '.claude', 'lib'))
-from core import setup_script, finalize, logger, handle_debug  # noqa: E402
+# Add .claude/lib to path (minimal bootstrap, then use get_project_root)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
+from core import setup_script, finalize, logger, handle_debug, get_project_root  # noqa: E402
 from oracle import call_openrouter, OracleAPIError  # noqa: E402
+
+# Project root available via get_project_root() if needed
 
 # Default personas for analyze mode
 DEFAULT_PERSONAS = ["judge", "critic", "skeptic", "innovator", "advocate"]
@@ -116,14 +108,15 @@ def call_oracle_worker(args):
         }
 
 
-def run_swarm(prompts, model="google/gemini-2.0-flash-thinking-exp", max_workers=50):
+def run_swarm(prompts, model="google/gemini-2.0-flash-thinking-exp", max_workers=50, requests_per_minute=60):
     """
-    Execute oracle swarm in parallel.
+    Execute oracle swarm in parallel with rate limiting.
 
     Args:
         prompts: List of prompt strings
         model: OpenRouter model to use
         max_workers: Maximum concurrent workers
+        requests_per_minute: Rate limit (default 60/min to avoid API quota issues)
 
     Returns:
         List of result dicts
@@ -134,19 +127,42 @@ def run_swarm(prompts, model="google/gemini-2.0-flash-thinking-exp", max_workers
         for i, prompt in enumerate(prompts)
     ]
 
+    # Apply safety limits
+    if len(prompts) > 100:
+        logger.warning(f"⚠️ Large swarm ({len(prompts)} prompts). Consider costs. Limiting to 20 workers.")
+        max_workers = min(max_workers, 20)
+
     # Limit workers
     num_workers = min(max_workers, len(prompts))
 
-    logger.info(f"Spawning {len(prompts)} oracles with {num_workers} workers...")
+    # Calculate delay between request batches for rate limiting
+    # If we have more prompts than RPM allows, we need to pace ourselves
+    min_delay = 60.0 / requests_per_minute if requests_per_minute > 0 else 0
+
+    logger.info(f"Spawning {len(prompts)} oracles with {num_workers} workers (rate: {requests_per_minute}/min)...")
 
     results = []
     completed = 0
     total = len(prompts)
+    last_submit_time = 0
 
-    # Execute in parallel
+    # Execute in parallel with rate limiting
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        futures = {executor.submit(call_oracle_worker, args): args[0] for args in worker_args}
+        futures = {}
 
+        # Submit with rate limiting
+        for args in worker_args:
+            # Rate limit: ensure minimum delay between submissions
+            now = time.time()
+            elapsed = now - last_submit_time
+            if elapsed < min_delay and last_submit_time > 0:
+                time.sleep(min_delay - elapsed)
+
+            future = executor.submit(call_oracle_worker, args)
+            futures[future] = args[0]
+            last_submit_time = time.time()
+
+        # Collect results
         for future in as_completed(futures):
             worker_id = futures[future]
             result = future.result()
@@ -495,6 +511,12 @@ def main():
         default=50,
         help="Maximum concurrent workers (default: 50)"
     )
+    parser.add_argument(
+        "--rate-limit",
+        type=int,
+        default=60,
+        help="Requests per minute rate limit (default: 60)"
+    )
 
     args = parser.parse_args()
     handle_debug(args)
@@ -581,7 +603,12 @@ def main():
 
         # Execute swarm
         print(f"\n🐝 Spawning {len(prompts)} oracles...")
-        results = run_swarm(prompts, model=args.model, max_workers=args.max_workers)
+        results = run_swarm(
+            prompts,
+            model=args.model,
+            max_workers=args.max_workers,
+            requests_per_minute=args.rate_limit
+        )
 
         # Synthesize results
         if mode == "analyze":

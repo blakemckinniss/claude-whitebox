@@ -428,8 +428,11 @@ def main():
             # process_write returns a warning string if stubs detected
             if isinstance(result_val, str):
                 warning_message = result_val
-        except Exception:
-            pass  # Silent failure - don't break the hook
+        except Exception as e:
+            # Log error to stderr and state for debugging (don't break the hook)
+            import sys as _sys
+            print(f"[state_updater] Processor error for {tool_name}: {e}", file=_sys.stderr)
+            track_error(state, "hook_processor_error", f"{tool_name}: {str(e)[:200]}")
 
     # Save state
     save_state(state)

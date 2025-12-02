@@ -5,7 +5,69 @@ Shared utilities for all scripts in the arsenal.
 """
 import argparse
 import logging
+import os
 import sys
+from pathlib import Path
+from functools import lru_cache
+
+
+@lru_cache(maxsize=1)
+def get_project_root() -> Path:
+    """Find project root by walking up to find .claude/lib/core.py.
+
+    This function is cached so repeated calls are fast.
+    Can be called from any script in the project.
+
+    Returns:
+        Path to project root directory
+
+    Raises:
+        RuntimeError if project root cannot be found
+    """
+    # Start from this file's location
+    current = Path(__file__).resolve().parent
+
+    # Walk up looking for .claude/lib/core.py marker
+    while current != current.parent:
+        marker = current / ".claude" / "lib" / "core.py"
+        if marker.exists():
+            return current  # This directory contains .claude/
+        current = current.parent
+
+    raise RuntimeError("Could not find project root with .claude/lib/core.py")
+
+
+@lru_cache(maxsize=1)
+def load_config() -> dict:
+    """Load enforcement.json configuration.
+
+    Returns cached config dict. Falls back to empty dict if file missing.
+    """
+    import json
+    config_path = get_project_root() / ".claude" / "config" / "enforcement.json"
+    try:
+        with open(config_path) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def get_threshold(key: str, default: int = 50) -> int:
+    """Get a threshold value from config.
+
+    Args:
+        key: Threshold key (e.g., 'production_write', 'strategic_advice')
+        default: Default value if not found
+
+    Returns:
+        Threshold value as integer
+    """
+    config = load_config()
+    thresholds = config.get("thresholds", {})
+    if key in thresholds:
+        return thresholds[key].get("min_confidence", default)
+    return default
+
 
 # Standardized Logging
 logging.basicConfig(
