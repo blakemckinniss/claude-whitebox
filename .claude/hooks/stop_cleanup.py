@@ -40,9 +40,10 @@ DISMISSAL_SCAN_BYTES = 20000  # 20KB for dismissal detection (needs to see both 
 MAX_CREATED_FILES_SCAN = 10  # How many recently created files to check
 
 # Stub patterns to detect in created files
+# Use comment markers to avoid false positives on docstring examples
 STUB_PATTERNS = [
-    b'TODO',
-    b'FIXME',
+    b'# TODO',
+    b'# FIXME',
     b'NotImplementedError',
     b'raise NotImplementedError',
     b'pass  #',
