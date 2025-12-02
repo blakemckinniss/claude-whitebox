@@ -41,11 +41,12 @@ from synapse_core import (
 # (name, patterns, directive_message, severity)
 THINKING_FLAW_PATTERNS: List[tuple] = [
     # SHORTCUT - Skipping steps
+    # NOTE: Patterns narrowed to require explicit skip/bypass context (reduces false positives)
     ("shortcut", [
-        r"I('ll| will) just\s+(quickly\s+)?(edit|write|change|update|fix)",
         r"(don't|no) need to (read|check|verify|test)",
         r"skip(ping)?\s+(the\s+)?(read|check|verification)",
-        r"directly\s+(edit|write|modify)",
+        r"without\s+(first\s+)?(read|check|verify)ing",
+        r"before\s+(read|check|verify)ing\s+(the\s+)?file",
     ], "**STOP.** Shortcut reasoning detected. Read before edit. Verify before claim.", 2),
 
     # ASSUMPTION - Claiming without evidence

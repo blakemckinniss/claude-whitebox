@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Whitebox Framework Setup
-# Usage: .claude/setup.sh [--venv-only | --project <name>]
+# Whitebox Framework Setup - Main entry point for new repos
+# Sets up Python venv, dependencies, and creates new projects with full structure
+#
+# Usage: .claude/config/setup_claude.sh [--venv-only | --project <name>]
+#   or:  ./setup.sh (if using root wrapper)
 
 set -e
 

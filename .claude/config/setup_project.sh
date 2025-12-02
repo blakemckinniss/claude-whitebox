@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Create or clone a project into projects/
-# Usage: new-project.sh <name|git-url> [--ignore]
+# Quick Project Import - Creates empty folder or clones git repo into projects/
+# Use this for importing EXISTING repos. For NEW projects with full structure,
+# use setup_claude.sh --project <name> instead.
+#
+# Usage: .claude/config/setup_project.sh <name|git-url> [--ignore]
 
 set -e
 
