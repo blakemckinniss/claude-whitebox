@@ -53,6 +53,28 @@ PUNCH_LIST_FILE = MEMORY_DIR / "punch_list.json"
 HANDOFF_FILE = MEMORY_DIR / "handoff.json"
 PROGRESS_FILE = MEMORY_DIR / "progress.json"
 
+
+def _get_project_handoff_file(project_context=None) -> Path:
+    """Get handoff file path (project-scoped if available)."""
+    if PROJECT_AWARE and project_context:
+        try:
+            from project_state import get_project_memory_dir
+            return get_project_memory_dir(project_context.project_id) / "handoff.json"
+        except Exception:
+            pass
+    return HANDOFF_FILE
+
+
+def _get_project_progress_file(project_context=None) -> Path:
+    """Get progress file path (project-scoped if available)."""
+    if PROJECT_AWARE and project_context:
+        try:
+            from project_state import get_project_memory_dir
+            return get_project_memory_dir(project_context.project_id) / "progress.json"
+        except Exception:
+            pass
+    return PROGRESS_FILE
+
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
@@ -137,16 +159,19 @@ def prune_old_gaps(state):
 # AUTONOMOUS AGENT: HANDOFF & ONBOARDING
 # =============================================================================
 
-def load_handoff_data() -> dict | None:
+def load_handoff_data(project_context=None) -> dict | None:
     """Load handoff data from previous session.
 
     This implements the Anthropic pattern of bridging context across sessions:
     https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+
+    NOTE: Now project-scoped to load context for the specific project.
     """
-    if not HANDOFF_FILE.exists():
+    handoff_file = _get_project_handoff_file(project_context)
+    if not handoff_file.exists():
         return None
     try:
-        with open(HANDOFF_FILE) as f:
+        with open(handoff_file) as f:
             data = json.load(f)
         # Check if handoff is stale (>24h old)
         from datetime import datetime
@@ -164,12 +189,16 @@ def load_handoff_data() -> dict | None:
         return None
 
 
-def load_work_queue() -> list:
-    """Load pending work items from progress file."""
-    if not PROGRESS_FILE.exists():
+def load_work_queue(project_context=None) -> list:
+    """Load pending work items from progress file.
+
+    NOTE: Now project-scoped.
+    """
+    progress_file = _get_project_progress_file(project_context)
+    if not progress_file.exists():
         return []
     try:
-        with open(PROGRESS_FILE) as f:
+        with open(progress_file) as f:
             data = json.load(f)
         return data.get("work_queue", [])
     except (json.JSONDecodeError, KeyError):
@@ -327,8 +356,12 @@ def build_resume_context(state, result: dict) -> str:
 # INITIALIZATION
 # =============================================================================
 
-def initialize_session() -> dict:
-    """Initialize or refresh session state."""
+def initialize_session(project_context=None) -> dict:
+    """Initialize or refresh session state.
+
+    Args:
+        project_context: Optional ProjectContext for project-scoped operations.
+    """
     result = {
         "action": "none",
         "message": "",
@@ -349,7 +382,8 @@ def initialize_session() -> dict:
         result["message"] = f"Fresh session (reason: {reason})"
 
         # === AUTONOMOUS AGENT: Restore work queue from progress file ===
-        work_queue = load_work_queue()
+        # Now project-scoped to load correct project's work queue
+        work_queue = load_work_queue(project_context)
         if work_queue:
             state.work_queue = work_queue
     else:
@@ -376,7 +410,8 @@ def initialize_session() -> dict:
     result["session_id"] = state.session_id
 
     # === AUTONOMOUS AGENT: Load handoff data ===
-    handoff = load_handoff_data()
+    # Now project-scoped to load correct project's handoff
+    handoff = load_handoff_data(project_context)
     result["handoff"] = handoff
 
     # Save updated state
@@ -412,8 +447,8 @@ def main():
     # Load state BEFORE initialize (to capture previous session's context)
     previous_state = load_state()
 
-    # Initialize session
-    result = initialize_session()
+    # Initialize session (pass project_context for project-scoped operations)
+    result = initialize_session(project_context)
 
     # SUDO SECURITY: Audit passed - clear stop hook flags for this session
     session_id = os.environ.get("CLAUDE_SESSION_ID", "default")[:16]

@@ -26,6 +26,17 @@ from session_state import (
     prepare_handoff, complete_feature, extract_work_from_errors,
 )
 
+# Import project-aware state management
+try:
+    from project_detector import get_current_project, ProjectContext
+    from project_state import (
+        get_active_project_state, save_active_state, get_project_memory_dir,
+        add_global_lesson, promote_lesson_to_global,
+    )
+    PROJECT_AWARE = True
+except ImportError:
+    PROJECT_AWARE = False
+
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
@@ -33,8 +44,32 @@ from session_state import (
 SCRATCH_DIR = Path(__file__).resolve().parent.parent / "tmp"  # .claude/hooks -> .claude -> .claude/tmp
 LESSONS_FILE = MEMORY_DIR / "__lessons.md"
 SESSION_LOG_FILE = MEMORY_DIR / "session_log.jsonl"
+
+# Legacy paths (used as fallback when not project-aware)
 PROGRESS_FILE = MEMORY_DIR / "progress.json"  # Autonomous agent progress tracking
 HANDOFF_FILE = MEMORY_DIR / "handoff.json"  # Session handoff data
+
+
+def _get_project_progress_file() -> Path:
+    """Get progress file path (project-scoped if available)."""
+    if PROJECT_AWARE:
+        try:
+            context = get_current_project()
+            return get_project_memory_dir(context.project_id) / "progress.json"
+        except Exception:
+            pass
+    return PROGRESS_FILE
+
+
+def _get_project_handoff_file() -> Path:
+    """Get handoff file path (project-scoped if available)."""
+    if PROJECT_AWARE:
+        try:
+            context = get_current_project()
+            return get_project_memory_dir(context.project_id) / "handoff.json"
+        except Exception:
+            pass
+    return HANDOFF_FILE
 
 # Files in .claude/tmp/ older than this get cleaned (in seconds)
 SCRATCH_CLEANUP_AGE = 86400  # 24 hours
@@ -211,14 +246,17 @@ def save_progress(state):
 
     Using JSON instead of Markdown because "the model is less likely to
     inappropriately change or overwrite JSON files compared to Markdown files."
+
+    NOTE: Progress is now project-scoped to avoid cross-project pollution.
     """
-    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+    progress_file = _get_project_progress_file()
+    progress_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Load existing progress
     existing = []
-    if PROGRESS_FILE.exists():
+    if progress_file.exists():
         try:
-            with open(PROGRESS_FILE) as f:
+            with open(progress_file) as f:
                 data = json.load(f)
                 existing = data.get("entries", [])
         except (json.JSONDecodeError, KeyError):
@@ -241,7 +279,7 @@ def save_progress(state):
         "work_queue": [w for w in state.work_queue if w.get("status") == "pending"][:20],
     }
 
-    with open(PROGRESS_FILE, 'w') as f:
+    with open(progress_file, 'w') as f:
         json.dump(progress_data, f, indent=2, default=str)
 
 
@@ -251,8 +289,11 @@ def save_handoff(state):
     This is the key insight from Anthropic's agent harness:
     "agents need a way to bridge the gap between coding sessions"
     through structured artifacts.
+
+    NOTE: Handoff is now project-scoped to avoid cross-project pollution.
     """
-    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+    handoff_file = _get_project_handoff_file()
+    handoff_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Prepare handoff data
     handoff = prepare_handoff(state)
@@ -271,7 +312,7 @@ def save_handoff(state):
         "last_checkpoint": state.checkpoints[-1] if state.checkpoints else None,
     }
 
-    with open(HANDOFF_FILE, 'w') as f:
+    with open(handoff_file, 'w') as f:
         json.dump(handoff_data, f, indent=2, default=str)
 
 

@@ -35,6 +35,13 @@ from session_state import (
     start_feature,  # v3.6: Feature tracking
 )
 
+# Import project-aware state management
+try:
+    from project_detector import get_current_project, ProjectContext
+    PROJECT_AWARE = True
+except ImportError:
+    PROJECT_AWARE = False
+
 
 def output_hook_result(context: str = "", decision: str = "allow", reason: str = ""):
     """Output hook result with optional blocking."""
@@ -125,11 +132,36 @@ def main():
     # Load state
     state = load_state()
 
+    # === PROJECT-AWARE GOAL ISOLATION ===
+    # If project changed since goal was set, reset goal to avoid cross-project drift warnings
+    current_project_id = ""
+    if PROJECT_AWARE:
+        try:
+            context = get_current_project()
+            current_project_id = context.project_id
+        except Exception:
+            pass
+
+    if state.original_goal and state.goal_project_id and current_project_id:
+        if current_project_id != state.goal_project_id:
+            # Project changed! Reset goal-related state
+            state.original_goal = ""
+            state.goal_keywords = []
+            state.goal_set_turn = 0
+            state.goal_project_id = ""
+            # Clear scope expansion nudge history (project-specific)
+            if "scope_expansion" in state.nudge_history:
+                del state.nudge_history["scope_expansion"]
+            if "goal_drift" in state.nudge_history:
+                del state.nudge_history["goal_drift"]
+
     # Set goal if not already set
     if not state.original_goal:
         set_goal(state, prompt)
         # v3.6: Start tracking this as the current feature
         start_feature(state, prompt[:100])
+        # Track which project this goal belongs to
+        state.goal_project_id = current_project_id
         save_state(state)
         output_hook_result()
         sys.exit(0)

@@ -180,6 +180,7 @@ class SessionState:
     original_goal: str = ""  # First substantive user prompt
     goal_set_turn: int = 0  # Turn when goal was set
     goal_keywords: list = field(default_factory=list)  # Key terms from goal
+    goal_project_id: str = ""  # Project ID when goal was set (for multi-project isolation)
 
     # Meta-cognition: Sunk Cost Detector (v3.1)
     approach_history: list = field(default_factory=list)  # [{approach, turns, failures}]
