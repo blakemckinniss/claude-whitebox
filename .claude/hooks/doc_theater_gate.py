@@ -51,6 +51,7 @@ ALLOWED_MD_PATHS = [
     r'\.claude/memory/.*\.md$',         # Persistent memory
     r'\.claude/agents/.*\.md$',         # Subagent definitions
     r'\.claude/skills/.*\.md$',         # Skill definitions
+    r'\.claude/reminders/.*\.md$',      # Dynamic context reminders (reminder_injector.py)
     r'projects/.*/.*\.md$',             # Project-specific docs (user owns these)
 ]
 
@@ -111,6 +112,7 @@ def main():
             f"  • CLAUDE.md (constitution)\n"
             f"  • .claude/commands/*.md (slash commands)\n"
             f"  • .claude/memory/*.md (persistent memory)\n"
+            f"  • .claude/reminders/*.md (dynamic context)\n"
             f"  • projects/*/*.md (user-owned)\n\n"
             f"User can override with SUDO if truly needed."
         )
