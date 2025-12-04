@@ -116,6 +116,10 @@
           {
             "type": "command",
             "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/hooks/py proactive_nudge.py"
+          },
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR/.claude/hooks && $CLAUDE_PROJECT_DIR/.claude/hooks/py reminder_injector.py"
           }
         ]
       }
