@@ -49,6 +49,12 @@ except ImportError:
 # Scope's punch list file
 PUNCH_LIST_FILE = MEMORY_DIR / "punch_list.json"
 
+# Infrastructure manifest (prevents "create X" when X exists)
+INFRASTRUCTURE_FILE = MEMORY_DIR / "__infrastructure.md"
+
+# Capabilities index (prevents functional duplication)
+CAPABILITIES_FILE = MEMORY_DIR / "__capabilities.md"
+
 # Autonomous agent files (legacy - now project-scoped)
 HANDOFF_FILE = MEMORY_DIR / "handoff.json"
 PROGRESS_FILE = MEMORY_DIR / "progress.json"
@@ -212,6 +218,68 @@ def load_work_queue(project_context=None) -> list:
         return []
 
 
+def load_infrastructure_summary() -> str:
+    """Load infrastructure manifest summary for session context.
+
+    This prevents Claude from recommending "create X" when X already exists.
+    Injects key infrastructure awareness at session start.
+    """
+    if not INFRASTRUCTURE_FILE.exists():
+        return ""
+
+    try:
+        content = INFRASTRUCTURE_FILE.read_text()
+        # Extract just the "Setup Scripts" and "Key Directories" sections
+        lines = content.split("\n")
+        summary_lines = []
+        in_section = False
+
+        for line in lines:
+            if line.startswith("## Setup Scripts") or line.startswith("## Key Directories"):
+                in_section = True
+                summary_lines.append(line)
+            elif line.startswith("## ") and in_section:
+                in_section = False
+            elif in_section:
+                summary_lines.append(line)
+
+        return "\n".join(summary_lines).strip()
+    except (IOError, OSError):
+        return ""
+
+
+def load_capabilities_summary() -> str:
+    """Load capabilities index summary for session context.
+
+    This prevents Claude from creating duplicate functionality by surfacing
+    what already exists, grouped by PURPOSE not just filename.
+
+    Critical for template projects where the same functionality gets
+    proposed session after session.
+    """
+    if not CAPABILITIES_FILE.exists():
+        return ""
+
+    try:
+        content = CAPABILITIES_FILE.read_text()
+        # Extract category headers and counts
+        lines = content.split("\n")
+        categories = []
+
+        for line in lines:
+            if line.startswith("## ") and not line.startswith("## Before"):
+                # Extract emoji + category name
+                cat = line[3:].strip()
+                categories.append(cat)
+
+        if categories:
+            # Compact format: just list the categories
+            return "Categories: " + " | ".join(categories[:8])
+        return ""
+    except (IOError, OSError):
+        return ""
+
+
 def build_onboarding_context(state, handoff: dict | None, project_context=None) -> str:
     """Build the session onboarding protocol context.
 
@@ -223,8 +291,24 @@ def build_onboarding_context(state, handoff: dict | None, project_context=None) 
     For autonomous agents, this is AUTOMATIC - no human input needed.
 
     NEW: Project-aware onboarding surfaces project context for fast switching.
+    NEW: Infrastructure awareness prevents "create X" when X exists.
     """
     parts = []
+
+    # === STEP 0.5: Infrastructure & Capabilities Awareness ===
+    # This prevents recommending "create X" when X exists AND prevents
+    # creating DUPLICATE FUNCTIONALITY when similar capability exists
+    infra = load_infrastructure_summary()
+    caps = load_capabilities_summary()
+
+    if infra or caps:
+        parts.append("🚨 **DUPLICATION PREVENTION** (read before proposing new functionality):")
+        if infra and "setup_claude.sh" in infra:
+            parts.append("  • Setup scripts EXIST: `setup_claude.sh`, `setup_project.sh`")
+        parts.append("  • Hooks: 53 | Ops: 34 | Commands: 57")
+        if caps:
+            parts.append(f"  • {caps}")
+        parts.append("  ⚠️ Before creating new: check `.claude/memory/__capabilities.md`")
 
     # === STEP 0: Project Context (for multi-project swiss army knife) ===
     if project_context and PROJECT_AWARE:
@@ -504,6 +588,14 @@ def main():
         context = build_resume_context(previous_state, result)
         if context:
             output["message"] = f"🔁 Resuming: {context}"
+
+    # === ALWAYS: Add duplication prevention reminder ===
+    # This is critical for template projects where Claude forgets what exists
+    caps_reminder = load_capabilities_summary()
+    if caps_reminder and output.get("message"):
+        output["message"] += f"\n⚠️ Before creating new: check `__capabilities.md` (53 hooks, 34 ops)"
+    elif caps_reminder:
+        output["message"] = "⚠️ Before creating new: check `__capabilities.md` (53 hooks, 34 ops)"
 
     print(json.dumps(output))
     sys.exit(0)

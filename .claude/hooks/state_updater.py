@@ -25,7 +25,7 @@ from session_state import (
     resolve_error, add_domain_signal, extract_libraries_from_code,
     track_failure, reset_failures,  # v3.1: Sunk cost tracking
     track_batch_tool, clear_pending_file, clear_pending_search,  # v3.2: Batch enforcement
-    extract_function_names, add_pending_integration_grep, clear_integration_grep,  # v3.3: Integration blindness
+    extract_function_names, extract_function_def_lines, add_pending_integration_grep, clear_integration_grep,  # v3.3: Integration blindness
     create_checkpoint, track_feature_file, complete_feature,  # v3.6: Autonomous agent patterns
     add_work_item,  # v3.6: Auto-feature discovery
 )
@@ -163,13 +163,30 @@ def process_edit(state, tool_input, result):
                 track_library_used(state, lib)
 
             # v3.3: Detect function edits for integration blindness prevention
-            # Extract from OLD_STRING (what's being changed), not new_string
-            # new_string may contain unrelated functions that appear in replacement text
+            # v3.4: Only trigger for SIGNATURE changes, not body-only changes
+            # - Signature change: function definition line differs between old/new
+            # - Body-only change: same function def line in both old and new
+            # - New function: function in new but not old (no callers to check)
             if filepath.endswith(('.py', '.js', '.ts', '.tsx', '.rs', '.go')):
                 old_code = tool_input.get("old_string", "")
-                functions = extract_function_names(old_code)
-                for func in functions:
-                    add_pending_integration_grep(state, func, filepath)
+                new_code_str = tool_input.get("new_string", "")
+
+                # Extract function definition LINES (not just names)
+                old_func_lines = extract_function_def_lines(old_code)
+                new_func_lines = extract_function_def_lines(new_code_str)
+
+                # Only add pending grep if:
+                # 1. Function exists in old (being edited, not added)
+                # 2. Function signature DIFFERS between old and new
+                for func_name, old_def in old_func_lines.items():
+                    new_def = new_func_lines.get(func_name)
+                    if new_def is None:
+                        # Function removed or renamed - definitely need grep
+                        add_pending_integration_grep(state, func_name, filepath)
+                    elif old_def != new_def:
+                        # Signature changed (params differ) - need grep
+                        add_pending_integration_grep(state, func_name, filepath)
+                    # else: body-only change - skip (signature unchanged)
 
 
 def detect_stubs_in_content(content: str) -> list[str]:

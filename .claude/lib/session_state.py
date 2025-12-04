@@ -1094,6 +1094,25 @@ FUNCTION_PATTERNS = [
 ]
 
 
+
+def extract_function_def_lines(code: str) -> dict[str, str]:
+    """Extract function definition LINES for signature change detection."""
+    result = {}
+    patterns = [
+        (r'^(\s*def\s+(\w+)\s*\([^)]*\)\s*(?:->.*?)?:)', 2),
+        (r'^(\s*(?:async\s+)?function\s+(\w+)\s*\([^)]*\))', 2),
+        (r'^(\s*(?:pub\s+)?fn\s+(\w+)\s*[<(][^{]*)', 2),
+        (r'^(\s*func\s+(\w+)\s*\([^)]*\))', 2),
+    ]
+    for line in code.split('\n'):
+        for pattern, name_group in patterns:
+            match = re.match(pattern, line)
+            if match:
+                result[match.group(name_group)] = ' '.join(match.group(1).strip().split())
+                break
+    return result
+
+
 def extract_function_names(code: str, check_exported: bool = True) -> list[str]:
     """Extract function/method names from code snippet.
 
