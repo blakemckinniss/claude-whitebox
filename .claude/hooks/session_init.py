@@ -589,6 +589,14 @@ def main():
         if context:
             output["message"] = f"🔁 Resuming: {context}"
 
+    # === ALWAYS: Add duplication prevention reminder ===
+    # This is critical for template projects where Claude forgets what exists
+    caps_reminder = load_capabilities_summary()
+    if caps_reminder and output.get("message"):
+        output["message"] += f"\n⚠️ Before creating new: check `__capabilities.md` (53 hooks, 34 ops)"
+    elif caps_reminder:
+        output["message"] = "⚠️ Before creating new: check `__capabilities.md` (53 hooks, 34 ops)"
+
     print(json.dumps(output))
     sys.exit(0)
 

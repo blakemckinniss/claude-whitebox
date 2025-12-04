@@ -228,8 +228,14 @@ def format_block_message(filepath: str, similar: list[str], functional: list[dic
 
 def main():
     """PreToolUse hook entry point."""
+    # Read all stdin first - json.load() on pipes can miss data
+    stdin_content = sys.stdin.read()
+    if not stdin_content.strip():
+        print(json.dumps({}))
+        sys.exit(0)
+
     try:
-        input_data = json.load(sys.stdin)
+        input_data = json.loads(stdin_content)
     except (json.JSONDecodeError, ValueError):
         print(json.dumps({}))
         sys.exit(0)
