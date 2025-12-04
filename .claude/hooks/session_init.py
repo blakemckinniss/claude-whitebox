@@ -49,6 +49,9 @@ except ImportError:
 # Scope's punch list file
 PUNCH_LIST_FILE = MEMORY_DIR / "punch_list.json"
 
+# Infrastructure manifest (prevents "create X" when X exists)
+INFRASTRUCTURE_FILE = MEMORY_DIR / "__infrastructure.md"
+
 # Autonomous agent files (legacy - now project-scoped)
 HANDOFF_FILE = MEMORY_DIR / "handoff.json"
 PROGRESS_FILE = MEMORY_DIR / "progress.json"
@@ -212,6 +215,36 @@ def load_work_queue(project_context=None) -> list:
         return []
 
 
+def load_infrastructure_summary() -> str:
+    """Load infrastructure manifest summary for session context.
+
+    This prevents Claude from recommending "create X" when X already exists.
+    Injects key infrastructure awareness at session start.
+    """
+    if not INFRASTRUCTURE_FILE.exists():
+        return ""
+
+    try:
+        content = INFRASTRUCTURE_FILE.read_text()
+        # Extract just the "Setup Scripts" and "Key Directories" sections
+        lines = content.split("\n")
+        summary_lines = []
+        in_section = False
+
+        for line in lines:
+            if line.startswith("## Setup Scripts") or line.startswith("## Key Directories"):
+                in_section = True
+                summary_lines.append(line)
+            elif line.startswith("## ") and in_section:
+                in_section = False
+            elif in_section:
+                summary_lines.append(line)
+
+        return "\n".join(summary_lines).strip()
+    except (IOError, OSError):
+        return ""
+
+
 def build_onboarding_context(state, handoff: dict | None, project_context=None) -> str:
     """Build the session onboarding protocol context.
 
@@ -223,8 +256,19 @@ def build_onboarding_context(state, handoff: dict | None, project_context=None) 
     For autonomous agents, this is AUTOMATIC - no human input needed.
 
     NEW: Project-aware onboarding surfaces project context for fast switching.
+    NEW: Infrastructure awareness prevents "create X" when X exists.
     """
     parts = []
+
+    # === STEP 0.5: Infrastructure Awareness ===
+    # This prevents recommending "create bootstrap.sh" when setup scripts exist
+    infra = load_infrastructure_summary()
+    if infra:
+        parts.append("📦 **INFRASTRUCTURE** (verify before recommending 'create X'):")
+        # Compact format - just list key files
+        if "setup_claude.sh" in infra:
+            parts.append("  • Setup: `.claude/config/setup_claude.sh`, `setup_project.sh`")
+        parts.append("  • Hooks: 53 | Ops: 34 | Commands: 57")
 
     # === STEP 0: Project Context (for multi-project swiss army knife) ===
     if project_context and PROJECT_AWARE:

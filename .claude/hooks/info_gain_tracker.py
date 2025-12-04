@@ -30,8 +30,10 @@ MEMORY_DIR = Path(__file__).parent.parent / "memory"
 STATE_FILE = MEMORY_DIR / "info_gain_state.json"
 
 # Thresholds
-READS_BEFORE_WARN = 4  # Warn after 4 reads without progress
-READS_BEFORE_BLOCK = 7  # Consider blocking after 7
+# NOTE: Set higher to avoid premature "stop reading" nudges during audits.
+# The original 4/7 was too aggressive - caused incomplete infrastructure analysis.
+READS_BEFORE_WARN = 8   # Warn after 8 reads without progress
+READS_BEFORE_BLOCK = 15  # Consider blocking after 15
 
 # Tools that indicate progress (information was used)
 PROGRESS_TOOLS = {"Edit", "Write"}
