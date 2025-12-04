@@ -52,6 +52,9 @@ PUNCH_LIST_FILE = MEMORY_DIR / "punch_list.json"
 # Infrastructure manifest (prevents "create X" when X exists)
 INFRASTRUCTURE_FILE = MEMORY_DIR / "__infrastructure.md"
 
+# Capabilities index (prevents functional duplication)
+CAPABILITIES_FILE = MEMORY_DIR / "__capabilities.md"
+
 # Autonomous agent files (legacy - now project-scoped)
 HANDOFF_FILE = MEMORY_DIR / "handoff.json"
 PROGRESS_FILE = MEMORY_DIR / "progress.json"
@@ -245,6 +248,38 @@ def load_infrastructure_summary() -> str:
         return ""
 
 
+def load_capabilities_summary() -> str:
+    """Load capabilities index summary for session context.
+
+    This prevents Claude from creating duplicate functionality by surfacing
+    what already exists, grouped by PURPOSE not just filename.
+
+    Critical for template projects where the same functionality gets
+    proposed session after session.
+    """
+    if not CAPABILITIES_FILE.exists():
+        return ""
+
+    try:
+        content = CAPABILITIES_FILE.read_text()
+        # Extract category headers and counts
+        lines = content.split("\n")
+        categories = []
+
+        for line in lines:
+            if line.startswith("## ") and not line.startswith("## Before"):
+                # Extract emoji + category name
+                cat = line[3:].strip()
+                categories.append(cat)
+
+        if categories:
+            # Compact format: just list the categories
+            return "Categories: " + " | ".join(categories[:8])
+        return ""
+    except (IOError, OSError):
+        return ""
+
+
 def build_onboarding_context(state, handoff: dict | None, project_context=None) -> str:
     """Build the session onboarding protocol context.
 
@@ -260,15 +295,20 @@ def build_onboarding_context(state, handoff: dict | None, project_context=None) 
     """
     parts = []
 
-    # === STEP 0.5: Infrastructure Awareness ===
-    # This prevents recommending "create bootstrap.sh" when setup scripts exist
+    # === STEP 0.5: Infrastructure & Capabilities Awareness ===
+    # This prevents recommending "create X" when X exists AND prevents
+    # creating DUPLICATE FUNCTIONALITY when similar capability exists
     infra = load_infrastructure_summary()
-    if infra:
-        parts.append("📦 **INFRASTRUCTURE** (verify before recommending 'create X'):")
-        # Compact format - just list key files
-        if "setup_claude.sh" in infra:
-            parts.append("  • Setup: `.claude/config/setup_claude.sh`, `setup_project.sh`")
+    caps = load_capabilities_summary()
+
+    if infra or caps:
+        parts.append("🚨 **DUPLICATION PREVENTION** (read before proposing new functionality):")
+        if infra and "setup_claude.sh" in infra:
+            parts.append("  • Setup scripts EXIST: `setup_claude.sh`, `setup_project.sh`")
         parts.append("  • Hooks: 53 | Ops: 34 | Commands: 57")
+        if caps:
+            parts.append(f"  • {caps}")
+        parts.append("  ⚠️ Before creating new: check `.claude/memory/__capabilities.md`")
 
     # === STEP 0: Project Context (for multi-project swiss army knife) ===
     if project_context and PROJECT_AWARE:

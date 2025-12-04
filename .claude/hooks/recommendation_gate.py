@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 """
-Recommendation Gate Hook: Blocks "create X" suggestions without verification.
+Recommendation Gate Hook: Blocks duplicate functionality creation.
 
 Hook Type: PreToolUse (on Edit|Write)
-Purpose: Prevent recommending creation of infrastructure that already exists.
+Purpose: Prevent creating infrastructure/functionality that already exists.
 
 THE PROBLEM:
-Claude makes confident recommendations like "create bootstrap.sh" without
-checking if similar infrastructure already exists. This erodes user trust.
+Claude forgets what exists between sessions and proposes "new" functionality
+that duplicates existing capabilities. This creates organizational debt.
 
 THE FIX:
-Before writing files with names suggesting new infrastructure, check if
-similar files exist. Block with "VERIFY FIRST" if patterns match.
+1. Check for similar FILENAMES (setup*.sh when setup_claude.sh exists)
+2. Check for similar FUNCTIONALITY using capabilities.json (semantic match)
+3. Block with list of existing capabilities to read first
 
 Targets:
 - setup*.sh, bootstrap*.sh, init*.sh
-- *_gate.py, *_hook.py (new hooks)
-- INFRASTRUCTURE.md, MANIFEST.md (meta docs)
+- *_gate.py, *_hook.py, *_injector.py, *_tracker.py
+- *.py in .claude/ops/
 """
 
 import sys
@@ -30,6 +31,8 @@ from pathlib import Path
 
 CLAUDE_DIR = Path(__file__).parent.parent
 PROJECT_ROOT = CLAUDE_DIR.parent
+MEMORY_DIR = CLAUDE_DIR / "memory"
+CAPABILITIES_FILE = MEMORY_DIR / "__capabilities.json"
 
 # Patterns that suggest infrastructure creation (case-insensitive)
 INFRASTRUCTURE_PATTERNS = [
@@ -122,27 +125,98 @@ def find_similar_files(filepath: str) -> list[str]:
     return sorted(similar)[:5]  # Limit to 5 matches
 
 
-def format_block_message(filepath: str, similar: list[str]) -> str:
+def load_capabilities() -> list[dict]:
+    """Load capabilities index for functional similarity checking."""
+    if not CAPABILITIES_FILE.exists():
+        return []
+    try:
+        return json.loads(CAPABILITIES_FILE.read_text())
+    except (json.JSONDecodeError, IOError):
+        return []
+
+
+def find_functional_overlaps(filepath: str) -> list[dict]:
+    """Find existing capabilities that might overlap functionally.
+
+    Extracts keywords from the proposed filename and finds capabilities
+    with matching terms in their name or summary.
+    """
+    capabilities = load_capabilities()
+    if not capabilities:
+        return []
+
+    proposed_name = Path(filepath).stem.lower()
+
+    # Extract meaningful keywords from proposed name
+    # e.g., "security_validator_gate" -> ["security", "validator", "gate"]
+    keywords = re.split(r"[_\-]", proposed_name)
+    keywords = [k for k in keywords if len(k) > 2]  # Skip short words
+
+    # Also check for compound concepts
+    compound_concepts = {
+        "security": ["audit", "vulnerability", "injection", "xss"],
+        "validate": ["check", "verify", "gate"],
+        "track": ["monitor", "velocity", "state"],
+        "inject": ["context", "surface", "pointer"],
+        "memory": ["remember", "lesson", "decision", "spark"],
+        "scope": ["goal", "drift", "anchor"],
+        "error": ["suppression", "resolve", "fix"],
+    }
+
+    # Expand keywords with related concepts
+    expanded = set(keywords)
+    for kw in keywords:
+        if kw in compound_concepts:
+            expanded.update(compound_concepts[kw])
+
+    # Find matching capabilities
+    matches = []
+    for cap in capabilities:
+        cap_text = f"{cap.get('name', '')} {cap.get('summary', '')}".lower()
+        score = sum(1 for kw in expanded if kw in cap_text)
+        if score >= 2:  # Require at least 2 keyword matches
+            matches.append({
+                "name": cap.get("name", ""),
+                "summary": cap.get("summary", "")[:60],
+                "category": cap.get("category", ""),
+                "score": score,
+            })
+
+    # Sort by score and return top matches
+    matches.sort(key=lambda x: -x["score"])
+    return matches[:5]
+
+
+def format_block_message(filepath: str, similar: list[str], functional: list[dict] = None) -> str:
     """Format the blocking message."""
     lines = [
         "",
-        "🛑 **INFRASTRUCTURE CREATION BLOCKED**",
+        "🛑 **DUPLICATE FUNCTIONALITY BLOCKED**",
         f"   Proposed: `{filepath}`",
         "",
-        "   **Similar files already exist:**",
     ]
-    for s in similar:
-        lines.append(f"   - `{s}`")
+
+    if similar:
+        lines.append("   **Similar FILES already exist:**")
+        for s in similar:
+            lines.append(f"   - `{s}`")
+        lines.append("")
+
+    if functional:
+        lines.append("   **Similar FUNCTIONALITY already exists:**")
+        for f in functional:
+            lines.append(f"   - `{f['name']}` - {f['summary']}")
+        lines.append("")
 
     lines.extend([
+        "   **Before creating new functionality:**",
+        "   1. Read `.claude/memory/__capabilities.md` for full index",
+        "   2. Read the existing implementations listed above",
+        "   3. Verify they don't already solve the problem",
+        "   4. If extending needed, edit existing file",
+        "   5. Only create new if truly DIFFERENT purpose",
         "",
-        "   **Before creating new infrastructure:**",
-        "   1. Read the existing files above",
-        "   2. Verify they don't already solve the problem",
-        "   3. If modification needed, edit existing file",
-        "   4. Only create new if truly different purpose",
-        "",
-        "   To proceed anyway: acknowledge you've read the existing files.",
+        "   To proceed: state which existing capability is insufficient and why.",
         "",
     ])
     return "\n".join(lines)
@@ -181,9 +255,12 @@ def main():
     # Find similar existing files
     similar = find_similar_files(filepath)
 
-    if similar:
+    # Find functionally similar capabilities
+    functional = find_functional_overlaps(filepath)
+
+    if similar or functional:
         # Block with verification requirement
-        message = format_block_message(filepath, similar)
+        message = format_block_message(filepath, similar, functional)
         result = {
             "decision": "block",
             "reason": message,
@@ -191,10 +268,10 @@ def main():
         print(json.dumps(result))
         sys.exit(0)
 
-    # No similar files found - allow but warn
+    # No similar files or functionality found - allow but warn
     result = {
         "decision": "allow",
-        "message": f"⚠️ Creating new infrastructure: {Path(filepath).name}. Verify no similar exists.",
+        "message": f"⚠️ Creating new: {Path(filepath).name}. Read __capabilities.md first.",
     }
     print(json.dumps(result))
     sys.exit(0)

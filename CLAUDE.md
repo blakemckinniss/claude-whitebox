@@ -4,6 +4,26 @@
 
 ---
 
+## 🎯 PROJECT IDENTITY (READ FIRST)
+
+**This is a TEMPLATE PROJECT** - a reusable hook system for bootstrapping AI-guided coding projects.
+
+**What already exists:**
+- **53 hooks** in `.claude/hooks/` - gates, injectors, trackers, lifecycle
+- **34 ops tools** in `.claude/ops/` - audit, verify, council, research, etc.
+- **57 commands** in `.claude/commands/` - slash commands for common workflows
+- **Setup scripts** in `.claude/config/` - venv, deps, project scaffolding
+
+**Before proposing new functionality:**
+1. Read `.claude/memory/__capabilities.md` - full functional index
+2. Check if similar capability exists (the `recommendation_gate` hook enforces this)
+3. Extend existing over creating new
+
+**Anti-pattern:** Proposing "create bootstrap.sh" when `setup_claude.sh` exists.
+**Anti-pattern:** Proposing "new security gate" when `content_gate`, `security_claim_gate` exist.
+
+---
+
 ## 📦 Context
 
 * **Mode:** Solo dev, localhost. No auth/security/scaling theater.
