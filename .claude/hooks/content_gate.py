@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """
-Content Gate Hook v4: AST-based semantic security blocking for Write/Edit operations.
+Content Gate Hook v5: AST-based security blocking + code quality metrics.
 
 Hook Type: PreToolUse (Edit, Write only)
 Latency Target: <30ms (AST parsing adds ~10ms)
 
-UPGRADE from v3: Uses AST analysis for Python files instead of regex.
+UPGRADE from v4: Added code quality metrics (warnings, not blocks).
 Benefits:
 - No false positives on strings/comments
 - Detects aliased dangerous calls (f = eval; f(x))
 - Catches indirect calls and SQL injection in execute()
 - Falls back to regex for non-Python content
+- NEW: Warns on long methods, high complexity, debug statements
 
 SEVERITY LEVELS:
 - CRITICAL: No bypass allowed (eval, SQL injection)
 - BLOCK: SUDO bypass allowed (shell=True, bare except)
+- WARN: Quality metrics (long method, complexity, debug statements)
 """
 
 import _lib_path  # noqa: F401
@@ -235,6 +237,86 @@ def format_violations(violations: List[Dict], file_path: str) -> str:
 
 
 # =============================================================================
+# CODE QUALITY METRICS (v5) - Warnings, not blocks
+# =============================================================================
+
+# Patterns for code metrics (static regex, not dynamic)
+_RE_CONDITIONALS = r"\b(if|elif|for|while|except|try)\b"
+_RE_DEBUG_PRINT = r"\bprint\s*\("
+_RE_TECH_DEBT = r"\b(TODO|FIXME|HACK|XXX)\b"
+
+
+def check_code_quality_metrics(content: str, file_path: str) -> List[Dict]:
+    """Check code for quality issues (warnings, not blocks).
+
+    Returns list of warning dicts with severity='warn'.
+    """
+    if not content or not file_path:
+        return []
+
+    # Only check Python files for now
+    if not file_path.endswith('.py'):
+        return []
+
+    # Skip scratch/tmp files
+    if ".claude/tmp/" in file_path or "/tmp/" in file_path:
+        return []
+
+    warnings = []
+    lines = content.count('\n') + 1
+
+    # Long method detection (>60 lines suggests needs refactoring)
+    if lines > 60:
+        warnings.append({
+            "name": "long_method",
+            "severity": "warn",
+            "line": 1,
+            "message": f"Long code block ({lines} lines) - consider breaking into smaller functions",
+            "suggestion": "Extract logical sections into separate functions",
+            "matched": f"{lines} lines"
+        })
+
+    # High cyclomatic complexity (>12 conditionals)
+    conditionals = len(re.findall(_RE_CONDITIONALS, content))
+    if conditionals > 12:
+        warnings.append({
+            "name": "high_complexity",
+            "severity": "warn",
+            "line": 1,
+            "message": f"High complexity ({conditionals} control flow statements)",
+            "suggestion": "Simplify logic or extract helper functions",
+            "matched": f"{conditionals} conditionals"
+        })
+
+    # Debug statement count (>5 print statements is suspicious)
+    debug_count = len(re.findall(_RE_DEBUG_PRINT, content, re.IGNORECASE))
+    if debug_count >= 5:
+        warnings.append({
+            "name": "debug_statements",
+            "severity": "warn",
+            "line": 1,
+            "message": f"Many print() statements ({debug_count}) - remove before commit",
+            "suggestion": "Use logging module or remove debug prints",
+            "matched": f"{debug_count} print()"
+        })
+
+    return warnings[:2]  # Max 2 quality warnings
+
+
+def format_quality_warnings(warnings: List[Dict], file_path: str) -> str:
+    """Format quality warnings (non-blocking)."""
+    if not warnings:
+        return ""
+
+    lines = ["\n📊 CODE QUALITY NOTES:"]
+    for w in warnings:
+        lines.append(f"  • {w['message']}")
+        lines.append(f"    → {w['suggestion']}")
+
+    return "\n".join(lines)
+
+
+# =============================================================================
 # MAIN
 # =============================================================================
 
@@ -271,16 +353,25 @@ def main():
     # Check for SUDO bypass
     has_sudo = check_sudo_in_transcript(transcript_path)
 
-    # Check for violations
+    # Check for security violations (blocks)
     violations = check_content_violations(content, file_path, has_sudo)
 
-    if not violations:
-        output_hook_result("PreToolUse")
+    if violations:
+        # Block with formatted message
+        reason = format_violations(violations, file_path)
+        output_hook_result("PreToolUse", decision="deny", reason=reason)
         sys.exit(0)
 
-    # Block with formatted message
-    reason = format_violations(violations, file_path)
-    output_hook_result("PreToolUse", decision="deny", reason=reason)
+    # v5: Check for quality warnings (non-blocking)
+    quality_warnings = check_code_quality_metrics(content, file_path)
+
+    if quality_warnings:
+        # Allow but inject warning context
+        warning_text = format_quality_warnings(quality_warnings, file_path)
+        output_hook_result("PreToolUse", context=warning_text)
+        sys.exit(0)
+
+    output_hook_result("PreToolUse")
     sys.exit(0)
 
 
