@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Auto Learn Hook v3: PostToolUse hook that captures lessons from errors.
+Auto Learn Hook v4: PostToolUse hook that captures lessons AND provides quality hints.
 
 Hook Type: PostToolUse
 Latency Target: <50ms
@@ -9,6 +9,11 @@ Automatically captures lessons when:
 - Tool execution fails with useful error messages
 - Patterns emerge (same error twice = capture)
 - Hook blocks with actionable feedback
+
+NEW in v4: Post-action quality hints
+- Suggest ruff after Python edits
+- Suggest rg over grep
+- Tool-specific best practice reminders
 
 Writes to lessons.md without manual intervention.
 """
@@ -125,6 +130,99 @@ def should_capture(state: dict, lesson: str) -> bool:
     return True
 
 
+# =============================================================================
+# POST-ACTION QUALITY HINTS (v4)
+# =============================================================================
+
+# Hint cooldown state file
+HINT_STATE = MEMORY_DIR / "quality_hint_state.json"
+
+
+def load_hint_state() -> dict:
+    """Load hint cooldown state."""
+    if HINT_STATE.exists():
+        try:
+            return json.loads(HINT_STATE.read_text())
+        except (json.JSONDecodeError, IOError):
+            pass
+    return {"last_hints": {}, "session_hints": []}
+
+
+def save_hint_state(state: dict):
+    """Save hint cooldown state."""
+    try:
+        HINT_STATE.write_text(json.dumps(state, indent=2))
+    except IOError:
+        pass
+
+
+def should_show_hint(hint_state: dict, hint_id: str, cooldown: int = 5) -> bool:
+    """Check if hint should be shown (avoid spam). Cooldown = tool calls."""
+    last_hints = hint_state.get("last_hints", {})
+    session_hints = hint_state.get("session_hints", [])
+
+    # Max 3 hints per session for same type
+    if session_hints.count(hint_id) >= 3:
+        return False
+
+    # Cooldown: don't repeat same hint within N tool calls
+    # If never shown before (not in last_hints), allow it
+    if hint_id not in last_hints:
+        return True
+
+    last_shown_at = last_hints[hint_id]
+    current_count = len(session_hints)
+    if current_count - last_shown_at < cooldown:
+        return False
+
+    return True
+
+
+def record_hint_shown(hint_state: dict, hint_id: str):
+    """Record that a hint was shown."""
+    hint_state["session_hints"].append(hint_id)
+    hint_state["last_hints"][hint_id] = len(hint_state["session_hints"])
+    # Keep bounded
+    hint_state["session_hints"] = hint_state["session_hints"][-50:]
+
+
+def get_quality_hints(tool_name: str, tool_input: dict, tool_output: str) -> list[str]:
+    """Generate post-action quality hints based on tool usage."""
+    hints = []
+
+    if tool_name in ("Write", "Edit"):
+        file_path = tool_input.get("file_path", "")
+
+        # Python file hints
+        if file_path.endswith(".py"):
+            hints.append(("py_ruff", "Run `ruff check --fix && ruff format` after editing Python"))
+
+        # JavaScript/TypeScript hints
+        elif file_path.endswith((".js", ".ts", ".tsx", ".jsx")):
+            hints.append(("js_lint", "Run `npm run lint -- --fix` or `eslint --fix` after editing"))
+
+    elif tool_name == "Bash":
+        command = tool_input.get("command", "")
+
+        # grep vs ripgrep
+        if re.search(r'\bgrep\s+-r', command) and "rg " not in command:
+            hints.append(("use_rg", "Use `rg` (ripgrep) instead of `grep -r` for 10-100x speed"))
+
+        # find vs fd
+        if re.search(r'\bfind\s+\.\s+-name', command) and "fd " not in command:
+            hints.append(("use_fd", "Use `fd` instead of `find . -name` for faster/simpler syntax"))
+
+        # cat large files
+        if re.search(r'\bcat\s+\S+\s*\|\s*head', command):
+            hints.append(("use_head", "Use `head -n <file>` directly instead of `cat | head`"))
+
+        # pip without -q
+        if re.search(r'\bpip\s+install\b', command) and "-q" not in command:
+            hints.append(("pip_quiet", "Use `pip install -q` to reduce noise"))
+
+    return hints
+
+
 def write_lesson(lesson: str, context: str = ""):
     """Append lesson to lessons.md."""
     try:
@@ -159,45 +257,50 @@ def main():
 
     tool_name = input_data.get("tool_name", "")
     tool_output = input_data.get("tool_output", "")
+    tool_input = input_data.get("tool_input", {}) or {}
 
-    # Only process Bash tool outputs (where errors are most learnable)
-    if tool_name != "Bash":
-        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse"}}))
-        sys.exit(0)
+    messages = []
 
-    # Check if output contains errors
-    if not tool_output or "error" not in tool_output.lower() and "failed" not in tool_output.lower():
-        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse"}}))
-        sys.exit(0)
+    # ==========================================================================
+    # Part 1: Error Learning (Bash only)
+    # ==========================================================================
+    if tool_name == "Bash":
+        # Check if output contains errors
+        if tool_output and ("error" in tool_output.lower() or "failed" in tool_output.lower()):
+            lesson = extract_lesson_from_error(tool_output)
+            if lesson:
+                state = load_state()
+                if should_capture(state, lesson):
+                    command = tool_input.get("command", "")[:50] if isinstance(tool_input, dict) else ""
+                    if write_lesson(lesson, command):
+                        state["lessons_written"].append(lesson)
+                        state["lessons_written"] = state["lessons_written"][-50:]
+                        save_state(state)
+                        messages.append(f"🐘 Auto-learned: {lesson[:60]}...")
 
-    # Try to extract lesson
-    lesson = extract_lesson_from_error(tool_output)
+    # ==========================================================================
+    # Part 2: Quality Hints (Write, Edit, Bash)
+    # ==========================================================================
+    if tool_name in ("Write", "Edit", "Bash"):
+        hint_state = load_hint_state()
+        raw_hints = get_quality_hints(tool_name, tool_input, tool_output)
 
-    if not lesson:
-        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse"}}))
-        sys.exit(0)
+        for hint_id, hint_text in raw_hints:
+            if should_show_hint(hint_state, hint_id):
+                record_hint_shown(hint_state, hint_id)
+                messages.append(f"💡 {hint_text}")
+                break  # Max 1 hint per tool call
 
-    # Load state and check if we should capture
-    state = load_state()
+        save_hint_state(hint_state)
 
-    if not should_capture(state, lesson):
-        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse"}}))
-        sys.exit(0)
-
-    # Write the lesson
-    tool_input = input_data.get("tool_input", {})
-    command = tool_input.get("command", "")[:50] if isinstance(tool_input, dict) else ""
-
-    if write_lesson(lesson, command):
-        state["lessons_written"].append(lesson)
-        state["lessons_written"] = state["lessons_written"][-50:]  # Keep last 50
-        save_state(state)
-
-        # Notify that a lesson was captured
+    # ==========================================================================
+    # Output
+    # ==========================================================================
+    if messages:
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PostToolUse",
-                "additionalContext": f"🐘 Auto-learned: {lesson[:60]}...",
+                "additionalContext": "\n".join(messages),
             }
         }
     else:
